@@ -1,5 +1,8 @@
-# ARC-Interactive
-No backend required; enjoy puzzle-solving directly in your browser.
+# ARC-Interactive: Puzzle-Solving in Your Browser
+
+Explore the challenges of the Abstraction and Reasoning Corpus (ARC) with ARC-Interactive, a browser-based tool designed to bring these fascinating puzzles to life. No backend required.
+
+Try it here: [ARC-Interactive](https://neoneye.github.io/arc/)
 
 ## Gallery of tasks in the ARC datasets
 
