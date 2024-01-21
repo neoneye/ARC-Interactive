@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="edit.css">
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+    <script src="pako_inflate.min.js"></script>
+    <script src="common.js"></script>
+    <script src="edit.js"></script>
+    <title>ARC edit</title>
+</head>
+<body onload="body_onload()">
+    <div id="dragndrop-area-outer" class="hidden">
+        <canvas id="dragndrop-area-canvas"></canvas>
+        <button id="dragndrop-area-reject-button" class="hover-button" onclick="gPageController.pasteFromClipboardReject()" title="Abort the paste operation.">Reject</button>
+        <button id="dragndrop-area-accept-button" class="hover-button" onclick="gPageController.pasteFromClipboardAccept()" title="Enter = Finish the paste operation.">Accept</button>
+    </div>
+
+    <div id="tool-panel" class="hidden" onclick="gPageController.dismissToolPanel(event)">
+        <div id="tool-panel-inner">
+            <div id="tool-panel-inner-inner">
+                <button class="secondary-button" onclick="gPageController.startOverWithInputImage()" title="Go back to the original image">Start over 🥶🙀🙈</button>
+                <hr>
+                <div>
+                    <h4>Change image size (width x height)</h4>
+                    <div>
+                        <input type="text" id="canvas-size-input" maxlength="10" value="3x3" placeholder="widthxheight" onkeydown="gPageController.resizeImageOnKeyDown(event)">
+                        <button class="secondary-button" onclick="gPageController.resizeImage()" id="resize_btn" title="Apply the new size to the image">Resize</button>
+                    </div>
+                </div>
+                <hr>
+                <div id="tool-panel-crop-copy-paste">
+                    <button class="secondary-button" onclick="gPageController.copyToClipboard()" title="C = Copy to clipboard">Copy</button>
+                    <button class="secondary-button" onclick="gPageController.pasteFromClipboard()()" title="V = Paste from clipboard">Paste</button>
+                    <button id="crop-selected-rectangle-button" class="secondary-button hidden" onclick="gPageController.cropSelectedRectangle()" title="Extract the selected rectangle">Crop</button>
+                </div>
+                <hr>
+
+                <div class="tool-with-icon-container">
+                    <button class="tool-with-icon" onclick="gPageController.flipX()" title="Flip X, or reverse the x-axis">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M504.3 273.6c4.9-4.5 7.7-10.9 7.7-17.6s-2.8-13-7.7-17.6l-112-104c-7-6.5-17.2-8.2-25.9-4.4s-14.4 12.5-14.4 22l0 56-192 0 0-56c0-9.5-5.7-18.2-14.4-22s-18.9-2.1-25.9 4.4l-112 104C2.8 243 0 249.3 0 256s2.8 13 7.7 17.6l112 104c7 6.5 17.2 8.2 25.9 4.4s14.4-12.5 14.4-22l0-56 192 0 0 56c0 9.5 5.7 18.2 14.4 22s18.9 2.1 25.9-4.4l112-104z"/></svg>
+                    </button>
+                    <button class="tool-with-icon" onclick="gPageController.flipY()" title="Flip Y, or reverse the y-axis">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="8" viewBox="0 0 256 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M145.6 7.7C141 2.8 134.7 0 128 0s-13 2.8-17.6 7.7l-104 112c-6.5 7-8.2 17.2-4.4 25.9S14.5 160 24 160H80V352H24c-9.5 0-18.2 5.7-22 14.4s-2.1 18.9 4.4 25.9l104 112c4.5 4.9 10.9 7.7 17.6 7.7s13-2.8 17.6-7.7l104-112c6.5-7 8.2-17.2 4.4-25.9s-12.5-14.4-22-14.4H176V160h56c9.5 0 18.2-5.7 22-14.4s2.1-18.9-4.4-25.9l-104-112z"/></svg>
+                    </button>
+                    <button class="tool-with-icon" onclick="gPageController.rotateCCW()" title="Rotate counter clockwise or plus 90 degrees">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z"/></svg>
+                    </button>
+                    <button class="tool-with-icon" onclick="gPageController.rotateCW()" title="Rotate clockwise or minus 90 degrees">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"/></svg>
+                    </button>
+                </div>
+
+                <div class="tool-with-icon-container">
+                    <button class="tool-with-icon" onclick="gPageController.moveLeft()" title="Arrow left = Move left wrap around">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+                    </button>
+                    <button class="tool-with-icon" onclick="gPageController.moveRight()" title="Arrow right = Move right wrap around">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>
+                    </button>
+                    <button class="tool-with-icon" onclick="gPageController.moveUp()" title="Arrow up = Move up wrap around">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="12" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"/></svg>
+                    </button>
+                    <button class="tool-with-icon" onclick="gPageController.moveDown()" title="Arrow down = Move down wrap around">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="12" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></svg>
+                    </button>
+                </div>
+
+                <hr>
+
+                <div id="tool-radio-buttons">
+                    <ul class="segmented-control">
+                        <li class="segmented-control__item">
+                            <input class="segmented-control__input" type="radio" name="tool_switching" id="tool_paint" value="paint" checked>
+                            <label class="segmented-control__label" for="tool_paint" title="P = Paint tool">Paint</label>
+                        </li>
+                        <li class="segmented-control__item">
+                            <input class="segmented-control__input" type="radio" name="tool_switching" id="tool_select" value="select">
+                            <label class="segmented-control__label" for="tool_select" title="S = Select tool">Select</label>
+                        </li>
+                        <li class="segmented-control__item">
+                            <input class="segmented-control__input" type="radio" name="tool_switching" id="tool_fill" value="fill">
+                            <label class="segmented-control__label" for="tool_fill" title="L = Fill tool">Fill</label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header class="titlebar-container">
+        <div class="titlebar-item titlebar-item-left">
+            <a class="secondary-button" href="#" onclick="goBack()">Back</a>
+            <button id="fullscreen-button" class="secondary-button hidden" onclick="gPageController.toggleFullscreen()">F=Fullscreen</button>
+        </div>
+        
+        <div class="titlebar-item titlebar-item-center" id="title_task">Task name</div>
+        
+        <div class="titlebar-item titlebar-item-right">
+            <button class="secondary-button" onclick="gPageController.toggleOverlay()">O=Overlay</button>
+        </div>
+    </header>
+
+    <main id="main-outer">
+        <div id="main-inner">
+
+            <table id="mytable" cellspacing="0">
+                <tr id="mytable-row0"></tr>
+                <tr id="mytable-row1" class="line-height-zero"></tr>
+                <tr id="mytable-row2" class="line-height-zero"></tr>
+            </table>
+
+            <div id="draw-area-outer" class="hidden">
+                <canvas id="draw-area-canvas"></canvas>
+            </div>
+
+        </div>
+    </main>
+
+    <footer id="page-footer-draw-mode" class="hidden">
+        <div class="page-footer-left">
+            <!-- Left -->
+            <button id="tool-button" class="secondary-button" onclick="gPageController.showToolPanel()">Tool: paint</button>
+        </div>
+        <div id="palette" class="page-footer-center">
+            <div id="palette-item0" class="arc_color_0 palette_item_selected" onclick="gPageController.pickColor(0)"></div>
+            <div id="palette-item1" class="arc_color_1" onclick="gPageController.pickColor(1)"></div>
+            <div id="palette-item2" class="arc_color_2" onclick="gPageController.pickColor(2)"></div>
+            <div id="palette-item3" class="arc_color_3" onclick="gPageController.pickColor(3)"></div>
+            <div id="palette-item4" class="arc_color_4" onclick="gPageController.pickColor(4)"></div>
+            <div id="palette-item5" class="arc_color_5" onclick="gPageController.pickColor(5)"></div>
+            <div id="palette-item6" class="arc_color_6" onclick="gPageController.pickColor(6)"></div>
+            <div id="palette-item7" class="arc_color_7" onclick="gPageController.pickColor(7)"></div>
+            <div id="palette-item8" class="arc_color_8" onclick="gPageController.pickColor(8)"></div>
+            <div id="palette-item9" class="arc_color_9" onclick="gPageController.pickColor(9)"></div>
+        </div>
+        <div class="page-footer-right">
+            <!-- Right -->
+            <button class="secondary-button" onclick="gPageController.submitDrawing()">Submit!</button>
+            <div id="submit-status-correct" class="hidden">&#128156; Correct</div>
+            <div id="submit-status-incorrect" class="hidden">&#128128; Incorrect</div>
+        </div>
+    </footer>
+</body>
+</html>
