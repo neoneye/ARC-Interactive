@@ -1,0 +1,354 @@
+body {
+    /* background-color: red; */
+}
+
+@media only screen and (min-width: 700px) {
+    body {
+        /* background-color: red; */
+    
+        /* Prevent page-footer from scrolling, due to the selected color in the palette extending beyond the bottom edge. */
+        overflow-y: hidden;
+        position: fixed;
+        width: 100%;
+    }
+}
+
+#main-inner {
+    /* background-color: red; */
+}
+
+.hidden {
+    display: none;
+}
+
+#title_task {
+    width: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#dragndrop-area-outer {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+#dragndrop-area-reject-button, #dragndrop-area-accept-button {
+    font-size: x-large;
+    font-weight: bold;
+    padding: 2em;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 0;
+}
+
+.hover-button {
+    color: var(--ui-background);
+    background-color: var(--ui-text-color);
+    border: none;
+}
+
+.hover-button:hover {
+    color: var(--ui-text-color);
+    background-color: var(--ui-background);
+}
+
+#dragndrop-area-accept-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+#dragndrop-area-reject-button {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+#dragndrop-area-canvas {
+    background-color: rgba(149, 149, 149, 0.734);
+    opacity: 0.9;
+}
+
+#draw-area-outer {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+}
+
+#tool-panel {
+    position: absolute;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background-color: rgba(128, 128, 128, 0.7);
+}
+
+#tool-panel-inner {
+    width: 60vw;
+    height: 60vh;
+    display: block;
+    background-color: grey;
+    opacity: 1;
+    box-shadow: 0 5px 24px 1px rgb(0 0 0/33%);
+    position: relative;
+    padding: 0.5em;
+}
+
+#tool-panel-inner-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Aligns children with space between them */
+    height: 100%; /* Set the height to fill the parent container */
+}
+
+#canvas-size-input {
+    font-size: 20px;
+    width: 8ch;
+}
+
+#tool-panel-crop-copy-paste {
+    display: flex;
+    justify-content: space-between; /* Aligns children with space between them */
+    gap: 10px; /* Space between the buttons */
+}
+
+#tool-panel-crop-copy-paste button {
+    flex: 1; /* Each button will take equal space */
+}
+
+#page-footer-draw-mode {
+    border-top: 1px solid var(--ui-separator);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* 1fr for the left and right columns, auto for the middle column */
+    justify-content: center; /* Centers the middle column */
+    align-items: center; /* Aligns items vertically in the center, if needed */
+    gap: 10px; /* Optional: Adds space between columns */
+}
+
+.page-footer-left {
+    /* border: 1px dashed red; */
+    margin-left: 10px;
+}
+  
+.page-footer-center {
+    /* border: 1px dashed green; */
+}
+
+.page-footer-right {
+    /* border: 1px dashed blue; */
+    text-align: right;
+    margin-right: 10px;
+}
+
+#palette {
+    display: flex;
+    max-width: 40vw;
+    flex-wrap: wrap;
+}
+
+@media only screen and (min-width: 800px) {
+    #palette {
+        max-width: none;
+        flex-wrap: nowrap;
+    }
+}
+
+#palette div {
+    aspect-ratio: 1;
+    width: 8vw;
+    max-width: 80px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    /* Desktops with mouse */
+    #palette div:hover {
+        opacity: 0.8;
+        border: 1px solid white;
+    }
+
+    #palette div.palette_item_selected:hover {
+        opacity: 1;
+        border: 2px solid white;
+    }
+}
+
+.palette_item_selected {
+    z-index: 2;
+    border: 2px solid white;
+    border-radius: 5px;
+    transform: scale(1.25);
+    box-shadow: 0 5px 24px 1px rgb(0 0 0/33%);
+}
+
+.arc_color_0 {
+    background-color: #000;
+}
+.arc_color_1 {
+    background-color: #0074D9; /* blue */
+}
+.arc_color_2 {
+    background-color: #FF4136; /* red */
+}
+.arc_color_3 {
+    background-color: #2ECC40; /* green */
+}
+.arc_color_4 {
+    background-color: #FFDC00; /* yellow */
+}
+.arc_color_5 {
+    background-color: #AAAAAA; /* grey */
+}
+.arc_color_6 {
+    background-color: #F012BE; /* fuschia */
+}
+.arc_color_7 {
+    background-color: #FF851B; /* orange */
+}
+.arc_color_8 {
+    background-color: #7FDBFF; /* teal */
+}
+.arc_color_9 {
+    background-color: #870C25; /* brown */
+}
+
+.tool-with-icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tool-with-icon {
+    font-size: large;
+    font-weight: bold;
+    aspect-ratio: 1;
+    width: 6vw;
+    max-width: 60px;
+}
+
+@media only screen and (min-width: 600px) {
+    #title_task {
+        width: 250px;
+    }
+}
+
+#dragndrop-area-outer.hidden,
+#mytable.hidden,
+#draw-area-outer.hidden,
+#page-footer-draw-mode.hidden,
+#tool-panel.hidden,
+#submit-status-correct.hidden, 
+#submit-status-incorrect.hidden,
+#crop-selected-rectangle-button.hidden {
+    display: none !important;
+}
+
+.segmented-control {
+    display: flex;
+    width: 100%;
+    margin: 2em 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.segmented-control__item {
+    flex: 1; /* Each item will take equal space */
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    box-sizing: border-box;
+}
+
+.segmented-control__input {
+    position: absolute;
+    visibility: hidden;
+}
+
+.segmented-control__label {
+    display: block;
+    margin: 0 -1px -1px 0; /* -1px margin removes double-thickness borders between items */
+    padding: 1em .25em;
+    border: 1px solid #ddd;
+    font: 14px/1.5 sans-serif; 
+    text-align: center;  
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.segmented-control__input:checked + .segmented-control__label {
+    background: #eee;
+    color: #333; 
+}
+
+@media (hover: hover) and (pointer: fine) {
+    /* Desktops with mouse */
+    .segmented-control__label:hover {
+        background: #fafafa;
+    }
+}
+
+#mytable {
+    border-collapse: collapse;
+    border-spacing: 0;
+    background-color: rgb(50, 50, 50);
+}
+
+.line-height-zero {
+    line-height: 0;
+}
+
+#mytable .center-x {
+    text-align: center; 
+} 
+
+#mytable .input-image-cell { 
+    vertical-align: bottom;
+    padding-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+} 
+
+#mytable .output-image-cell { 
+    vertical-align: top; 
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#mytable .seperator-column {
+    background-color: black;
+    width: 10px;
+}
+
+#mytable .test-output-cell {
+    line-height: 1.5;
+}
+
+#mytable .active-test {
+    background-color: #a4a4a4;
+    color: black;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    /* Desktops with mouse */
+    #mytable .active-test {
+        cursor: pointer;
+    }
+    #mytable .click-to-active-test {
+        cursor: pointer;
+    }
+}
