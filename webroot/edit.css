@@ -1,3 +1,9 @@
+html {
+    /* disable pull-to-refresh in mobile browsers */
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
 body {
     /* background-color: red; */
 }
