@@ -86,6 +86,8 @@ class PageController {
         this.pasteX = 0;
         this.pasteY = 0;
 
+        this.enablePlotDraw = false;
+
         var pixels = [];
         let maxPixelSize = 100;
         for (var i = 0; i < maxPixelSize; i++) {
@@ -120,7 +122,7 @@ class PageController {
         console.log('PageController.onload()', this.db);
         await this.loadTask();
         this.addEventListeners();
-        this.hideEditorShowOverlay();
+        this.hideEditorShowOverview();
     }
 
     addEventListeners() {
@@ -213,7 +215,7 @@ class PageController {
             }
         }
         if (event.code === 'KeyO') {
-            this.toggleOverlay();
+            this.toggleOverview();
         }
         if (event.code === 'KeyC') {
             this.copyToClipboard();
@@ -339,9 +341,12 @@ class PageController {
         this.isDrawing = true;
         var ctx = this.canvas.getContext('2d');
         let position = this.getPosition(event);
-        let xcellSize = 5;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(position.x, position.y, xcellSize, xcellSize);
+
+        if (this.enablePlotDraw) {
+            let plotSize = 5;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(position.x, position.y, plotSize, plotSize);
+        }
 
         if(this.isPasteMode) {
             this.pasteX = position.x;
@@ -402,9 +407,12 @@ class PageController {
         }
         var ctx = this.canvas.getContext('2d');
         let position = this.getPosition(event);
-        let xcellSize = 5;
-        ctx.fillStyle = 'grey';
-        ctx.fillRect(position.x, position.y, xcellSize, xcellSize);
+
+        if (this.enablePlotDraw) {
+            let plotSize = 5;
+            ctx.fillStyle = 'grey';
+            ctx.fillRect(position.x, position.y, plotSize, plotSize);
+        }
 
         if(this.isPasteMode) {
             this.pasteX = position.x;
@@ -611,9 +619,9 @@ class PageController {
     populateTable(task) {
         let cellSize = this.calcCellSize(task);
 
-        let el_tr0 = document.getElementById('mytable-row0');
-        let el_tr1 = document.getElementById('mytable-row1');
-        let el_tr2 = document.getElementById('mytable-row2');
+        let el_tr0 = document.getElementById('task-overview-table-row0');
+        let el_tr1 = document.getElementById('task-overview-table-row1');
+        let el_tr2 = document.getElementById('task-overview-table-row2');
 
         // Remove all children
         el_tr0.innerText = '';
@@ -683,7 +691,7 @@ class PageController {
                 el_td1.classList.add('active-test');
                 el_td2.classList.add('active-test');
                 let handler = () => {
-                    this.hideOverlayShowEditor();
+                    this.hideOverviewShowEditor();
                 };
                 el_td0.onpointerdown = handler;
                 el_td1.onpointerdown = handler;
@@ -858,17 +866,17 @@ class PageController {
         ctx.stroke();    
     }
 
-    toggleOverlay() {
-        let el = document.getElementById("mytable");
+    toggleOverview() {
+        let el = document.getElementById("task-overview");
         if (el.classList.contains('hidden')) {
-            this.hideEditorShowOverlay();
+            this.hideEditorShowOverview();
         } else {
-            this.hideOverlayShowEditor();
+            this.hideOverviewShowEditor();
         }
     }
 
-    hideOverlayShowEditor() {
-        let el0 = document.getElementById("mytable");
+    hideOverviewShowEditor() {
+        let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("draw-area-outer");
         let el2 = document.getElementById("page-footer-draw-mode");
         el0.classList.add('hidden');
@@ -880,8 +888,8 @@ class PageController {
         this.showCanvas(true);
     }
 
-    hideEditorShowOverlay() {
-        let el0 = document.getElementById("mytable");
+    hideEditorShowOverview() {
+        let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("draw-area-outer");
         let el2 = document.getElementById("page-footer-draw-mode");
         el0.classList.remove('hidden');
