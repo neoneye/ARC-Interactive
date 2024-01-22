@@ -517,6 +517,7 @@ class PageController {
         this.showTask(task);
 
         this.assignImageFromCurrentTest();
+        this.assignSelectRectangleFromCurrentImage();
         this.showCanvas(true);
     }
 
@@ -525,7 +526,6 @@ class PageController {
         let image = this.task.test[testIndex].input;
         let pixels = JSON.parse(JSON.stringify(image.pixels));
         this.image = new ARCImage(pixels)
-        this.assignSelectRectangleFromCurrentImage();
     }
 
     assignSelectRectangleFromCurrentImage() {
@@ -685,9 +685,9 @@ class PageController {
                 let handler = () => {
                     this.hideOverlayShowEditor();
                 };
-                el_td0.onclick = handler;
-                el_td1.onclick = handler;
-                el_td2.onclick = handler;
+                el_td0.onpointerdown = handler;
+                el_td1.onpointerdown = handler;
+                el_td2.onpointerdown = handler;
             } else {
                 el_td0.classList.add('click-to-active-test');
                 el_td1.classList.add('click-to-active-test');
@@ -695,9 +695,9 @@ class PageController {
                 let handler = () => {
                     this.activateTestIndex(i);
                 };
-                el_td0.onclick = handler;
-                el_td1.onclick = handler;
-                el_td2.onclick = handler;
+                el_td0.onpointerdown = handler;
+                el_td1.onpointerdown = handler;
+                el_td2.onpointerdown = handler;
             }
 
             {
@@ -959,7 +959,13 @@ class PageController {
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.populateTable(this.task);
-        this.assignImageFromCurrentTest();
+        let image = this.imageForTestIndex(this.currentTest);
+        if (image) {
+            this.image = image;
+        } else {
+            this.assignImageFromCurrentTest();
+        }
+        this.assignSelectRectangleFromCurrentImage();
         this.showCanvas(true);
     }
 
@@ -1036,6 +1042,7 @@ class PageController {
 
     startOverWithInputImage() {
         this.assignImageFromCurrentTest();
+        this.assignSelectRectangleFromCurrentImage();
         this.showCanvas(true);
         this.hideToolPanel();
     }
