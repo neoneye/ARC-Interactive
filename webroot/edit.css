@@ -261,7 +261,7 @@ body {
 }
 
 #dragndrop-area-outer.hidden,
-#mytable.hidden,
+#task-overview.hidden,
 #draw-area-outer.hidden,
 #page-footer-draw-mode.hidden,
 #tool-panel.hidden,
@@ -313,6 +313,14 @@ body {
     .segmented-control__label:hover {
         background: #fafafa;
     }
+}
+
+#task-overview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
 }
 
 #mytable {

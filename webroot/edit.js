@@ -859,7 +859,7 @@ class PageController {
     }
 
     toggleOverlay() {
-        let el = document.getElementById("mytable");
+        let el = document.getElementById("task-overview");
         if (el.classList.contains('hidden')) {
             this.hideEditorShowOverlay();
         } else {
@@ -868,7 +868,7 @@ class PageController {
     }
 
     hideOverlayShowEditor() {
-        let el0 = document.getElementById("mytable");
+        let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("draw-area-outer");
         let el2 = document.getElementById("page-footer-draw-mode");
         el0.classList.add('hidden');
@@ -881,7 +881,7 @@ class PageController {
     }
 
     hideEditorShowOverlay() {
-        let el0 = document.getElementById("mytable");
+        let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("draw-area-outer");
         let el2 = document.getElementById("page-footer-draw-mode");
         el0.classList.remove('hidden');
