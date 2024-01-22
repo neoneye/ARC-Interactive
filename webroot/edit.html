@@ -100,18 +100,20 @@
         <div class="titlebar-item titlebar-item-center" id="title_task">Task name</div>
         
         <div class="titlebar-item titlebar-item-right">
-            <button class="secondary-button" onclick="gPageController.toggleOverlay()">O=Overlay</button>
+            <button class="secondary-button" onclick="gPageController.toggleOverview()" title="O = Toggle between overview and editor.">Overview</button>
         </div>
     </header>
 
     <main id="main-outer">
         <div id="main-inner">
 
-            <table id="mytable" cellspacing="0">
-                <tr id="mytable-row0"></tr>
-                <tr id="mytable-row1" class="line-height-zero user-select-none"></tr>
-                <tr id="mytable-row2" class="line-height-zero user-select-none"></tr>
-            </table>
+            <div id="task-overview">
+                <table id="task-overview-table" cellspacing="0">
+                    <tr id="task-overview-table-row0"></tr>
+                    <tr id="task-overview-table-row1" class="line-height-zero user-select-none"></tr>
+                    <tr id="task-overview-table-row2" class="line-height-zero user-select-none"></tr>
+                </table>
+            </div>
 
             <div id="draw-area-outer" class="hidden">
                 <canvas id="draw-area-canvas"></canvas>
