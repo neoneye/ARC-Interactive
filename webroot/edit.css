@@ -323,7 +323,7 @@ body {
     height: 100%;
 }
 
-#mytable {
+#task-overview-table {
     border-collapse: collapse;
     border-spacing: 0;
     background-color: rgb(50, 50, 50);
@@ -333,43 +333,43 @@ body {
     line-height: 0;
 }
 
-#mytable .center-x {
+#task-overview-table .center-x {
     text-align: center; 
 } 
 
-#mytable .input-image-cell { 
+#task-overview-table .input-image-cell { 
     vertical-align: bottom;
     padding-bottom: 20px;
     padding-left: 10px;
     padding-right: 10px;
 } 
 
-#mytable .output-image-cell { 
+#task-overview-table .output-image-cell { 
     vertical-align: top; 
     padding-left: 10px;
     padding-right: 10px;
 }
 
-#mytable .seperator-column {
+#task-overview-table .seperator-column {
     background-color: black;
     width: 10px;
 }
 
-#mytable .test-output-cell {
+#task-overview-table .test-output-cell {
     line-height: 1.5;
 }
 
-#mytable .active-test {
+#task-overview-table .active-test {
     background-color: #a4a4a4;
     color: black;
 }
 
 @media (hover: hover) and (pointer: fine) {
     /* Desktops with mouse */
-    #mytable .active-test {
+    #task-overview-table .active-test {
         cursor: pointer;
     }
-    #mytable .click-to-active-test {
+    #task-overview-table .click-to-active-test {
         cursor: pointer;
     }
 }

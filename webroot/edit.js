@@ -120,7 +120,7 @@ class PageController {
         console.log('PageController.onload()', this.db);
         await this.loadTask();
         this.addEventListeners();
-        this.hideEditorShowOverlay();
+        this.hideEditorShowOverview();
     }
 
     addEventListeners() {
@@ -213,7 +213,7 @@ class PageController {
             }
         }
         if (event.code === 'KeyO') {
-            this.toggleOverlay();
+            this.toggleOverview();
         }
         if (event.code === 'KeyC') {
             this.copyToClipboard();
@@ -611,9 +611,9 @@ class PageController {
     populateTable(task) {
         let cellSize = this.calcCellSize(task);
 
-        let el_tr0 = document.getElementById('mytable-row0');
-        let el_tr1 = document.getElementById('mytable-row1');
-        let el_tr2 = document.getElementById('mytable-row2');
+        let el_tr0 = document.getElementById('task-overview-table-row0');
+        let el_tr1 = document.getElementById('task-overview-table-row1');
+        let el_tr2 = document.getElementById('task-overview-table-row2');
 
         // Remove all children
         el_tr0.innerText = '';
@@ -683,7 +683,7 @@ class PageController {
                 el_td1.classList.add('active-test');
                 el_td2.classList.add('active-test');
                 let handler = () => {
-                    this.hideOverlayShowEditor();
+                    this.hideOverviewShowEditor();
                 };
                 el_td0.onpointerdown = handler;
                 el_td1.onpointerdown = handler;
@@ -858,16 +858,16 @@ class PageController {
         ctx.stroke();    
     }
 
-    toggleOverlay() {
+    toggleOverview() {
         let el = document.getElementById("task-overview");
         if (el.classList.contains('hidden')) {
-            this.hideEditorShowOverlay();
+            this.hideEditorShowOverview();
         } else {
-            this.hideOverlayShowEditor();
+            this.hideOverviewShowEditor();
         }
     }
 
-    hideOverlayShowEditor() {
+    hideOverviewShowEditor() {
         let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("draw-area-outer");
         let el2 = document.getElementById("page-footer-draw-mode");
@@ -880,7 +880,7 @@ class PageController {
         this.showCanvas(true);
     }
 
-    hideEditorShowOverlay() {
+    hideEditorShowOverview() {
         let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("draw-area-outer");
         let el2 = document.getElementById("page-footer-draw-mode");
