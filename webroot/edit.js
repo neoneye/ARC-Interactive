@@ -685,9 +685,9 @@ class PageController {
                 let handler = () => {
                     this.hideOverlayShowEditor();
                 };
-                el_td0.onclick = handler;
-                el_td1.onclick = handler;
-                el_td2.onclick = handler;
+                el_td0.onpointerdown = handler;
+                el_td1.onpointerdown = handler;
+                el_td2.onpointerdown = handler;
             } else {
                 el_td0.classList.add('click-to-active-test');
                 el_td1.classList.add('click-to-active-test');
@@ -695,9 +695,9 @@ class PageController {
                 let handler = () => {
                     this.activateTestIndex(i);
                 };
-                el_td0.onclick = handler;
-                el_td1.onclick = handler;
-                el_td2.onclick = handler;
+                el_td0.onpointerdown = handler;
+                el_td1.onpointerdown = handler;
+                el_td2.onpointerdown = handler;
             }
 
             {
