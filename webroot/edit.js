@@ -86,6 +86,8 @@ class PageController {
         this.pasteX = 0;
         this.pasteY = 0;
 
+        this.enablePlotDraw = false;
+
         var pixels = [];
         let maxPixelSize = 100;
         for (var i = 0; i < maxPixelSize; i++) {
@@ -339,9 +341,12 @@ class PageController {
         this.isDrawing = true;
         var ctx = this.canvas.getContext('2d');
         let position = this.getPosition(event);
-        let xcellSize = 5;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(position.x, position.y, xcellSize, xcellSize);
+
+        if (this.enablePlotDraw) {
+            let plotSize = 5;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(position.x, position.y, plotSize, plotSize);
+        }
 
         if(this.isPasteMode) {
             this.pasteX = position.x;
@@ -402,9 +407,12 @@ class PageController {
         }
         var ctx = this.canvas.getContext('2d');
         let position = this.getPosition(event);
-        let xcellSize = 5;
-        ctx.fillStyle = 'grey';
-        ctx.fillRect(position.x, position.y, xcellSize, xcellSize);
+
+        if (this.enablePlotDraw) {
+            let plotSize = 5;
+            ctx.fillStyle = 'grey';
+            ctx.fillRect(position.x, position.y, plotSize, plotSize);
+        }
 
         if(this.isPasteMode) {
             this.pasteX = position.x;
