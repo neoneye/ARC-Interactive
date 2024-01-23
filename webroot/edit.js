@@ -72,7 +72,7 @@ class PageController {
         }
 
         this.canvas = document.getElementById('draw-area-canvas');
-        this.dragndropCanvas = document.getElementById('dragndrop-area-canvas');
+        this.pasteCanvas = document.getElementById('paste-canvas');
         this.isDrawing = false;
         this.currentColor = 0;
         this.currentTest = 0;
@@ -131,14 +131,14 @@ class PageController {
         this.canvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
         this.canvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
 
-        // Interaction with the dragndrop canvas
-        this.dragndropCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); }, false);
-        this.dragndropCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); }, false);
+        // Interaction with the paste canvas
+        this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
+        this.pasteCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); }, false);
+        this.pasteCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); }, false);
+        this.pasteCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); }, false);
+        this.pasteCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); }, false);
+        this.pasteCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); }, false);
+        this.pasteCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); }, false);
 
         // Listen for the keyup event
         window.addEventListener('keyup', (event) => { this.keyUp(event); });
@@ -196,7 +196,7 @@ class PageController {
         }
 
         if (this.isPasteMode) {
-            // While the dragndrop canvas is visible, only the 'Enter' key is handled.
+            // While the paste canvas is visible, only the 'Enter' key is handled.
             // All other keyboard interactions are ignored.
             if (event.code === 'Enter') {
                 this.pasteFromClipboardAccept();
@@ -801,8 +801,8 @@ class PageController {
 
         if (this.isPasteMode) {
             if (this.clipboard) {
-                const ctx2 = this.dragndropCanvas.getContext('2d');
-                ctx2.clearRect(0, 0, this.dragndropCanvas.width, this.dragndropCanvas.height);
+                const ctx2 = this.pasteCanvas.getContext('2d');
+                ctx2.clearRect(0, 0, this.pasteCanvas.width, this.pasteCanvas.height);
 
                 let pasteX = this.pasteX;
                 let pasteY = this.pasteY;
@@ -811,7 +811,7 @@ class PageController {
                 let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
                 let minXRaw = pasteX - halfWidth;
                 let minYRaw = pasteY - halfHeight;
-                let position2 = this.translateCoordinatesToSecondCanvas(this.dragndropCanvas, this.canvas, minXRaw, minYRaw);
+                let position2 = this.translateCoordinatesToSecondCanvas(this.pasteCanvas, this.canvas, minXRaw, minYRaw);
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
                 ctx.globalAlpha = 0.75;
@@ -1091,18 +1091,18 @@ class PageController {
         this.pasteY = this.canvas.height / 2;
         this.hideToolPanel();
         this.isPasteMode = true;
-        this.showDragndropArea();
+        this.showPasteArea();
         resizeCanvas();
         this.showCanvas(true);
     }
 
-    showDragndropArea() {
-        let el = document.getElementById('dragndrop-area-outer');
+    showPasteArea() {
+        let el = document.getElementById('paste-area-outer');
         el.classList.remove('hidden');
     }
 
-    hideDragndropArea() {
-        let el = document.getElementById('dragndrop-area-outer');
+    hidePasteArea() {
+        let el = document.getElementById('paste-area-outer');
         el.classList.add('hidden');
     }
 
@@ -1151,14 +1151,14 @@ class PageController {
         this.selectRectangle.y1 = clampedY1;
 
         this.showCanvas(true);
-        this.hideDragndropArea();
+        this.hidePasteArea();
     }
 
     pasteFromClipboardReject() {
         console.log('Paste from clipboard reject.');
         this.isPasteMode = false;
         this.showCanvas(true);
-        this.hideDragndropArea();
+        this.hidePasteArea();
     }
 
     // Get either the selected rectangle or the rectangle for the entire image
@@ -1357,8 +1357,8 @@ function resizeCanvas() {
         canvas.height = parentDiv.clientHeight;
     }
     {
-        let canvas = document.getElementById('dragndrop-area-canvas');
-        let parentDiv = document.getElementById('dragndrop-area-outer');    
+        let canvas = document.getElementById('paste-canvas');
+        let parentDiv = document.getElementById('paste-area-outer');
         canvas.width = parentDiv.clientWidth;
         canvas.height = parentDiv.clientHeight;
     }
