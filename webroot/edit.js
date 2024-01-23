@@ -117,23 +117,10 @@ class PageController {
         this.hideEditorShowOverview();
     }
 
-    resizeOrChangeOrientation() {
-        resizeCanvas();
-        if (this.isOverviewHidden()) {
-            this.showCanvas(true);
-        } else {
-            this.updateOverview();
-        }
-    }
-
     addEventListeners() {
         // Add an event listener to resize the canvas whenever the window is resized
-        window.addEventListener('resize', () => {
-            this.resizeOrChangeOrientation();
-        });
-        window.addEventListener('orientationchange', () => {
-            this.resizeOrChangeOrientation();
-        });        
+        window.addEventListener('resize', () => { this.resizeOrChangeOrientation(); });
+        window.addEventListener('orientationchange', () => { this.resizeOrChangeOrientation(); });
 
         // Interaction with the image canvas
         this.canvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
@@ -176,6 +163,15 @@ class PageController {
                 }
             });
         });
+    }
+
+    resizeOrChangeOrientation() {
+        resizeCanvas();
+        if (this.isOverviewHidden()) {
+            this.showCanvas(true);
+        } else {
+            this.updateOverview();
+        }
     }
 
     keyboardShortcutPickTool(radioButtonId) {
