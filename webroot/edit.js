@@ -88,17 +88,9 @@ class PageController {
 
         this.enablePlotDraw = false;
 
-        var pixels = [];
         let maxPixelSize = 100;
-        for (var i = 0; i < maxPixelSize; i++) {
-            var row = [];
-            for (var j = 0; j < maxPixelSize; j++) {
-                row.push(0);
-            }
-            pixels.push(row);
-        }
         this.maxPixelSize = maxPixelSize;
-        this.image = new ARCImage(pixels);
+        this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
 
         this.isFullscreen = false;
 
@@ -532,8 +524,7 @@ class PageController {
     assignImageFromCurrentTest() {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
-        let pixels = JSON.parse(JSON.stringify(image.pixels));
-        this.image = new ARCImage(pixels)
+        this.image = image.clone();
     }
 
     assignSelectRectangleFromCurrentImage() {
@@ -945,8 +936,7 @@ class PageController {
     }
 
     takeSnapshotOfCurrentImage() {
-        let pixels = JSON.parse(JSON.stringify(this.image.pixels));
-        let newImage = new ARCImage(pixels);
+        let newImage = this.image.clone();
         this.userDrawnImages[this.currentTest] = newImage;
     }
 
@@ -955,9 +945,7 @@ class PageController {
         if (!image) {
             return null;
         }
-        let pixels = JSON.parse(JSON.stringify(image.pixels));
-        let newImage = new ARCImage(pixels);
-        return newImage;
+        return image.clone();
     }
 
     activateTestIndex(testIndex) {
@@ -1026,22 +1014,8 @@ class PageController {
         console.log('Width:', size.width, 'Height:', size.height);
 
         // Resize the image, preserve the content.
-        let outsideColor = this.currentColor;
-        let pixels = this.image.pixels;
-        let newPixels = [];
-        for (var y = 0; y < size.height; y++) {
-            var row = [];
-            for (var x = 0; x < size.width; x++) {
-                var value = outsideColor;
-                if (y < pixels.length && x < pixels[y].length) {
-                    value = pixels[y][x];
-                }
-                row.push(value);
-            }
-            newPixels.push(row);
-        }
-        let newImage = new ARCImage(newPixels);
-        this.image = newImage;
+        let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
+        this.image = emptyImage.overlay(this.image, 0, 0);
         this.assignSelectRectangleFromCurrentImage();
         this.showCanvas(true);
 
