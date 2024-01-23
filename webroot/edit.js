@@ -117,15 +117,22 @@ class PageController {
         this.hideEditorShowOverview();
     }
 
+    resizeOrChangeOrientation() {
+        resizeCanvas();
+        if (this.isOverviewHidden()) {
+            this.showCanvas(true);
+        } else {
+            this.updateOverview();
+        }
+    }
+
     addEventListeners() {
         // Add an event listener to resize the canvas whenever the window is resized
         window.addEventListener('resize', () => {
-            resizeCanvas();
-            this.showCanvas(true);
+            this.resizeOrChangeOrientation();
         });
         window.addEventListener('orientationchange', () => {
-            resizeCanvas();
-            this.showCanvas(true);
+            this.resizeOrChangeOrientation();
         });        
 
         // Interaction with the image canvas
@@ -556,7 +563,7 @@ class PageController {
     showTask(task) {
         console.log('Show task:', task);
 
-        this.populateTable(task);
+        this.updateOverview();
     }
 
     calcCellSize(task) {
@@ -607,7 +614,8 @@ class PageController {
         return cellSize;
     }
 
-    populateTable(task) {
+    updateOverview() {
+        let task = this.task;
         let cellSize = this.calcCellSize(task);
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
@@ -857,9 +865,13 @@ class PageController {
         ctx.stroke();    
     }
 
-    toggleOverview() {
+    isOverviewHidden() {
         let el = document.getElementById("task-overview");
-        if (el.classList.contains('hidden')) {
+        return el.classList.contains('hidden');
+    }
+
+    toggleOverview() {
+        if (this.isOverviewHidden()) {
             this.hideEditorShowOverview();
         } else {
             this.hideOverviewShowEditor();
@@ -888,7 +900,7 @@ class PageController {
         el2.classList.add('hidden');
 
         this.takeSnapshotOfCurrentImage();
-        this.populateTable(this.task);
+        this.updateOverview();
     }
 
     toggleFullscreen() {
@@ -954,7 +966,7 @@ class PageController {
         this.currentTest = testIndex % this.numberOfTests;
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
-        this.populateTable(this.task);
+        this.updateOverview();
         let image = this.imageForTestIndex(this.currentTest);
         if (image) {
             this.image = image;
