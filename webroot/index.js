@@ -22,7 +22,7 @@ class PageController {
     }
 
     async onload() {
-        this.db = await initializeDatabase();
+        this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         await this.loadTasks();
@@ -85,7 +85,7 @@ class PageController {
 
         let datasetId = this.datasetId;
         try {
-            let cachedData = await fetchData(this.db, datasetId);
+            let cachedData = await this.db.getData(datasetId);
             if (!cachedData) {
                 console.log('No cached data. Fetching');
 
@@ -97,7 +97,7 @@ class PageController {
                 const jsonData = JSON.parse(decompressed);
     
                 // Store in IndexedDB
-                await storeData(this.db, datasetId, jsonData);
+                await this.db.setData(datasetId, jsonData);
                 
                 // Update timestamp
                 let utcTimestamp = Date.now();
@@ -176,7 +176,7 @@ class PageController {
         let extraWide = (count > 6);
         let canvas = task.toThumbnailCanvas(extraWide, 1);
 
-        await storeCanvas(this.db, canvas, task.thumbnailCacheId);
+        await this.db.setImageFromCanvas(task.thumbnailCacheId, canvas);
     }
 
     async dataURLForTaskThumbnailIfCached(task) {
@@ -187,7 +187,7 @@ class PageController {
         var image = null;
         try {
             // console.log('Loading image', thumbnailCacheId);
-            image = await fetchImage(this.db, thumbnailCacheId);
+            image = await this.db.getImage(thumbnailCacheId);
         } catch (error) {
             console.error(`Error loading image ${thumbnailCacheId}`, error);
             return null;

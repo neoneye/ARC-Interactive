@@ -105,6 +105,37 @@ async function fetchImage(db, id) {
     });
 }
 
+class DatabaseWrapper {
+    constructor(indexedDBInstance) {
+        this.indexedDBInstance = indexedDBInstance;
+    }
+
+    static async create() {
+        let indexedDBInstance = await initializeDatabase();
+        return new DatabaseWrapper(indexedDBInstance);
+    }
+
+    async getData(key) {
+        // console.log('DatabaseWrapper.getData()', key);
+        return await fetchData(this.indexedDBInstance, key);
+    }
+
+    async setData(key, data) {
+        // console.log('DatabaseWrapper.setData()', key);
+        await storeData(this.indexedDBInstance, key, data);
+    }
+
+    async getImage(key) {
+        // console.log('DatabaseWrapper.getImage()', key);
+        return await fetchImage(this.indexedDBInstance, key);
+    }
+
+    async setImageFromCanvas(key, canvas) {
+        // console.log('DatabaseWrapper.setImageFromCanvas()', key);
+        await storeCanvas(this.indexedDBInstance, canvas, key);
+    }
+}
+
 class ARCImage {
     constructor(pixels) {
         var min_length = 1000000;
