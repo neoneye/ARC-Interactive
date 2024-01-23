@@ -71,8 +71,8 @@ class PageController {
             el.classList.remove('hidden');
         }
 
-        this.canvas = document.getElementById('draw-area-canvas');
-        this.dragndropCanvas = document.getElementById('dragndrop-area-canvas');
+        this.drawCanvas = document.getElementById('draw-canvas');
+        this.pasteCanvas = document.getElementById('paste-canvas');
         this.isDrawing = false;
         this.currentColor = 0;
         this.currentTest = 0;
@@ -88,17 +88,9 @@ class PageController {
 
         this.enablePlotDraw = false;
 
-        var pixels = [];
         let maxPixelSize = 100;
-        for (var i = 0; i < maxPixelSize; i++) {
-            var row = [];
-            for (var j = 0; j < maxPixelSize; j++) {
-                row.push(0);
-            }
-            pixels.push(row);
-        }
         this.maxPixelSize = maxPixelSize;
-        this.image = new ARCImage(pixels);
+        this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
 
         this.isFullscreen = false;
 
@@ -127,32 +119,26 @@ class PageController {
 
     addEventListeners() {
         // Add an event listener to resize the canvas whenever the window is resized
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            this.showCanvas(true);
-        });
-        window.addEventListener('orientationchange', () => {
-            resizeCanvas();
-            this.showCanvas(true);
-        });        
+        window.addEventListener('resize', () => { this.resizeOrChangeOrientation(); });
+        window.addEventListener('orientationchange', () => { this.resizeOrChangeOrientation(); });
 
-        // Interaction with the image canvas
-        this.canvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
-        this.canvas.addEventListener('touchmove', (event) => { this.moveDraw(event); }, false);
-        this.canvas.addEventListener('touchend', (event) => { this.stopDraw(event); }, false);
-        this.canvas.addEventListener('mousedown', (event) => { this.startDraw(event); }, false);
-        this.canvas.addEventListener('mousemove', (event) => { this.moveDraw(event); }, false);
-        this.canvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
-        this.canvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
+        // Interaction with the draw canvas
+        this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
+        this.drawCanvas.addEventListener('touchmove', (event) => { this.moveDraw(event); }, false);
+        this.drawCanvas.addEventListener('touchend', (event) => { this.stopDraw(event); }, false);
+        this.drawCanvas.addEventListener('mousedown', (event) => { this.startDraw(event); }, false);
+        this.drawCanvas.addEventListener('mousemove', (event) => { this.moveDraw(event); }, false);
+        this.drawCanvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
+        this.drawCanvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
 
-        // Interaction with the dragndrop canvas
-        this.dragndropCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); }, false);
-        this.dragndropCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); }, false);
-        this.dragndropCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); }, false);
+        // Interaction with the paste canvas
+        this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
+        this.pasteCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); }, false);
+        this.pasteCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); }, false);
+        this.pasteCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); }, false);
+        this.pasteCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); }, false);
+        this.pasteCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); }, false);
+        this.pasteCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); }, false);
 
         // Listen for the keyup event
         window.addEventListener('keyup', (event) => { this.keyUp(event); });
@@ -179,6 +165,15 @@ class PageController {
         });
     }
 
+    resizeOrChangeOrientation() {
+        resizeCanvas();
+        if (this.isOverviewHidden()) {
+            this.showCanvas(true);
+        } else {
+            this.updateOverview();
+        }
+    }
+
     keyboardShortcutPickTool(radioButtonId) {
         let el = document.getElementById(radioButtonId);
         el.checked = true;
@@ -201,7 +196,7 @@ class PageController {
         }
 
         if (this.isPasteMode) {
-            // While the dragndrop canvas is visible, only the 'Enter' key is handled.
+            // While the paste canvas is visible, only the 'Enter' key is handled.
             // All other keyboard interactions are ignored.
             if (event.code === 'Enter') {
                 this.pasteFromClipboardAccept();
@@ -263,7 +258,7 @@ class PageController {
     }
 
     getPosition(event) {
-        let rect = this.canvas.getBoundingClientRect();
+        let rect = this.drawCanvas.getBoundingClientRect();
         var x, y;
         // Check if it's a touch event
         if (event.touches) {
@@ -339,7 +334,7 @@ class PageController {
     startDraw(event) {
         event.preventDefault();
         this.isDrawing = true;
-        var ctx = this.canvas.getContext('2d');
+        var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
 
         if (this.enablePlotDraw) {
@@ -356,8 +351,8 @@ class PageController {
             return;
         }
 
-        let width = this.canvas.width - this.inset * 2;
-        let height = this.canvas.height - this.inset * 2;
+        let width = this.drawCanvas.width - this.inset * 2;
+        let height = this.drawCanvas.height - this.inset * 2;
         let cellSize = this.image.cellSize(width, height);
 
         const drawX = this.inset;
@@ -405,7 +400,7 @@ class PageController {
         if (!this.isDrawing) {
             return;
         }
-        var ctx = this.canvas.getContext('2d');
+        var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
 
         if (this.enablePlotDraw) {
@@ -422,8 +417,8 @@ class PageController {
             return;
         }
 
-        let width = this.canvas.width - this.inset * 2;
-        let height = this.canvas.height - this.inset * 2;
+        let width = this.drawCanvas.width - this.inset * 2;
+        let height = this.drawCanvas.height - this.inset * 2;
         let cellSize = this.image.cellSize(width, height);
 
         const drawX = this.inset;
@@ -460,7 +455,7 @@ class PageController {
     stopDraw(event) {
         event.preventDefault();
         this.isDrawing = false;
-        // var ctx = this.canvas.getContext('2d');
+        // var ctx = this.drawCanvas.getContext('2d');
         // let cellSize = 100;
         // ctx.fillStyle = 'white';
         // ctx.fillRect(0, 0, cellSize, cellSize);
@@ -532,8 +527,7 @@ class PageController {
     assignImageFromCurrentTest() {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
-        let pixels = JSON.parse(JSON.stringify(image.pixels));
-        this.image = new ARCImage(pixels)
+        this.image = image.clone();
     }
 
     assignSelectRectangleFromCurrentImage() {
@@ -565,7 +559,7 @@ class PageController {
     showTask(task) {
         console.log('Show task:', task);
 
-        this.populateTable(task);
+        this.updateOverview();
     }
 
     calcCellSize(task) {
@@ -573,7 +567,7 @@ class PageController {
         let width = el.clientWidth;
         let height = el.clientHeight;
 
-        let heightOfNonImage = 40;
+        let heightOfNonImage = 80;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
@@ -616,7 +610,8 @@ class PageController {
         return cellSize;
     }
 
-    populateTable(task) {
+    updateOverview() {
+        let task = this.task;
         let cellSize = this.calcCellSize(task);
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
@@ -756,10 +751,10 @@ class PageController {
     showCanvas(clear) {
         let isSelectTool = this.isCurrentToolSelect();
 
-        const ctx = this.canvas.getContext('2d');
+        const ctx = this.drawCanvas.getContext('2d');
 
-        let canvasWidth = this.canvas.width;
-        let canvasHeight = this.canvas.height;
+        let canvasWidth = this.drawCanvas.width;
+        let canvasHeight = this.drawCanvas.height;
         let inset = this.inset;
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
@@ -806,8 +801,8 @@ class PageController {
 
         if (this.isPasteMode) {
             if (this.clipboard) {
-                const ctx2 = this.dragndropCanvas.getContext('2d');
-                ctx2.clearRect(0, 0, this.dragndropCanvas.width, this.dragndropCanvas.height);
+                const ctx2 = this.pasteCanvas.getContext('2d');
+                ctx2.clearRect(0, 0, this.pasteCanvas.width, this.pasteCanvas.height);
 
                 let pasteX = this.pasteX;
                 let pasteY = this.pasteY;
@@ -816,7 +811,7 @@ class PageController {
                 let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
                 let minXRaw = pasteX - halfWidth;
                 let minYRaw = pasteY - halfHeight;
-                let position2 = this.translateCoordinatesToSecondCanvas(this.dragndropCanvas, this.canvas, minXRaw, minYRaw);
+                let position2 = this.translateCoordinatesToSecondCanvas(this.pasteCanvas, this.drawCanvas, minXRaw, minYRaw);
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
                 ctx.globalAlpha = 0.75;
@@ -866,9 +861,13 @@ class PageController {
         ctx.stroke();    
     }
 
-    toggleOverview() {
+    isOverviewHidden() {
         let el = document.getElementById("task-overview");
-        if (el.classList.contains('hidden')) {
+        return el.classList.contains('hidden');
+    }
+
+    toggleOverview() {
+        if (this.isOverviewHidden()) {
             this.hideEditorShowOverview();
         } else {
             this.hideOverviewShowEditor();
@@ -897,7 +896,7 @@ class PageController {
         el2.classList.add('hidden');
 
         this.takeSnapshotOfCurrentImage();
-        this.populateTable(this.task);
+        this.updateOverview();
     }
 
     toggleFullscreen() {
@@ -945,8 +944,7 @@ class PageController {
     }
 
     takeSnapshotOfCurrentImage() {
-        let pixels = JSON.parse(JSON.stringify(this.image.pixels));
-        let newImage = new ARCImage(pixels);
+        let newImage = this.image.clone();
         this.userDrawnImages[this.currentTest] = newImage;
     }
 
@@ -955,9 +953,7 @@ class PageController {
         if (!image) {
             return null;
         }
-        let pixels = JSON.parse(JSON.stringify(image.pixels));
-        let newImage = new ARCImage(pixels);
-        return newImage;
+        return image.clone();
     }
 
     activateTestIndex(testIndex) {
@@ -966,7 +962,7 @@ class PageController {
         this.currentTest = testIndex % this.numberOfTests;
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
-        this.populateTable(this.task);
+        this.updateOverview();
         let image = this.imageForTestIndex(this.currentTest);
         if (image) {
             this.image = image;
@@ -1026,22 +1022,8 @@ class PageController {
         console.log('Width:', size.width, 'Height:', size.height);
 
         // Resize the image, preserve the content.
-        let outsideColor = this.currentColor;
-        let pixels = this.image.pixels;
-        let newPixels = [];
-        for (var y = 0; y < size.height; y++) {
-            var row = [];
-            for (var x = 0; x < size.width; x++) {
-                var value = outsideColor;
-                if (y < pixels.length && x < pixels[y].length) {
-                    value = pixels[y][x];
-                }
-                row.push(value);
-            }
-            newPixels.push(row);
-        }
-        let newImage = new ARCImage(newPixels);
-        this.image = newImage;
+        let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
+        this.image = emptyImage.overlay(this.image, 0, 0);
         this.assignSelectRectangleFromCurrentImage();
         this.showCanvas(true);
 
@@ -1105,22 +1087,22 @@ class PageController {
         }
         let image = this.clipboard;
         console.log(`Paste from clipboard. width: ${image.width}, height: ${image.height}`);
-        this.pasteX = this.canvas.width / 2;
-        this.pasteY = this.canvas.height / 2;
+        this.pasteX = this.drawCanvas.width / 2;
+        this.pasteY = this.drawCanvas.height / 2;
         this.hideToolPanel();
         this.isPasteMode = true;
-        this.showDragndropArea();
+        this.showPasteArea();
         resizeCanvas();
         this.showCanvas(true);
     }
 
-    showDragndropArea() {
-        let el = document.getElementById('dragndrop-area-outer');
+    showPasteArea() {
+        let el = document.getElementById('paste-area-outer');
         el.classList.remove('hidden');
     }
 
-    hideDragndropArea() {
-        let el = document.getElementById('dragndrop-area-outer');
+    hidePasteArea() {
+        let el = document.getElementById('paste-area-outer');
         el.classList.add('hidden');
     }
 
@@ -1135,8 +1117,8 @@ class PageController {
         }
         console.log('Paste from clipboard accept.');
 
-        let canvasWidth = this.canvas.width;
-        let canvasHeight = this.canvas.height;
+        let canvasWidth = this.drawCanvas.width;
+        let canvasHeight = this.drawCanvas.height;
         let inset = this.inset;
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
@@ -1169,14 +1151,14 @@ class PageController {
         this.selectRectangle.y1 = clampedY1;
 
         this.showCanvas(true);
-        this.hideDragndropArea();
+        this.hidePasteArea();
     }
 
     pasteFromClipboardReject() {
         console.log('Paste from clipboard reject.');
         this.isPasteMode = false;
         this.showCanvas(true);
-        this.hideDragndropArea();
+        this.hidePasteArea();
     }
 
     // Get either the selected rectangle or the rectangle for the entire image
@@ -1369,14 +1351,14 @@ function body_onload() {
 
 function resizeCanvas() {
     {
-        let canvas = document.getElementById('draw-area-canvas');
+        let canvas = document.getElementById('draw-canvas');
         let parentDiv = document.getElementById('draw-area-outer');    
         canvas.width = parentDiv.clientWidth;
         canvas.height = parentDiv.clientHeight;
     }
     {
-        let canvas = document.getElementById('dragndrop-area-canvas');
-        let parentDiv = document.getElementById('dragndrop-area-outer');    
+        let canvas = document.getElementById('paste-canvas');
+        let parentDiv = document.getElementById('paste-area-outer');
         canvas.width = parentDiv.clientWidth;
         canvas.height = parentDiv.clientHeight;
     }
