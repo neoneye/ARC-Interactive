@@ -121,6 +121,29 @@ class ARCImage {
         this.height = pixels.length;
     }
 
+    static color(width, height, color) {
+        if (width < 1 || height < 1 || width > 255 || height > 255) {
+            throw new Error(`Image size must be between 1x1 and 255x255: width=${width}, height=${height}`);
+        }
+        if (color < 0 || color > 255) {
+            throw new Error(`Pixel color must be between 0 and 255: color=${color}`);
+        }
+        var pixels = [];
+        for (var y = 0; y < height; y++) {
+            var row = [];
+            for (var x = 0; x < width; x++) {
+                row.push(color);
+            }
+            pixels.push(row);
+        }
+        return new ARCImage(pixels);
+    }
+
+    clone() {
+        let pixels = JSON.parse(JSON.stringify(this.pixels));
+        return new ARCImage(pixels);
+    }
+
     toCanvas() {
         let cellSize = 1;
         return this.toCanvasWithCellSize(cellSize);

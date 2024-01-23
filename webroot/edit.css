@@ -41,7 +41,7 @@ body {
     text-overflow: ellipsis;
 }
 
-#dragndrop-area-outer {
+#paste-area-outer {
     position: absolute;
     display: block;
     top: 0;
@@ -51,7 +51,7 @@ body {
     z-index: 100;
 }
 
-#dragndrop-area-reject-button, #dragndrop-area-accept-button {
+#paste-area-reject-button, #paste-area-accept-button {
     font-size: x-large;
     font-weight: bold;
     padding: 2em;
@@ -72,19 +72,19 @@ body {
     background-color: var(--ui-background);
 }
 
-#dragndrop-area-accept-button {
+#paste-area-accept-button {
     position: absolute;
     bottom: 0;
     right: 0;
 }
 
-#dragndrop-area-reject-button {
+#paste-area-reject-button {
     position: absolute;
     bottom: 0;
     left: 0;
 }
 
-#dragndrop-area-canvas {
+#paste-canvas {
     background-color: rgba(149, 149, 149, 0.734);
     opacity: 0.9;
 }
@@ -260,7 +260,7 @@ body {
     }
 }
 
-#dragndrop-area-outer.hidden,
+#paste-area-outer.hidden,
 #task-overview.hidden,
 #draw-area-outer.hidden,
 #page-footer-draw-mode.hidden,

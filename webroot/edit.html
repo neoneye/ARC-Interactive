@@ -13,10 +13,10 @@
     <title>ARC edit</title>
 </head>
 <body onload="body_onload()">
-    <div id="dragndrop-area-outer" class="hidden">
-        <canvas id="dragndrop-area-canvas"></canvas>
-        <button id="dragndrop-area-reject-button" class="hover-button" onclick="gPageController.pasteFromClipboardReject()" title="Abort the paste operation.">Reject</button>
-        <button id="dragndrop-area-accept-button" class="hover-button" onclick="gPageController.pasteFromClipboardAccept()" title="Enter = Finish the paste operation.">Accept</button>
+    <div id="paste-area-outer" class="hidden">
+        <canvas id="paste-canvas"></canvas>
+        <button id="paste-area-reject-button" class="hover-button" onclick="gPageController.pasteFromClipboardReject()" title="Abort the paste operation.">Reject</button>
+        <button id="paste-area-accept-button" class="hover-button" onclick="gPageController.pasteFromClipboardAccept()" title="Enter = Finish the paste operation.">Accept</button>
     </div>
 
     <div id="tool-panel" class="hidden" onclick="gPageController.dismissToolPanel(event)">
@@ -116,7 +116,7 @@
             </div>
 
             <div id="draw-area-outer" class="hidden">
-                <canvas id="draw-area-canvas"></canvas>
+                <canvas id="draw-canvas"></canvas>
             </div>
 
         </div>
