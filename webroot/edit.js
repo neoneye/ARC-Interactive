@@ -567,7 +567,7 @@ class PageController {
         let width = el.clientWidth;
         let height = el.clientHeight;
 
-        let heightOfNonImage = 40;
+        let heightOfNonImage = 80;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
