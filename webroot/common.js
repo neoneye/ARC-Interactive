@@ -198,12 +198,12 @@ class Dataset {
     static tasksFromJsonData(jsonData, datasetId) {
         let tasks = [];
         for (let key of Object.keys(jsonData)) {
-            let dict = jsonData[key];
-            let taskId = dict.id;
+            let taskJsonData = jsonData[key];
+            let taskId = taskJsonData.id;
             let encodedId = encodeURIComponent(taskId);
             let openUrl = `edit.html?dataset=${datasetId}&task=${encodedId}`;
             let thumbnailCacheId = `task_thumbnail_${datasetId}_${taskId}`;
-            let task = new ARCTask(dict, openUrl, thumbnailCacheId);
+            let task = new ARCTask(taskJsonData, openUrl, thumbnailCacheId);
             tasks.push(task);
         }
         console.log('Loaded tasks:', tasks.length);
