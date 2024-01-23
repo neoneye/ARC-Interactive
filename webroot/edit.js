@@ -71,7 +71,7 @@ class PageController {
             el.classList.remove('hidden');
         }
 
-        this.canvas = document.getElementById('draw-area-canvas');
+        this.drawCanvas = document.getElementById('draw-canvas');
         this.pasteCanvas = document.getElementById('paste-canvas');
         this.isDrawing = false;
         this.currentColor = 0;
@@ -122,14 +122,14 @@ class PageController {
         window.addEventListener('resize', () => { this.resizeOrChangeOrientation(); });
         window.addEventListener('orientationchange', () => { this.resizeOrChangeOrientation(); });
 
-        // Interaction with the image canvas
-        this.canvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
-        this.canvas.addEventListener('touchmove', (event) => { this.moveDraw(event); }, false);
-        this.canvas.addEventListener('touchend', (event) => { this.stopDraw(event); }, false);
-        this.canvas.addEventListener('mousedown', (event) => { this.startDraw(event); }, false);
-        this.canvas.addEventListener('mousemove', (event) => { this.moveDraw(event); }, false);
-        this.canvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
-        this.canvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
+        // Interaction with the draw canvas
+        this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
+        this.drawCanvas.addEventListener('touchmove', (event) => { this.moveDraw(event); }, false);
+        this.drawCanvas.addEventListener('touchend', (event) => { this.stopDraw(event); }, false);
+        this.drawCanvas.addEventListener('mousedown', (event) => { this.startDraw(event); }, false);
+        this.drawCanvas.addEventListener('mousemove', (event) => { this.moveDraw(event); }, false);
+        this.drawCanvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
+        this.drawCanvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
 
         // Interaction with the paste canvas
         this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
@@ -258,7 +258,7 @@ class PageController {
     }
 
     getPosition(event) {
-        let rect = this.canvas.getBoundingClientRect();
+        let rect = this.drawCanvas.getBoundingClientRect();
         var x, y;
         // Check if it's a touch event
         if (event.touches) {
@@ -334,7 +334,7 @@ class PageController {
     startDraw(event) {
         event.preventDefault();
         this.isDrawing = true;
-        var ctx = this.canvas.getContext('2d');
+        var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
 
         if (this.enablePlotDraw) {
@@ -351,8 +351,8 @@ class PageController {
             return;
         }
 
-        let width = this.canvas.width - this.inset * 2;
-        let height = this.canvas.height - this.inset * 2;
+        let width = this.drawCanvas.width - this.inset * 2;
+        let height = this.drawCanvas.height - this.inset * 2;
         let cellSize = this.image.cellSize(width, height);
 
         const drawX = this.inset;
@@ -400,7 +400,7 @@ class PageController {
         if (!this.isDrawing) {
             return;
         }
-        var ctx = this.canvas.getContext('2d');
+        var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
 
         if (this.enablePlotDraw) {
@@ -417,8 +417,8 @@ class PageController {
             return;
         }
 
-        let width = this.canvas.width - this.inset * 2;
-        let height = this.canvas.height - this.inset * 2;
+        let width = this.drawCanvas.width - this.inset * 2;
+        let height = this.drawCanvas.height - this.inset * 2;
         let cellSize = this.image.cellSize(width, height);
 
         const drawX = this.inset;
@@ -455,7 +455,7 @@ class PageController {
     stopDraw(event) {
         event.preventDefault();
         this.isDrawing = false;
-        // var ctx = this.canvas.getContext('2d');
+        // var ctx = this.drawCanvas.getContext('2d');
         // let cellSize = 100;
         // ctx.fillStyle = 'white';
         // ctx.fillRect(0, 0, cellSize, cellSize);
@@ -751,10 +751,10 @@ class PageController {
     showCanvas(clear) {
         let isSelectTool = this.isCurrentToolSelect();
 
-        const ctx = this.canvas.getContext('2d');
+        const ctx = this.drawCanvas.getContext('2d');
 
-        let canvasWidth = this.canvas.width;
-        let canvasHeight = this.canvas.height;
+        let canvasWidth = this.drawCanvas.width;
+        let canvasHeight = this.drawCanvas.height;
         let inset = this.inset;
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
@@ -811,7 +811,7 @@ class PageController {
                 let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
                 let minXRaw = pasteX - halfWidth;
                 let minYRaw = pasteY - halfHeight;
-                let position2 = this.translateCoordinatesToSecondCanvas(this.pasteCanvas, this.canvas, minXRaw, minYRaw);
+                let position2 = this.translateCoordinatesToSecondCanvas(this.pasteCanvas, this.drawCanvas, minXRaw, minYRaw);
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
                 ctx.globalAlpha = 0.75;
@@ -1087,8 +1087,8 @@ class PageController {
         }
         let image = this.clipboard;
         console.log(`Paste from clipboard. width: ${image.width}, height: ${image.height}`);
-        this.pasteX = this.canvas.width / 2;
-        this.pasteY = this.canvas.height / 2;
+        this.pasteX = this.drawCanvas.width / 2;
+        this.pasteY = this.drawCanvas.height / 2;
         this.hideToolPanel();
         this.isPasteMode = true;
         this.showPasteArea();
@@ -1117,8 +1117,8 @@ class PageController {
         }
         console.log('Paste from clipboard accept.');
 
-        let canvasWidth = this.canvas.width;
-        let canvasHeight = this.canvas.height;
+        let canvasWidth = this.drawCanvas.width;
+        let canvasHeight = this.drawCanvas.height;
         let inset = this.inset;
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
@@ -1351,7 +1351,7 @@ function body_onload() {
 
 function resizeCanvas() {
     {
-        let canvas = document.getElementById('draw-area-canvas');
+        let canvas = document.getElementById('draw-canvas');
         let parentDiv = document.getElementById('draw-area-outer');    
         canvas.width = parentDiv.clientWidth;
         canvas.height = parentDiv.clientHeight;
