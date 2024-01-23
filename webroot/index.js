@@ -79,65 +79,20 @@ class PageController {
 
     async loadTasks() {
         console.log('PageController.loadTasks()');
-
-        let storedUTCTimestamp = localStorage.getItem('lastFetchedUTCTimestamp');
-        console.log("JSON was fetched at UTC timestamp:", storedUTCTimestamp);
-
-        let datasetId = this.datasetId;
         try {
-            let cachedData = await this.db.getData(datasetId);
-            if (!cachedData) {
-                console.log('No cached data. Fetching');
+            let dataset = await Dataset.load(this.db, this.datasetId);
 
-                // Fetch and decompress data if not in cache
-                const response = await fetch(`dataset/${datasetId}.json.gz`);
-                const arrayBuffer = await response.arrayBuffer();
-                const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
-                console.log('decompressed.length', decompressed.length);
-                const jsonData = JSON.parse(decompressed);
-    
-                // Store in IndexedDB
-                await this.db.setData(datasetId, jsonData);
-                
-                // Update timestamp
-                let utcTimestamp = Date.now();
-                localStorage.setItem('lastFetchedUTCTimestamp', utcTimestamp.toString());
-    
-                let tasks = this.processData(jsonData);
+            // Render thumbnails
+            await this.renderTasks(dataset.tasks);
 
-                // Render thumbnails
-                await this.renderTasks(tasks);
-
-                await this.showTasks(tasks);
-            } else {
-                console.log('Using cached data');
-                let tasks = this.processData(cachedData);
-                await this.showTasks(tasks);
-            }
+            await this.showTasks(dataset.tasks);
         } catch (error) {
             console.error('Error loading bundle', error);
         }
     }
 
-    processData(jsonData) {
-        console.log('processData called');
-
-        let tasks = [];
-        for (let key of Object.keys(jsonData)) {
-            let dict = jsonData[key];
-            let taskId = dict.id;
-            let encodedId = encodeURIComponent(taskId);
-            let openUrl = `edit.html?dataset=${this.datasetId}&task=${encodedId}`;
-            let thumbnailCacheId = `task_thumbnail_${this.datasetId}_${taskId}`;
-            let task = new ARCTask(dict, openUrl, thumbnailCacheId);
-            tasks.push(task);
-        }
-        console.log('Loaded tasks:', tasks.length);
-
-        return tasks;
-    }
-
     async renderTasks(tasks) {
+        let time0 = Date.now();
         console.log('Render tasks:', tasks.length);
 
         var count_hit = 0;
@@ -155,7 +110,9 @@ class PageController {
             await this.renderTaskThumbnailToCache(task);
             count_miss += 1;
         }
-        console.log(`Render tasks. Hit: ${count_hit}. Miss: ${count_miss}`);
+
+        let time1 = Date.now();
+        console.log(`Render tasks. elapsed: ${time1 - time0} ms. Hit: ${count_hit}. Miss: ${count_miss}.`);
     }
 
     hideDemo() {
@@ -257,8 +214,6 @@ class PageController {
     }
 
     flushIndexedDB() {
-        localStorage.removeItem('lastFetchedUTCTimestamp');
-
         const openRequest = indexedDB.open(indexdb_database_name, 1);
 
         openRequest.onsuccess = function() {

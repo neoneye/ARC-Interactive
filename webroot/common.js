@@ -136,6 +136,81 @@ class DatabaseWrapper {
     }
 }
 
+class Dataset {
+    constructor(datasetId, tasks) {
+        this.datasetId = datasetId;
+        this.tasks = tasks;
+    }
+
+    static async load(database, datasetId) {
+        if (!(database instanceof DatabaseWrapper)) {
+            throw new Error(`database is not an instance of DatabaseWrapper. database: ${database}`);
+        }
+
+        let time0 = Date.now();
+
+        let uint8Array = await Dataset.fetchDatasetJsonGz(database, datasetId);
+
+        let time1 = Date.now();
+
+        // Decompress data
+        let decompressed = pako.inflate(uint8Array, { to: 'string' });
+        console.log('decompressed.length', decompressed.length);
+        let jsonData = JSON.parse(decompressed);
+
+        let time2 = Date.now();
+
+        // Extract tasks
+        let tasks = Dataset.tasksFromJsonData(jsonData, datasetId);
+
+        let time3 = Date.now();
+        console.log(`Dataset.load() elapsed ${time3 - time0} ms. Fetch: ${time1 - time0} ms. Decompress: ${time2 - time1} ms. Tasks from json: ${time3 - time2} ms.`);
+
+        return new Dataset(datasetId, tasks);
+    }
+
+    // Return cached data if available. Fetch data if not in cache.
+    static async fetchDatasetJsonGz(database, datasetId) {
+        if (!(database instanceof DatabaseWrapper)) {
+            throw new Error(`database is not an instance of DatabaseWrapper. database: ${database}`);
+        }
+
+        let cacheKey = `dataset_${datasetId}_json_gz`;
+        let cachedData = await database.getData(cacheKey);
+        if (cachedData) {
+            console.log(`Using cached dataset. Key: ${cacheKey} Length: ${cachedData.length}`);
+            return new Uint8Array(cachedData);
+        }
+        console.log('No cached dataset. Will fetch now.');
+
+        // Fetch data if not in cache
+        const response = await fetch(`dataset/${datasetId}.json.gz`);
+        const arrayBuffer = await response.arrayBuffer();
+        let uint8Array = new Uint8Array(arrayBuffer);
+        console.log('Did fetch dataset.');
+
+        // Store in IndexedDB
+        await database.setData(cacheKey, uint8Array);
+        console.log(`Saved dataset to cache. Key: ${cacheKey} Length: ${uint8Array.length}`);
+        return uint8Array;
+    }
+
+    static tasksFromJsonData(jsonData, datasetId) {
+        let tasks = [];
+        for (let key of Object.keys(jsonData)) {
+            let dict = jsonData[key];
+            let taskId = dict.id;
+            let encodedId = encodeURIComponent(taskId);
+            let openUrl = `edit.html?dataset=${datasetId}&task=${encodedId}`;
+            let thumbnailCacheId = `task_thumbnail_${datasetId}_${taskId}`;
+            let task = new ARCTask(dict, openUrl, thumbnailCacheId);
+            tasks.push(task);
+        }
+        console.log('Loaded tasks:', tasks.length);
+        return tasks;
+    }
+}
+
 class ARCImage {
     constructor(pixels) {
         var min_length = 1000000;
