@@ -209,6 +209,16 @@ class Dataset {
         console.log('Loaded tasks:', tasks.length);
         return tasks;
     }
+
+    findTask(taskId) {
+        console.log(`findTask taskId: ${taskId}`);
+        for (let task of this.tasks) {
+            if (task.jsonData.id == taskId) {
+                return task;
+            }
+        }
+        return null;
+    }
 }
 
 class ARCImage {

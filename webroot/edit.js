@@ -110,7 +110,7 @@ class PageController {
     }
 
     async onload() {
-        this.db = await initializeDatabase();
+        this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         await this.loadTask();
         this.addEventListeners();
@@ -497,20 +497,19 @@ class PageController {
     async loadTask() {
         console.log('PageController.loadBundle()');
 
-        var cachedData = null;
+        var dataset = null;
         try {
-            cachedData = await fetchData(this.db, this.datasetId);
+            dataset = await Dataset.load(this.db, this.datasetId);
         } catch (error) {
             console.error('Error loading bundle', error);
             return;
         }
-        if (!cachedData) {
-            console.error('Error there is no cached data.');
+        if (!dataset) {
+            console.error('Error there is no dataset.');
             return;
         }
-        console.log('Using cached data');
 
-        let task = await this.findTask(cachedData, this.taskId);
+        let task = dataset.findTask(this.taskId);
         if(!task) {
             console.error('Error there is no task.');
             return;
@@ -537,23 +536,6 @@ class PageController {
             x1: this.image.width - 1,
             y1: this.image.height - 1,
         };
-    }
-
-    findTask(jsonData, taskId) {
-        console.log('processData called');
-
-        for (let key of Object.keys(jsonData)) {
-            let dict = jsonData[key];
-            let id = dict.id;
-            if (taskId == id) {
-                let openUrl = `http://127.0.0.1:8090/task/${taskId}`;
-                let thumbnailCacheId = `task_thumbnail_${this.datasetId}_${taskId}`;
-                let task = new ARCTask(dict, openUrl, thumbnailCacheId);
-                return task;
-            }
-        }
-
-        return null;
     }
 
     showTask(task) {
