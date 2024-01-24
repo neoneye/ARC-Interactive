@@ -66,6 +66,12 @@ class PageController {
             console.error("URLSearchParams does not contain 'dataset' parameter.");
         }
 
+        if(urlParamDataset) {
+            let el = document.getElementById('link-to-tasks-page');
+            el.href = `/?dataset=${urlParamDataset}`;
+            console.log('setting back button url: el.href', el.href);
+        }
+
         if (enableFullscreenMode()) {
             let el = document.getElementById('fullscreen-button');
             el.classList.remove('hidden');

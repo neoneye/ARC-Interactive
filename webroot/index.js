@@ -23,10 +23,47 @@ class PageController {
 
     async onload() {
         this.db = await DatabaseWrapper.create();
-        console.log('PageController.onload()', this.db);
+        // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         await this.loadTasks();
         // await this.loadNames();
+
+        // Restore scroll position
+        // When the user moves to another page, and then clicks the back button, the page is scrolled to the original position.
+        let key = this.scrollTopKey();
+        let el = document.getElementById('main-inner');
+        let rawValue = sessionStorage.getItem(key);
+        if (typeof rawValue != 'undefined') {
+            let value = parseInt(rawValue);
+            if (value > 0) {
+                el.scrollTop = value;
+                console.log(`PageController.onload() Restored scroll position. key: ${key}. value: ${value}`);
+            }
+        }
+    }
+
+    onbeforeunload() {
+        // console.log('PageController.onbeforeunload()');
+
+        // Save scroll position in sessionStorage, so that we can restore it when the page is reloaded.
+        // When the user moves to another page, and then clicks the back button, the page is scrolled to the original position.
+        let key = this.scrollTopKey();
+        let el = document.getElementById('main-inner');
+        let scrollTop = el.scrollTop;
+        let value = scrollTop.toString();
+        sessionStorage.setItem(key, value);
+        console.log(`PageController.onbeforeunload() Saved scroll position. key: ${key}. value: ${value}`);
+    }
+
+    scrollTopKey() {
+        var pathName = document.location.pathname;
+        // console.log('PageController.scrollTopKey() pathName:', pathName);
+        if (pathName == '/index.html') {
+            // console.log('PageController.scrollTopKey() pathName is index.html. Setting to /');
+            pathName = '/';
+        }
+        let key = "scrollTop_" + pathName;
+        return key;
     }
 
     setupDatasetPicker() {
