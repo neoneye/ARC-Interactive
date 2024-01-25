@@ -28,6 +28,10 @@ class PageController {
         await this.loadTasks();
         // await this.loadNames();
 
+        addEventListener("pagehide", (event) => {
+            this.onbeforeunload();
+        });
+
         // Restore scroll position
         // When the user moves to another page, and then clicks the back button, the page is scrolled to the original position.
         let key = this.scrollTopKey();
