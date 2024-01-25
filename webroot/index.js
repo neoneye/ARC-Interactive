@@ -23,10 +23,78 @@ class PageController {
 
     async onload() {
         this.db = await DatabaseWrapper.create();
-        console.log('PageController.onload()', this.db);
+        // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         await this.loadTasks();
         // await this.loadNames();
+
+        addEventListener("pagehide", (event) => { this.onpagehide(); });
+
+        this.scrollPositionRestore();
+        this.scrollPositionReset();
+        this.scrollViewFocus();
+    }
+
+    // The pagehide event is sent to a Window when the browser hides the current page in the process of 
+    // presenting a different page from the session's history.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event
+    onpagehide() {
+        // console.log('PageController.onpagehide()');
+        this.scrollPositionSave();
+    }
+    
+    // Save scroll position in sessionStorage, so that we can restore it when the page is reloaded.
+    // When the user moves to another page, and then clicks the back button, the page is scrolled to the original position.
+    scrollPositionSave() {
+        let key = this.scrollPositionKey();
+        let el = document.getElementById('main-inner');
+        let scrollTop = el.scrollTop;
+        let value = scrollTop.toString();
+        sessionStorage.setItem(key, value);
+        console.log(`Saved scroll position. key: '${key}' value: ${value}`);
+    }
+
+    // Restore scroll position
+    // When the user moves to another page, and then clicks the back button, the page is scrolled to the original position.
+    scrollPositionRestore() {
+        let key = this.scrollPositionKey();
+        let el = document.getElementById('main-inner');
+        let rawValue = sessionStorage.getItem(key);
+        if (typeof rawValue != 'undefined') {
+            let value = parseInt(rawValue);
+            if (value > 0) {
+                el.scrollTop = value;
+                console.log(`Restored scroll position. key: '${key}' value: ${value}`);
+            }
+        }
+    }
+
+    // Remove the value from sessionStorage, so that it is not restored again.
+    scrollPositionReset() {
+        let key = this.scrollPositionKey();
+        sessionStorage.removeItem(key);
+        console.log(`Reset scroll position. key: '${key}'`);
+    }
+
+    scrollPositionKey() {
+        var pathName = document.location.pathname;
+        // console.log('scrollPositionKey() pathName:', pathName);
+        if (pathName == '/index.html') {
+            // console.log('scrollPositionKey() pathName is index.html. Setting to /');
+            pathName = '/';
+        }
+        let key = "scrollPosition_" + pathName;
+        return key;
+    }
+
+    scrollTopSetZero() {
+        let el = document.getElementById('main-inner');
+        el.scrollTop = 0;
+    }
+
+    scrollViewFocus() {
+        let el = document.getElementById('main-inner');
+        el.focus();
     }
 
     setupDatasetPicker() {
@@ -37,6 +105,7 @@ class PageController {
 
         // Listen for changes to the selected option
         select.addEventListener('change', () => {
+            this.scrollTopSetZero();
             window.location.href = `index.html?dataset=${encodeURIComponent(select.value)}`;
         });
     }
