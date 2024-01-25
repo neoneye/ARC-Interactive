@@ -68,7 +68,7 @@ class PageController {
 
         if(urlParamDataset) {
             let el = document.getElementById('link-to-tasks-page');
-            el.href = `/?dataset=${urlParamDataset}`;
+            el.href = `.?dataset=${urlParamDataset}`;
             console.log('setting back button url: el.href', el.href);
         }
 
