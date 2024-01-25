@@ -8,6 +8,10 @@ html {
   overscroll-behavior: none;
 }
 
+#main-inner:focus {
+  outline: none;
+}
+
 #overlay {
   position: fixed;
   top: 0;
