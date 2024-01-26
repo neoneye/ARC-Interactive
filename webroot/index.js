@@ -131,20 +131,24 @@ class PageController {
             let lazyImages = [].slice.call(document.querySelectorAll("img.lazy-load"));
           
             if ("IntersectionObserver" in window) {
+                let options = {
+                    // rootMargin: "500px 0px"
+                    // rootMargin: "0px 0px"
+                };
               let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
                   if (entry.isIntersecting) {
                     let lazyImage = entry.target;
                     let taskindex = lazyImage.dataset.taskindex;
-                    lazyImage.src = lazyImage.dataset.src;
+                    // lazyImage.src = lazyImage.dataset.src;
                     lazyImage.classList.remove("lazy-load");
                     lazyImageObserver.unobserve(lazyImage);
-                    console.log('Lazy load image', lazyImage, taskindex);
+                    // console.log('Lazy load image', lazyImage, taskindex);
                     let index = parseInt(taskindex);
                     if (index >= 0) {
                         let task = pageControllerInstance.dataset.tasks[index];
                         if (task) {
-                            console.log('Lazy load image', lazyImage, taskindex, task);
+                            // console.log('Lazy load image', lazyImage, taskindex, task);
                             // let count = task.train.length + task.test.length;
                             // let extraWide = (count > 6);
                             // let canvas = task.toThumbnailCanvas(extraWide, 1);
@@ -158,7 +162,7 @@ class PageController {
                     }
                   }
                 });
-              });
+              }, options);
           
               lazyImages.forEach(function(lazyImage) {
                 lazyImageObserver.observe(lazyImage);
