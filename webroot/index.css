@@ -40,13 +40,16 @@ html {
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(1, 1fr);
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content; /* This ensures that the grid doesn't stretch beyond its content */
   grid-gap: 0; 
 }
 
 .gallery_cell {
   box-sizing: border-box;
-  border: 3px solid transparent;
+  /* border: 3px solid transparent; */
   /* background-color: #303030; */
   /* opacity: 0.9; */
   position: relative;
@@ -64,7 +67,7 @@ html {
   /* opacity: 1.0; */
   cursor: pointer;
   /* border: 1px solid #fff; */
-  border: 3px solid rgb(0, 139, 245);
+  /* border: 3px solid rgb(0, 139, 245); */
   border-radius: 0.25em;
   background-color: rgb(50, 50, 50);
   /* box-shadow: 0 1px black; */
@@ -128,3 +131,46 @@ img.gallery_cell_image_wide {
     display: inline-block;
   }
 }
+
+@media (min-width: 320px) { 
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 480px) { 
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 640px) { 
+  .gallery {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 800px) { 
+  .gallery {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 960px) { 
+  .gallery {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (min-width: 1120px) { 
+  .gallery {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@media (min-width: 1280px) { 
+  .gallery {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
