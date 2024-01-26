@@ -457,6 +457,18 @@ class ARCTask {
         return thumbnailCanvas;
     }
 
+    toCustomCanvasSize(extraWide, width, height) {
+        const thumbnailCanvas = document.createElement('canvas');
+        const thumbnailCtx = thumbnailCanvas.getContext('2d');
+        thumbnailCanvas.width = width;
+        thumbnailCanvas.height = height;
+
+        let insetValue = 5;
+        let canvas = this.toCanvas(insetValue, extraWide);
+        thumbnailCtx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+        return thumbnailCanvas;
+    }
+
     toCanvas(insetValue, extraWide) {
         let scale = 4;
         var width = 320 * scale;
