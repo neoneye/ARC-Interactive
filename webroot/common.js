@@ -465,8 +465,8 @@ class ARCTask {
         thumbnailCanvas.height = height;
 
         let insetValue = 5;
-        let canvas = this.toCanvas(insetValue, extraWide);
-        thumbnailCtx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+        let canvas = this.toCanvas(0, extraWide);
+        thumbnailCtx.drawImage(canvas, insetValue, insetValue, thumbnailCanvas.width - 2 * insetValue, thumbnailCanvas.height - 2 * insetValue);
         return thumbnailCanvas;
     }
 

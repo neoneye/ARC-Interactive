@@ -95,9 +95,12 @@ html {
 }
 
 .gallery_cell {
+  display: inline-block; /* Makes the <a> tag behave like a block element */
   margin: auto;
-  display: block;
+  /* display: block; */
   object-fit: none;
+  overflow: hidden;
+  line-height: 0;       /* Removes extra space inside <a> tag */
 }
 
 img.gallery_cell_image_normal {
