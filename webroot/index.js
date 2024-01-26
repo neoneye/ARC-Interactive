@@ -121,57 +121,53 @@ class PageController {
         }
         this.showTasks(this.dataset.tasks);
         this.hideOverlay();
-        {
-            let pageControllerInstance = this;
+
+        if ("IntersectionObserver" in window) {
             let lazyImages = [].slice.call(document.querySelectorAll("img.lazy-load"));
-          
-            if ("IntersectionObserver" in window) {
-                let options = {
-                    // rootMargin: "500px 0px"
-                    // rootMargin: "0px 0px"
-                };
-              let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
-                entries.forEach(function(entry) {
-                  if (entry.isIntersecting) {
-                    let lazyImage = entry.target;
-                    let taskindex = lazyImage.dataset.taskindex;
-                    lazyImage.classList.remove("lazy-load");
-                    lazyImageObserver.unobserve(lazyImage);
-                    // console.log('Lazy load image', lazyImage, taskindex);
-                    let parent = lazyImage.parentNode;
-
-                    let index = parseInt(taskindex);
-                    if (index >= 0) {
-                        let task = pageControllerInstance.dataset.tasks[index];
-                        if (task) {
-                            // console.log('Lazy load image', lazyImage, taskindex, task);
-                            let count = task.train.length + task.test.length;
-                            let extraWide = (count > 6);
-
-                            let width = extraWide ? 320 : 160;
-                            let height = 80;
-
-                            let scale = 2;
-                            let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
-                            let url = canvas.toDataURL();
-                            lazyImage.src = url;
-                        }
-                    }
-                  }
-                });
-              }, options);
-          
-              lazyImages.forEach(function(lazyImage) {
+            let lazyImageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => { this.lazyImageCallback(entry, observer); });
+            });
+            lazyImages.forEach(function(lazyImage) {
                 lazyImageObserver.observe(lazyImage);
-              });
-            } else {
-              // Fallback for browsers that don't support Intersection Observer
-              // Load all images immediately
-              lazyImages.forEach(function(lazyImage) {
-                lazyImage.src = lazyImage.dataset.src;
-              });
-            }
-          }
+            });
+        } else {
+            console.log('IntersectionObserver not supported');
+        }
+    }
+
+    // Render thumbnails for the tasks that are visible in the viewport.
+    lazyImageCallback(entry, lazyImageObserver) {
+        if (!entry.isIntersecting) {
+            return;
+        }
+        let lazyImage = entry.target;
+        let taskindex = lazyImage.dataset.taskindex;
+        lazyImage.classList.remove("lazy-load");
+        lazyImageObserver.unobserve(lazyImage);
+        // console.log('Lazy load image', lazyImage, taskindex);
+
+        let index = parseInt(taskindex);
+        if (index < 0) {
+            console.log('Invalid taskindex', taskindex);
+            return;
+        }
+        let task = this.dataset.tasks[index];
+        if (!task) {
+            console.log('Invalid task at index', index, task);
+            return;
+        }
+
+        // console.log('Lazy load image', lazyImage, taskindex, task);
+        let count = task.train.length + task.test.length;
+        let extraWide = (count > 6);
+
+        let width = extraWide ? 320 : 160;
+        let height = 80;
+
+        let scale = 2;
+        let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
+        let url = canvas.toDataURL();
+        lazyImage.src = url;
     }
 
     hideOverlay() {
