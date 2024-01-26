@@ -312,11 +312,12 @@ class ARCImage {
     }
 
     drawInner(ctx, x0, y0, cellSize) {
+        let cellSizeCeilInt = Math.ceil(cellSize);
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
                 ctx.fillStyle = color_palette[pixel];
-                ctx.fillRect(x0 + (x * cellSize), y0 + (y * cellSize), cellSize, cellSize);
+                ctx.fillRect(Math.floor(x0 + (x * cellSize)), Math.floor(y0 + (y * cellSize)), cellSizeCeilInt, cellSizeCeilInt);
             }
         }
     }
@@ -457,8 +458,20 @@ class ARCTask {
         return thumbnailCanvas;
     }
 
+    toCustomCanvasSize(extraWide, width, height) {
+        const thumbnailCanvas = document.createElement('canvas');
+        const thumbnailCtx = thumbnailCanvas.getContext('2d');
+        thumbnailCanvas.width = width;
+        thumbnailCanvas.height = height;
+
+        let insetValue = 5;
+        let canvas = this.toCanvas(0, extraWide);
+        thumbnailCtx.drawImage(canvas, insetValue, insetValue, thumbnailCanvas.width - 2 * insetValue, thumbnailCanvas.height - 2 * insetValue);
+        return thumbnailCanvas;
+    }
+
     toCanvas(insetValue, extraWide) {
-        let scale = 4;
+        let scale = 1;
         var width = 320 * scale;
         if (extraWide) {
             width *= 2;

@@ -623,7 +623,7 @@ class PageController {
 
             {
                 el_td0.classList.add('center-x');
-                el_td0.innerText = `Train ${i + 1}`;
+                el_td0.innerText = `${i + 1}`;
             }
 
             {
@@ -693,7 +693,7 @@ class PageController {
 
             {
                 el_td0.classList.add('center-x');
-                el_td0.innerText = `Test ${i + 1}`;
+                el_td0.innerText = `${i + 1}`;
             }
 
             {
