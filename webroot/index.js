@@ -154,7 +154,9 @@ class PageController {
                             // let canvas = task.toThumbnailCanvas(extraWide, 1);
                             // let dataURL = canvas.toDataURL();
                             // lazyImage.src = dataURL;
-                            let extraWide = false;
+                            let count = task.train.length + task.test.length;
+                            let extraWide = (count > 6);
+                            // let extraWide = false;
                             let canvas = task.toThumbnailCanvas(extraWide, 1);
                             let url = canvas.toDataURL();
                             lazyImage.src = url;
@@ -306,8 +308,10 @@ class PageController {
             let task = tasks[i];
 
             let count = task.train.length + task.test.length;
-            // let extraWide = (count > 6);
-            let extraWide = false;
+            let extraWide = (count > 6);
+            // let extraWide = false;
+
+            let img_width = extraWide ? 640 : 320;
 
             // let dataURL = await this.dataURLForTaskThumbnail(task);
             // if (!dataURL) {
@@ -340,7 +344,7 @@ class PageController {
             // set attribute data-src="image/1.jpg" to img tag
             el_img.setAttribute("data-src", "image/1.jpg");
             el_img.setAttribute("data-taskindex", `${i}`);
-            el_img.width = 320;
+            el_img.width = img_width;
             el_img.height = 200;
         }
     }
