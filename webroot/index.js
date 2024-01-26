@@ -2,6 +2,8 @@ class PageController {
     constructor() {
         this.db = null;
 
+        this.dataset = null;
+
         // Create URLSearchParams object
         const urlParams = new URLSearchParams(window.location.search);
 
@@ -113,14 +115,62 @@ class PageController {
         console.log('PageController.loadTasks()');
         try {
             let dataset = await Dataset.load(this.db, this.datasetId);
+            this.dataset = dataset;
 
             // Render thumbnails
-            await this.renderTasks(dataset.tasks);
+            // await this.renderTasks(dataset.tasks);
 
             await this.showTasks(dataset.tasks);
         } catch (error) {
             console.error('Error loading bundle', error);
         }
+        this.hideDemo();
+        this.hideOverlay();
+        {
+            let pageControllerInstance = this;
+            let lazyImages = [].slice.call(document.querySelectorAll("img.lazy-load"));
+          
+            if ("IntersectionObserver" in window) {
+              let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                  if (entry.isIntersecting) {
+                    let lazyImage = entry.target;
+                    let taskindex = lazyImage.dataset.taskindex;
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.remove("lazy-load");
+                    lazyImageObserver.unobserve(lazyImage);
+                    console.log('Lazy load image', lazyImage, taskindex);
+                    let index = parseInt(taskindex);
+                    if (index >= 0) {
+                        let task = pageControllerInstance.dataset.tasks[index];
+                        if (task) {
+                            console.log('Lazy load image', lazyImage, taskindex, task);
+                            // let count = task.train.length + task.test.length;
+                            // let extraWide = (count > 6);
+                            // let canvas = task.toThumbnailCanvas(extraWide, 1);
+                            // let dataURL = canvas.toDataURL();
+                            // lazyImage.src = dataURL;
+                            let extraWide = false;
+                            let canvas = task.toThumbnailCanvas(extraWide, 1);
+                            let url = canvas.toDataURL();
+                            lazyImage.src = url;
+                        }
+                    }
+                  }
+                });
+              });
+          
+              lazyImages.forEach(function(lazyImage) {
+                lazyImageObserver.observe(lazyImage);
+              });
+            } else {
+              // Fallback for browsers that don't support Intersection Observer
+              // Load all images immediately
+              lazyImages.forEach(function(lazyImage) {
+                lazyImage.src = lazyImage.dataset.src;
+              });
+            }
+          }
     }
 
     async renderTasks(tasks) {
@@ -204,7 +254,7 @@ class PageController {
         return dataURL;
     }
 
-    async showTasks(tasks) {
+    async xshowTasks(tasks) {
         console.log('Show tasks:', tasks.length);
         this.hideDemo();
 
@@ -243,6 +293,52 @@ class PageController {
         }
 
         this.hideOverlay();
+    }
+
+    async showTasks(tasks) {
+        console.log('Show tasks:', tasks.length);
+
+        for (let i = 0; i < tasks.length; i++) {
+            let task = tasks[i];
+
+            let count = task.train.length + task.test.length;
+            // let extraWide = (count > 6);
+            let extraWide = false;
+
+            // let dataURL = await this.dataURLForTaskThumbnail(task);
+            // if (!dataURL) {
+            //     console.error(`The dataURL is null. Error loading image ${task.thumbnailCacheId}`);
+            //     continue;
+            // }
+                    
+            // let canvas = task.toThumbnailCanvas(extraWide, 1);
+            // let canvas = task.toCanvas(5, extraWide);
+            // dataURL = canvas.toDataURL();
+    
+            const el_img = document.createElement('img');
+            el_img.className = 'gallery__img';
+    
+            const el_a = document.createElement('a');
+            if (extraWide) {
+                el_a.className = `gallery__item gallery__item__wide`;
+            } else {
+                el_a.className = 'gallery__item gallery__item__normal';
+            }
+            el_a.href = task.openUrl;
+            el_a.appendChild(el_img);
+    
+            const el_gallery = document.getElementById('gallery');
+            el_gallery.appendChild(el_a);
+    
+            // el_img.src = dataURL;
+            el_img.className = "lazy-load";
+            el_img.src = "image/loading.jpg";
+            // set attribute data-src="image/1.jpg" to img tag
+            el_img.setAttribute("data-src", "image/1.jpg");
+            el_img.setAttribute("data-taskindex", `${i}`);
+            el_img.width = 320;
+            el_img.height = 200;
+        }
     }
 
     flushIndexedDB() {
