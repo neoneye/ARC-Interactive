@@ -135,7 +135,6 @@ class PageController {
                   if (entry.isIntersecting) {
                     let lazyImage = entry.target;
                     let taskindex = lazyImage.dataset.taskindex;
-                    // lazyImage.src = lazyImage.dataset.src;
                     lazyImage.classList.remove("lazy-load");
                     lazyImageObserver.unobserve(lazyImage);
                     // console.log('Lazy load image', lazyImage, taskindex);
@@ -146,24 +145,14 @@ class PageController {
                         let task = pageControllerInstance.dataset.tasks[index];
                         if (task) {
                             // console.log('Lazy load image', lazyImage, taskindex, task);
-                            // let count = task.train.length + task.test.length;
-                            // let extraWide = (count > 6);
-                            // let canvas = task.toThumbnailCanvas(extraWide, 1);
-                            // let dataURL = canvas.toDataURL();
-                            // lazyImage.src = dataURL;
                             let count = task.train.length + task.test.length;
                             let extraWide = (count > 6);
-                            // let extraWide = false;
-                            // let rect = parent.getBoundingClientRect();
-                            // let width = rect.width;
-                            // let height = rect.height;
 
                             let width = extraWide ? 320 : 160;
                             let height = 80;
 
                             let scale = 2;
                             let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
-                            // let canvas = task.toThumbnailCanvas(extraWide, 1);
                             let url = canvas.toDataURL();
                             lazyImage.src = url;
                         }
@@ -197,12 +186,17 @@ class PageController {
 
             let count = task.train.length + task.test.length;
             let extraWide = (count > 6);
-            // let extraWide = false;
-
-            let img_width = extraWide ? 640 : 320;
 
             const el_img = document.createElement('img');
-            // el_img.className = 'gallery__img';
+    
+            el_img.className = "lazy-load";
+            if (extraWide) {
+                el_img.classList.add("gallery_cell_image_wide");
+            } else {
+                el_img.classList.add("gallery_cell_image_normal");
+            }
+            el_img.src = "image/loading.jpg";
+            el_img.setAttribute("data-taskindex", `${i}`);
     
             const el_a = document.createElement('a');
             if (extraWide) {
@@ -215,20 +209,6 @@ class PageController {
     
             const el_gallery = document.getElementById('gallery');
             el_gallery.appendChild(el_a);
-    
-            // el_img.src = dataURL;
-            el_img.className = "lazy-load";
-            if (extraWide) {
-                el_img.classList.add("gallery_cell_image_wide");
-            } else {
-                el_img.classList.add("gallery_cell_image_normal");
-            }
-            el_img.src = "image/loading.jpg";
-            // set attribute data-src="image/1.jpg" to img tag
-            el_img.setAttribute("data-src", "image/1.jpg");
-            el_img.setAttribute("data-taskindex", `${i}`);
-            // el_img.width = img_width;
-            // el_img.height = 200;
         }
     }
 

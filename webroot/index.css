@@ -58,7 +58,6 @@ html {
 @media (hover: hover) and (pointer: fine) {
   /* Desktops with mouse */
   .gallery_cell:hover img {
-    /* opacity: 0.06; */
     opacity: 0.6;
     -webkit-transition: opacity var(--opacity-transition);
     -moz-transition: opacity var(--opacity-transition);
@@ -67,49 +66,28 @@ html {
   }
 
   .gallery_cell:hover {
-    /* opacity: 1.0; */
     cursor: pointer;
-    /* border: 1px solid #fff; */
     border-color: #fff;
-    /* border: 3px solid rgb(0, 139, 245); */
-    /* border-radius: 0.25em; */
     border-radius: 3px;
     background-color: rgb(50, 50, 50);
-    /* box-shadow: 0 1px 1px #fff; */
-    /* box-shadow: 0 1px black; */
-    /* box-sizing: border-box; */
-  }
-
-  .gallery_cell:hover::after {
-    /* content: "Open"; */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--ui-text-color);
-    padding: 5px;
-    font-size: 20px;
-    font-weight: medium;
-    text-align: center;
   }
 }
 
 .gallery_cell {
   display: inline-block; /* Makes the <a> tag behave like a block element */
   margin: auto;
-  /* display: block; */
   object-fit: none;
   overflow: hidden;
   line-height: 0;       /* Removes extra space inside <a> tag */
 }
 
-img.gallery_cell_image_normal {
+.gallery_cell_image_normal {
   width: 160px;
   height: 80px;
   object-fit: scale-down;
 }
 
-img.gallery_cell_image_wide {
+.gallery_cell_image_wide {
   width: 320px;
   height: 80px;
   object-fit: scale-down;
