@@ -470,7 +470,7 @@ class ARCTask {
     }
 
     toCanvas(insetValue, extraWide) {
-        let scale = 4;
+        let scale = 1;
         var width = 320 * scale;
         if (extraWide) {
             width *= 2;

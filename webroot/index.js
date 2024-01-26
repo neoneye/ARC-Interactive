@@ -154,9 +154,12 @@ class PageController {
                             let count = task.train.length + task.test.length;
                             let extraWide = (count > 6);
                             // let extraWide = false;
-                            let rect = parent.getBoundingClientRect();
-                            let width = rect.width;
-                            let height = rect.height;
+                            // let rect = parent.getBoundingClientRect();
+                            // let width = rect.width;
+                            // let height = rect.height;
+
+                            let width = extraWide ? 320 : 160;
+                            let height = 80;
 
                             let scale = 2;
                             let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
