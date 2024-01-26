@@ -124,7 +124,7 @@ class PageController {
         } catch (error) {
             console.error('Error loading bundle', error);
         }
-        this.hideDemo();
+        // this.hideDemo();
         this.hideOverlay();
         {
             let pageControllerInstance = this;
@@ -144,6 +144,8 @@ class PageController {
                     lazyImage.classList.remove("lazy-load");
                     lazyImageObserver.unobserve(lazyImage);
                     // console.log('Lazy load image', lazyImage, taskindex);
+                    let parent = lazyImage.parentNode;
+
                     let index = parseInt(taskindex);
                     if (index >= 0) {
                         let task = pageControllerInstance.dataset.tasks[index];
@@ -157,7 +159,13 @@ class PageController {
                             let count = task.train.length + task.test.length;
                             let extraWide = (count > 6);
                             // let extraWide = false;
-                            let canvas = task.toThumbnailCanvas(extraWide, 1);
+                            let rect = parent.getBoundingClientRect();
+                            let width = rect.width;
+                            let height = rect.height;
+
+                            let scale = 2;
+                            let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
+                            // let canvas = task.toThumbnailCanvas(extraWide, 1);
                             let url = canvas.toDataURL();
                             lazyImage.src = url;
                         }
@@ -324,13 +332,13 @@ class PageController {
             // dataURL = canvas.toDataURL();
     
             const el_img = document.createElement('img');
-            el_img.className = 'gallery__img';
+            // el_img.className = 'gallery__img';
     
             const el_a = document.createElement('a');
             if (extraWide) {
-                el_a.className = `gallery__item gallery__item__wide`;
+                el_a.className = 'gallery_cell gallery_cell_wide';
             } else {
-                el_a.className = 'gallery__item gallery__item__normal';
+                el_a.className = 'gallery_cell gallery_cell_normal';
             }
             el_a.href = task.openUrl;
             el_a.appendChild(el_img);
@@ -340,12 +348,17 @@ class PageController {
     
             // el_img.src = dataURL;
             el_img.className = "lazy-load";
+            if (extraWide) {
+                el_img.classList.add("gallery_cell_image_wide");
+            } else {
+                el_img.classList.add("gallery_cell_image_normal");
+            }
             el_img.src = "image/loading.jpg";
             // set attribute data-src="image/1.jpg" to img tag
             el_img.setAttribute("data-src", "image/1.jpg");
             el_img.setAttribute("data-taskindex", `${i}`);
-            el_img.width = img_width;
-            el_img.height = 200;
+            // el_img.width = img_width;
+            // el_img.height = 200;
         }
     }
 
