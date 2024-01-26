@@ -116,15 +116,10 @@ class PageController {
         try {
             let dataset = await Dataset.load(this.db, this.datasetId);
             this.dataset = dataset;
-
-            // Render thumbnails
-            // await this.renderTasks(dataset.tasks);
-
-            await this.showTasks(dataset.tasks);
         } catch (error) {
             console.error('Error loading bundle', error);
         }
-        // this.hideDemo();
+        this.showTasks(this.dataset.tasks);
         this.hideOverlay();
         {
             let pageControllerInstance = this;
@@ -187,129 +182,11 @@ class PageController {
           }
     }
 
-    async renderTasks(tasks) {
-        let time0 = Date.now();
-        console.log('Render tasks:', tasks.length);
-
-        var count_hit = 0;
-        var count_miss = 0;
-        for (let i = 0; i < tasks.length; i++) {
-            let task = tasks[i];
-
-            let dataURL = await this.dataURLForTaskThumbnailIfCached(task);
-            if (dataURL != null) {
-                // console.log('Rendering task - already cached', task.id);
-                count_hit += 1;
-                continue;
-            }
-            // console.log('Rendering task', task.id);
-            await this.renderTaskThumbnailToCache(task);
-            count_miss += 1;
-        }
-
-        let time1 = Date.now();
-        console.log(`Render tasks. elapsed: ${time1 - time0} ms. Hit: ${count_hit}. Miss: ${count_miss}.`);
-    }
-
-    hideDemo() {
-        document.getElementById('demo1').hidden = true;
-        document.getElementById('demo2').hidden = true;
-        document.getElementById('demo3').hidden = true;
-    }
-
     hideOverlay() {
         document.getElementById("overlay").style.display = "none";
     }
 
-    async renderTaskThumbnailToCache(task) {
-        if (!(task instanceof ARCTask)) {
-            throw new Error(`task is not an instance of ARCTask. task: ${task}`);
-        }
-        let count = task.train.length + task.test.length;
-        let extraWide = (count > 6);
-        let canvas = task.toThumbnailCanvas(extraWide, 1);
-
-        await this.db.setImageFromCanvas(task.thumbnailCacheId, canvas);
-    }
-
-    async dataURLForTaskThumbnailIfCached(task) {
-        if (!(task instanceof ARCTask)) {
-            throw new Error(`task is not an instance of ARCTask. task: ${task}`);
-        }
-        let thumbnailCacheId = task.thumbnailCacheId;
-        var image = null;
-        try {
-            // console.log('Loading image', thumbnailCacheId);
-            image = await this.db.getImage(thumbnailCacheId);
-        } catch (error) {
-            console.error(`Error loading image ${thumbnailCacheId}`, error);
-            return null;
-        }
-        if (image == null) {
-            // console.log(`The image is not present in the cache. ${thumbnailCacheId}`);
-            return null;
-        }
-
-        // console.log('image', image);
-        let dataURL = URL.createObjectURL(image);
-        return dataURL;
-    }
-
-    async dataURLForTaskThumbnail(task) {
-        if (!(task instanceof ARCTask)) {
-            throw new Error(`task is not an instance of ARCTask. task: ${task}`);
-        }
-        let dataURL = await this.dataURLForTaskThumbnailIfCached(task);
-        if (dataURL != null) {
-            return dataURL;
-        }
-        await this.renderTaskThumbnailToCache(task);
-        dataURL = await this.dataURLForTaskThumbnailIfCached(task);
-        return dataURL;
-    }
-
-    async xshowTasks(tasks) {
-        console.log('Show tasks:', tasks.length);
-        this.hideDemo();
-
-        for (let i = 0; i < tasks.length; i++) {
-            let task = tasks[i];
-
-            let count = task.train.length + task.test.length;
-            let extraWide = (count > 6);
-
-            let dataURL = await this.dataURLForTaskThumbnail(task);
-            if (!dataURL) {
-                console.error(`The dataURL is null. Error loading image ${task.thumbnailCacheId}`);
-                continue;
-            }
-                    
-            // let canvas = task.toThumbnailCanvas(extraWide, 1);
-            // let canvas = task.toCanvas(5, extraWide);
-            // dataURL = canvas.toDataURL();
-    
-            const el_img = document.createElement('img');
-            el_img.className = 'gallery__img';
-    
-            const el_a = document.createElement('a');
-            if (extraWide) {
-                el_a.className = `gallery__item gallery__item__wide`;
-            } else {
-                el_a.className = 'gallery__item gallery__item__normal';
-            }
-            el_a.href = task.openUrl;
-            el_a.appendChild(el_img);
-    
-            const el_gallery = document.getElementById('gallery');
-            el_gallery.appendChild(el_a);
-    
-            el_img.src = dataURL;
-        }
-
-        this.hideOverlay();
-    }
-
-    async showTasks(tasks) {
+    showTasks(tasks) {
         console.log('Show tasks:', tasks.length);
 
         for (let i = 0; i < tasks.length; i++) {
@@ -321,16 +198,6 @@ class PageController {
 
             let img_width = extraWide ? 640 : 320;
 
-            // let dataURL = await this.dataURLForTaskThumbnail(task);
-            // if (!dataURL) {
-            //     console.error(`The dataURL is null. Error loading image ${task.thumbnailCacheId}`);
-            //     continue;
-            // }
-                    
-            // let canvas = task.toThumbnailCanvas(extraWide, 1);
-            // let canvas = task.toCanvas(5, extraWide);
-            // dataURL = canvas.toDataURL();
-    
             const el_img = document.createElement('img');
             // el_img.className = 'gallery__img';
     
