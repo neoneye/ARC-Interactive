@@ -312,11 +312,12 @@ class ARCImage {
     }
 
     drawInner(ctx, x0, y0, cellSize) {
+        let cellSizeCeilInt = Math.ceil(cellSize);
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
                 ctx.fillStyle = color_palette[pixel];
-                ctx.fillRect(x0 + (x * cellSize), y0 + (y * cellSize), cellSize, cellSize);
+                ctx.fillRect(Math.floor(x0 + (x * cellSize)), Math.floor(y0 + (y * cellSize)), cellSizeCeilInt, cellSizeCeilInt);
             }
         }
     }
