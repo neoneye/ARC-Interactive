@@ -26,7 +26,6 @@ class PageController {
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         await this.loadTasks();
-        // await this.loadNames();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
 
@@ -108,42 +107,6 @@ class PageController {
             this.scrollTopSetZero();
             window.location.href = `index.html?dataset=${encodeURIComponent(select.value)}`;
         });
-    }
-
-    async loadNames() {
-        console.log('PageController.loadNames()');
-        let names = [
-            '0a0a50ad',
-            '0a0ac772',
-            '0a0adaff',
-        ];
-
-        let new_names = [];
-        for (let i = 0; i < 1; i += 1) {
-            new_names = new_names.concat(names);
-        }
-        names = new_names;
-
-        let tasks = [];
-        for (let name of names) {
-            try {
-                let openUrl = `http://127.0.0.1:8090/task/${name}`
-                let thumbnailCacheId = `task_thumbnail_${name}`
-                let response = await fetch(`dataset/${name}.json`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                let jsonData = await response.json();
-                let task = new ARCTask(jsonData, openUrl, thumbnailCacheId);
-                tasks.push(task);
-            } catch (error) {
-                console.error("Error loading task:", name, error);
-            }
-        }
-
-        console.log('Loaded tasks:', tasks.length);
-        await this.renderTasks(tasks);
-        await this.showTasks(tasks);
     }
 
     async loadTasks() {
