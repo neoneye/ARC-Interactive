@@ -126,8 +126,15 @@ img.gallery_cell_image_wide {
   display: none;
 }
 
+#discord-link {
+  display: none;
+}
+
 @media only screen and (min-width: 800px) {
   #dataset-label {
+    display: inline-block;
+  }
+  #discord-link {
     display: inline-block;
   }
 }
