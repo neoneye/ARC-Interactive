@@ -874,11 +874,13 @@ class PageController {
 
     hideOverviewShowEditor() {
         let el0 = document.getElementById("task-overview");
-        let el1 = document.getElementById("draw-area-outer");
-        let el2 = document.getElementById("page-footer-draw-mode");
+        let el1 = document.getElementById("page-footer-overview-mode");
+        let el2 = document.getElementById("draw-area-outer");
+        let el3 = document.getElementById("page-footer-draw-mode");
         el0.classList.add('hidden');
-        el1.classList.remove('hidden');
+        el1.classList.add('hidden');
         el2.classList.remove('hidden');
+        el3.classList.remove('hidden');
 
         // Sometimes the browser doesn't render the <canvas> after it's hidden and shown again.
         resizeCanvas();
@@ -887,11 +889,13 @@ class PageController {
 
     hideEditorShowOverview() {
         let el0 = document.getElementById("task-overview");
-        let el1 = document.getElementById("draw-area-outer");
-        let el2 = document.getElementById("page-footer-draw-mode");
+        let el1 = document.getElementById("page-footer-overview-mode");
+        let el2 = document.getElementById("draw-area-outer");
+        let el3 = document.getElementById("page-footer-draw-mode");
         el0.classList.remove('hidden');
-        el1.classList.add('hidden');
+        el1.classList.remove('hidden');
         el2.classList.add('hidden');
+        el3.classList.add('hidden');
 
         this.takeSnapshotOfCurrentImage();
         this.updateOverview();
