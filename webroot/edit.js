@@ -601,6 +601,7 @@ class PageController {
     updateOverview() {
         let task = this.task;
         let cellSize = this.calcCellSize(task);
+        let gapSize = 1;
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -631,7 +632,7 @@ class PageController {
                 el_td1.classList.add('center-x');
 
                 let el_img = document.createElement('img');
-                let canvas = input.toCanvasWithCellSize(cellSize);
+                let canvas = input.toCanvasWithCellSize(cellSize, gapSize);
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td1.appendChild(el_img);
@@ -642,7 +643,7 @@ class PageController {
                 el_td2.classList.add('center-x');
 
                 let el_img = document.createElement('img');
-                let canvas = output.toCanvasWithCellSize(cellSize);
+                let canvas = output.toCanvasWithCellSize(cellSize, gapSize);
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td2.appendChild(el_img);
@@ -701,7 +702,7 @@ class PageController {
                 el_td1.classList.add('center-x');
 
                 let el_img = document.createElement('img');
-                let canvas = input.toCanvasWithCellSize(cellSize);
+                let canvas = input.toCanvasWithCellSize(cellSize, gapSize);
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td1.appendChild(el_img);
@@ -718,7 +719,7 @@ class PageController {
                 } else {
 
                     let el_img = document.createElement('img');
-                    let canvas = output.toCanvasWithCellSize(cellSize);
+                    let canvas = output.toCanvasWithCellSize(cellSize, gapSize);
                     let dataURL = canvas.toDataURL();
                     el_img.src = dataURL;
                     el_td2.appendChild(el_img);
@@ -755,12 +756,14 @@ class PageController {
         let image = this.image;
         let cellSize = image.cellSize(width, height);
 
+        let gapSize = 1;
+
         // Draw an outline around the image
         {
             let x = image.calcX0(0, width, cellSize) + inset - 1;
             let y = image.calcY0(0, height, cellSize) + inset - 1;
-            let w = image.width * cellSize + 2;
-            let h = image.height * cellSize + 2;
+            let w = image.width * cellSize + 2 - gapSize;
+            let h = image.height * cellSize + 2 - gapSize;
             var color = '#888888';
             if (isSelectTool) {
                 color = 'black';
@@ -770,7 +773,10 @@ class PageController {
         }
 
         // Draw the image
-        image.draw(ctx, inset, inset, width, height, cellSize, {});
+        let options = {
+            gapSize: gapSize,
+        };
+        image.draw(ctx, inset, inset, width, height, cellSize, options);
 
         // Draw the dashed select rectangle
         if (isSelectTool && !this.isPasteMode) {
