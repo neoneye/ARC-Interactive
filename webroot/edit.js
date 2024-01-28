@@ -99,7 +99,7 @@ class PageController {
         this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
 
         this.isFullscreen = false;
-        this.isGridVisible = false;
+        this.isGridVisible = PageController.getItemIsGridVisible();
 
         this.selectRectangle = { 
             x0: 0, 
@@ -916,8 +916,18 @@ class PageController {
         }
     }
 
+    static gridKey() {
+        return 'grid-visible';
+    }
+
+    static getItemIsGridVisible() {
+        let rawValue = localStorage.getItem(PageController.gridKey());
+        return rawValue == 'true';
+    }
+
     toggleGrid() {
         this.isGridVisible = !this.isGridVisible;
+        localStorage.setItem(PageController.gridKey(), this.isGridVisible);
         this.updateDrawCanvas(true);
         this.updateOverview();
     }
