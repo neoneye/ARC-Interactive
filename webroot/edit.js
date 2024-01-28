@@ -99,6 +99,7 @@ class PageController {
         this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
 
         this.isFullscreen = false;
+        this.isGridVisible = false;
 
         this.selectRectangle = { 
             x0: 0, 
@@ -174,7 +175,7 @@ class PageController {
     resizeOrChangeOrientation() {
         resizeCanvas();
         if (this.isOverviewHidden()) {
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
         } else {
             this.updateOverview();
         }
@@ -218,6 +219,9 @@ class PageController {
         if (event.code === 'KeyO') {
             this.toggleOverview();
         }
+        if (event.code === 'KeyG') {
+            this.toggleGrid();
+        }
         if (event.code === 'KeyC') {
             this.copyToClipboard();
         }
@@ -252,7 +256,7 @@ class PageController {
         let el = document.getElementById('tool-button');
         el.innerText = `Tool: ${toolId}`;
         this.currentTool = toolId;
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
 
         let el1 = document.getElementById('crop-selected-rectangle-button');
@@ -311,7 +315,7 @@ class PageController {
         this.pasteX = position.x;
         this.pasteY = position.y;
         // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
     }
 
     movePaste(event) {
@@ -329,7 +333,7 @@ class PageController {
         this.pasteX = position.x;
         this.pasteY = position.y;
         // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
     }
 
     stopPaste(event) {
@@ -353,7 +357,7 @@ class PageController {
             this.pasteX = position.x;
             this.pasteY = position.y;
             // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
             return;
         }
 
@@ -381,7 +385,7 @@ class PageController {
                 x1: clampedCellX,
                 y1: clampedCellY,
             };
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
             return;
         }
 
@@ -393,11 +397,11 @@ class PageController {
         }
         if(this.currentTool == 'paint') {
             this.image.pixels[celly][cellx] = this.currentColor;
-            this.showCanvas(false);
+            this.updateDrawCanvas(false);
         }
         if(this.currentTool == 'fill') {
             this.floodFill(cellx, celly);
-            this.showCanvas(false);
+            this.updateDrawCanvas(false);
         }
     }
 
@@ -419,7 +423,7 @@ class PageController {
             this.pasteX = position.x;
             this.pasteY = position.y;
             // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
             return;
         }
 
@@ -442,7 +446,7 @@ class PageController {
             let clampedCellY = Math.max(0, Math.min(celly, this.image.height - 1));
             this.selectRectangle.x1 = clampedCellX;
             this.selectRectangle.y1 = clampedCellY;
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
             return;
         }
 
@@ -454,7 +458,7 @@ class PageController {
         }
         if(this.currentTool == 'paint') {
             this.image.pixels[celly][cellx] = this.currentColor;
-            this.showCanvas(false);
+            this.updateDrawCanvas(false);
         }
     }
 
@@ -496,7 +500,7 @@ class PageController {
                     this.image.pixels[y][x] = this.currentColor;
                 }
             }
-            this.showCanvas(false);
+            this.updateDrawCanvas(false);
         }        
     }
 
@@ -526,7 +530,7 @@ class PageController {
 
         this.assignImageFromCurrentTest();
         this.assignSelectRectangleFromCurrentImage();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
     }
 
     assignImageFromCurrentTest() {
@@ -601,7 +605,7 @@ class PageController {
     updateOverview() {
         let task = this.task;
         let cellSize = this.calcCellSize(task);
-        let gapSize = 1;
+        let gapSize = this.isGridVisible ? 1 : 0;
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -737,7 +741,7 @@ class PageController {
         return this.currentTool == 'select';
     }
 
-    showCanvas(clear) {
+    updateDrawCanvas(clear) {
         let isSelectTool = this.isCurrentToolSelect();
 
         const ctx = this.drawCanvas.getContext('2d');
@@ -756,7 +760,7 @@ class PageController {
         let image = this.image;
         let cellSize = image.cellSize(width, height);
 
-        let gapSize = 1;
+        let gapSize = this.isGridVisible ? 1 : 0;
 
         // Draw an outline around the image
         {
@@ -878,7 +882,7 @@ class PageController {
 
         // Sometimes the browser doesn't render the <canvas> after it's hidden and shown again.
         resizeCanvas();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
     }
 
     hideEditorShowOverview() {
@@ -910,6 +914,12 @@ class PageController {
             // Fullscreen API is not supported
             alert("Fullscreen mode is not supported in your browser.");
         }
+    }
+
+    toggleGrid() {
+        this.isGridVisible = !this.isGridVisible;
+        this.updateDrawCanvas(true);
+        this.updateOverview();
     }
 
     submitDrawing() {
@@ -964,7 +974,7 @@ class PageController {
             this.assignImageFromCurrentTest();
         }
         this.assignSelectRectangleFromCurrentImage();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
     }
 
     getWidthHeightFromTextfield() {
@@ -1019,7 +1029,7 @@ class PageController {
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         this.image = emptyImage.overlay(this.image, 0, 0);
         this.assignSelectRectangleFromCurrentImage();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
 
         this.hideToolPanel();
     }
@@ -1027,7 +1037,7 @@ class PageController {
     startOverWithInputImage() {
         this.assignImageFromCurrentTest();
         this.assignSelectRectangleFromCurrentImage();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1062,7 +1072,7 @@ class PageController {
         }
         this.image = this.image.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
         this.assignSelectRectangleFromCurrentImage();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1087,7 +1097,7 @@ class PageController {
         this.isPasteMode = true;
         this.showPasteArea();
         resizeCanvas();
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
     }
 
     showPasteArea() {
@@ -1144,14 +1154,14 @@ class PageController {
         this.selectRectangle.x1 = clampedX1;
         this.selectRectangle.y1 = clampedY1;
 
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hidePasteArea();
     }
 
     pasteFromClipboardReject() {
         console.log('Paste from clipboard reject.');
         this.isPasteMode = false;
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hidePasteArea();
     }
 
@@ -1187,7 +1197,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
         this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1197,7 +1207,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
         this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1206,7 +1216,7 @@ class PageController {
         if (!this.isCurrentToolSelect()) {
             this.image = this.image.rotateCW();
             this.assignSelectRectangleFromCurrentImage();
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
             this.hideToolPanel();
             return;
         }
@@ -1218,7 +1228,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
         this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1227,7 +1237,7 @@ class PageController {
         if (!this.isCurrentToolSelect()) {
             this.image = this.image.rotateCCW();
             this.assignSelectRectangleFromCurrentImage();
-            this.showCanvas(true);
+            this.updateDrawCanvas(true);
             this.hideToolPanel();
             return;
         }
@@ -1239,7 +1249,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1254,7 +1264,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
         this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
         this.image = this.image.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1269,7 +1279,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
         this.image = this.image.overlay(image1, rectangle.x + 1, rectangle.y);
         this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1284,7 +1294,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
         this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
         this.image = this.image.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
@@ -1299,7 +1309,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
         this.image = this.image.overlay(image1, rectangle.x, rectangle.y + 1);
         this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
-        this.showCanvas(true);
+        this.updateDrawCanvas(true);
         this.hideToolPanel();
     }
 
