@@ -808,7 +808,7 @@ class PageController {
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
                 ctx.globalAlpha = 0.75;
-                clipboardImage.drawInner(ctx2, drawX, drawY, cellSize);
+                clipboardImage.drawInner(ctx2, drawX, drawY, cellSize, gapSize);
                 ctx.globalAlpha = 1;
 
                 let x0 = image.calcX0(0, width, cellSize) + inset;
