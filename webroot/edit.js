@@ -605,7 +605,6 @@ class PageController {
     updateOverview() {
         let task = this.task;
         let cellSize = this.calcCellSize(task);
-        let gapSize = this.isGridVisible ? 1 : 0;
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -636,7 +635,7 @@ class PageController {
                 el_td1.classList.add('center-x');
 
                 let el_img = document.createElement('img');
-                let canvas = input.toCanvasWithCellSize(cellSize, gapSize);
+                let canvas = input.toCanvasWithStyle(cellSize, this.isGridVisible);
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td1.appendChild(el_img);
@@ -647,7 +646,7 @@ class PageController {
                 el_td2.classList.add('center-x');
 
                 let el_img = document.createElement('img');
-                let canvas = output.toCanvasWithCellSize(cellSize, gapSize);
+                let canvas = output.toCanvasWithStyle(cellSize, this.isGridVisible);
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td2.appendChild(el_img);
@@ -706,7 +705,7 @@ class PageController {
                 el_td1.classList.add('center-x');
 
                 let el_img = document.createElement('img');
-                let canvas = input.toCanvasWithCellSize(cellSize, gapSize);
+                let canvas = input.toCanvasWithStyle(cellSize, this.isGridVisible);
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td1.appendChild(el_img);
@@ -723,7 +722,7 @@ class PageController {
                 } else {
 
                     let el_img = document.createElement('img');
-                    let canvas = output.toCanvasWithCellSize(cellSize, gapSize);
+                    let canvas = output.toCanvasWithStyle(cellSize, this.isGridVisible);
                     let dataURL = canvas.toDataURL();
                     el_img.src = dataURL;
                     el_td2.appendChild(el_img);

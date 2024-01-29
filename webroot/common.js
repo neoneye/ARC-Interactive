@@ -266,6 +266,13 @@ class ARCImage {
         return this.toCanvasWithCellSize(cellSize, gapSize);
     }
     
+    toCanvasWithStyle(cellSize, showGrid) {
+        if(showGrid) {
+            return this.toCanvasWithGridAndBorder(cellSize);
+        }
+        return this.toCanvasWithCellSize(cellSize, 0);
+    }
+
     toCanvasWithCellSize(cellSize, gapSize) {
         let canvas = document.createElement('canvas');
         let ctx = canvas.getContext('2d');
@@ -276,6 +283,25 @@ class ARCImage {
                 let pixel = this.pixels[y][x];
                 ctx.fillStyle = color_palette[pixel];
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize - gapSize, cellSize - gapSize);
+            }
+        }
+        return canvas;
+    }
+    
+    toCanvasWithGridAndBorder(cellSize) {
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+        let borderSize = 1;
+        let gapSize = 1;
+        canvas.width = this.width * cellSize - gapSize + borderSize * 2;
+        canvas.height = this.height * cellSize - gapSize + borderSize * 2;
+        ctx.fillStyle = '#555';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let y = 0; y < this.height; y += 1) {
+            for (let x = 0; x < this.width; x += 1) {
+                let pixel = this.pixels[y][x];
+                ctx.fillStyle = color_palette[pixel];
+                ctx.fillRect(x * cellSize + borderSize, y * cellSize + borderSize, cellSize - gapSize, cellSize - gapSize);
             }
         }
         return canvas;
