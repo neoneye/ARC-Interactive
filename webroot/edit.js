@@ -483,7 +483,7 @@ class PageController {
 
         this.currentColor = colorValue;
 
-        let fillSelectedRectangle = this.currentTool == 'select';
+        let fillSelectedRectangle = this.isCurrentToolSelect();
         if (fillSelectedRectangle) {
             let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
             if (minX > maxX || minY > maxY) {
@@ -767,11 +767,7 @@ class PageController {
             let y = image.calcY0(0, height, cellSize) + inset - 1;
             let w = image.width * cellSize + 2 - gapSize;
             let h = image.height * cellSize + 2 - gapSize;
-            var color = '#888888';
-            if (isSelectTool) {
-                color = 'black';
-            }
-            ctx.fillStyle = color;
+            ctx.fillStyle = '#555';
             ctx.fillRect(x, y, w, h);
         }
 
