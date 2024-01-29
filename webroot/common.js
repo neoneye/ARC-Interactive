@@ -262,19 +262,46 @@ class ARCImage {
 
     toCanvas() {
         let cellSize = 1;
-        return this.toCanvasWithCellSize(cellSize);
+        let gapSize = 0;
+        return this.toCanvasWithCellSize(cellSize, gapSize);
     }
     
-    toCanvasWithCellSize(cellSize) {
+    toCanvasWithStyle(cellSize, showGrid) {
+        if(showGrid) {
+            return this.toCanvasWithGridAndBorder(cellSize);
+        }
+        return this.toCanvasWithCellSize(cellSize, 0);
+    }
+
+    toCanvasWithCellSize(cellSize, gapSize) {
         let canvas = document.createElement('canvas');
         let ctx = canvas.getContext('2d');
-        canvas.width = this.width * cellSize;
-        canvas.height = this.height * cellSize;
+        canvas.width = this.width * cellSize - gapSize;
+        canvas.height = this.height * cellSize - gapSize;
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
                 ctx.fillStyle = color_palette[pixel];
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize - gapSize, cellSize - gapSize);
+            }
+        }
+        return canvas;
+    }
+    
+    toCanvasWithGridAndBorder(cellSize) {
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+        let borderSize = 1;
+        let gapSize = 1;
+        canvas.width = this.width * cellSize - gapSize + borderSize * 2;
+        canvas.height = this.height * cellSize - gapSize + borderSize * 2;
+        ctx.fillStyle = '#555';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let y = 0; y < this.height; y += 1) {
+            for (let x = 0; x < this.width; x += 1) {
+                let pixel = this.pixels[y][x];
+                ctx.fillStyle = color_palette[pixel];
+                ctx.fillRect(x * cellSize + borderSize, y * cellSize + borderSize, cellSize - gapSize, cellSize - gapSize);
             }
         }
         return canvas;
@@ -308,11 +335,15 @@ class ARCImage {
             let innerHeight = cellSize * this.height;
             y0 = drawY + height - innerHeight;
         }
-        this.drawInner(ctx, x0, y0, cellSize);
+        var gapSize = 0;
+        if (options.gapSize) {
+            gapSize = options.gapSize;
+        }
+        this.drawInner(ctx, x0, y0, cellSize, gapSize);
     }
 
-    drawInner(ctx, x0, y0, cellSize) {
-        let cellSizeCeilInt = Math.ceil(cellSize);
+    drawInner(ctx, x0, y0, cellSize, gapSize) {
+        let cellSizeCeilInt = Math.ceil(cellSize) - gapSize;
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];

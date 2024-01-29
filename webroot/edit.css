@@ -154,6 +154,19 @@ body {
     gap: 10px; /* Optional: Adds space between columns */
 }
 
+#page-footer-overview-mode {
+    border-top: 1px solid var(--ui-separator);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* 1fr for the left and right columns, auto for the middle column */
+    justify-content: center; /* Centers the middle column */
+    align-items: center; /* Aligns items vertically in the center, if needed */
+    gap: 10px; /* Optional: Adds space between columns */
+}
+
+#page-footer-overview-mode .secondary-button {
+    margin: 5px;
+}
+
 .page-footer-left {
     /* border: 1px dashed red; */
     margin-left: 10px;
@@ -264,6 +277,7 @@ body {
 #task-overview.hidden,
 #draw-area-outer.hidden,
 #page-footer-draw-mode.hidden,
+#page-footer-overview-mode.hidden,
 #tool-panel.hidden,
 #submit-status-correct.hidden, 
 #submit-status-incorrect.hidden,
