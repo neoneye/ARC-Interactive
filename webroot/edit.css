@@ -343,10 +343,6 @@ body {
     background-color: rgb(50, 50, 50);
 }
 
-.line-height-zero {
-    line-height: 0;
-}
-
 #task-overview-table .center-x {
     text-align: center; 
 } 
@@ -386,4 +382,11 @@ body {
     #task-overview-table .click-to-active-test {
         cursor: pointer;
     }
+}
+
+.image-size-label {
+    font-size: 12px;
+    color: rgb(119, 119, 119);
+    padding-top: 5px;
+    padding-bottom: 5px;
 }

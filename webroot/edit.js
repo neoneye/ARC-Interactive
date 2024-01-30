@@ -554,12 +554,12 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSize(task) {
+    calcCellSize(task, showSize) {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
 
-        let heightOfNonImage = 80;
+        let heightOfNonImage = showSize ? 110 : 80;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
@@ -604,7 +604,8 @@ class PageController {
 
     updateOverview() {
         let task = this.task;
-        let cellSize = this.calcCellSize(task);
+        let showSize = this.isGridVisible;
+        let cellSize = this.calcCellSize(task, showSize);
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -634,6 +635,13 @@ class PageController {
                 el_td1.classList.add('input-image-cell');
                 el_td1.classList.add('center-x');
 
+                let el_div = document.createElement('div');
+                el_div.className = 'image-size-label';
+                el_div.innerText = `${input.width}x${input.height}`;
+                if (showSize) {
+                    el_td1.appendChild(el_div);
+                }
+
                 let el_img = document.createElement('img');
                 let canvas = input.toCanvasWithStyle(cellSize, this.isGridVisible);
                 let dataURL = canvas.toDataURL();
@@ -650,6 +658,13 @@ class PageController {
                 let dataURL = canvas.toDataURL();
                 el_img.src = dataURL;
                 el_td2.appendChild(el_img);
+
+                let el_div = document.createElement('div');
+                el_div.className = 'image-size-label';
+                el_div.innerText = `${output.width}x${output.height}`;
+                if (showSize) {
+                    el_td2.appendChild(el_div);
+                }
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
@@ -704,6 +719,13 @@ class PageController {
                 el_td1.classList.add('input-image-cell');
                 el_td1.classList.add('center-x');
 
+                let el_div = document.createElement('div');
+                el_div.className = 'image-size-label';
+                el_div.innerText = `${input.width}x${input.height}`;
+                if (showSize) {
+                    el_td1.appendChild(el_div);
+                }
+
                 let el_img = document.createElement('img');
                 let canvas = input.toCanvasWithStyle(cellSize, this.isGridVisible);
                 let dataURL = canvas.toDataURL();
@@ -726,6 +748,13 @@ class PageController {
                     let dataURL = canvas.toDataURL();
                     el_img.src = dataURL;
                     el_td2.appendChild(el_img);
+    
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${output.width}x${output.height}`;
+                    if (showSize) {
+                        el_td2.appendChild(el_div);
+                    }
     
                 }
     
