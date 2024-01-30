@@ -659,24 +659,19 @@ class ARCTask {
     //
     // Return false if the task is normal.
     isExtraWideThumbnail() {
-        let count = this.train.length + this.test.length;
-        let extraWide = (count > 6);
-        if (extraWide) {
-            return true;
-        }
         let gapSize = 1;
         let width = this.calcThumbnailWidth(gapSize);
         let height = this.calcThumbnailHeight(gapSize);
-        if (width > 120) {
+        if (width > 150) {
             return true;
         }
         if (width < 1 || height < 1) {
             return false;
         }
-        if (width < 30) {
+        if (width < 60) {
             return false;
         }
         let aspectRatio = width / height;
-        return aspectRatio > 4.25;
+        return aspectRatio >= 3;
     }
 }
