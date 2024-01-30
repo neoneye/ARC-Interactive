@@ -158,9 +158,7 @@ class PageController {
         }
 
         // console.log('Lazy load image', lazyImage, taskindex, task);
-        let count = task.train.length + task.test.length;
-        let extraWide = (count > 6);
-
+        let extraWide = task.isExtraWideThumbnail();
         let width = extraWide ? 320 : 160;
         let height = 80;
 
@@ -180,8 +178,7 @@ class PageController {
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
 
-            let count = task.train.length + task.test.length;
-            let extraWide = (count > 6);
+            let extraWide = task.isExtraWideThumbnail();
 
             const el_img = document.createElement('img');
     
