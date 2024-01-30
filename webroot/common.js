@@ -612,5 +612,66 @@ class ARCTask {
         // ctx.fillRect((n_train * cellWidthTotalAvailable) / count + inset - Math.floor(trainTestGapSize / 2), 0, 2, height);
 
         return canvas;
-    }    
+    }
+
+    // Return an integer with the accumulated width of all the pairs in the task
+    calcThumbnailWidth(gapSize) {
+        var accumulatedWidth = 0;
+        for (let i = 0; i < this.train.length; i++) {
+            let image0 = this.train[i].input;
+            let image1 = this.train[i].output;
+            accumulatedWidth += Math.max(image0.width, image1.width);
+            if (i > 0) {
+                accumulatedWidth += gapSize;
+            }
+        }
+        accumulatedWidth += gapSize;
+        for (let i = 0; i < this.test.length; i++) {
+            let image0 = this.test[i].input;
+            let image1 = this.test[i].output;
+            accumulatedWidth += Math.max(image0.width, image1.width);
+            if (i > 0) {
+                accumulatedWidth += gapSize;
+            }
+        }
+        return accumulatedWidth;
+    }
+
+    // Return an integer with the max height of all the pairs in the task
+    calcThumbnailHeight(gapSize) {
+        var maxHeight = 0;
+        for (let i = 0; i < this.train.length; i++) {
+            let image0 = this.train[i].input;
+            let image1 = this.train[i].output;
+            let sum = image0.height + image1.height + gapSize;
+            maxHeight = Math.max(maxHeight, sum);
+        }
+        for (let i = 0; i < this.test.length; i++) {
+            let image0 = this.test[i].input;
+            let image1 = this.test[i].output;
+            let sum = image0.height + image1.height + gapSize;
+            maxHeight = Math.max(maxHeight, sum);
+        }
+        return maxHeight;
+    }
+
+    // Return true if the task is extra wide.
+    //
+    // Return false if the task is normal.
+    isExtraWideThumbnail() {
+        let gapSize = 1;
+        let width = this.calcThumbnailWidth(gapSize);
+        let height = this.calcThumbnailHeight(gapSize);
+        if (width > 150) {
+            return true;
+        }
+        if (width < 1 || height < 1) {
+            return false;
+        }
+        if (width < 60) {
+            return false;
+        }
+        let aspectRatio = width / height;
+        return aspectRatio >= 3;
+    }
 }
