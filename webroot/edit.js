@@ -558,12 +558,14 @@ class PageController {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
+        // console.log('calcCellSize() width:', width, 'height:', height);
 
-        let heightOfNonImage = showSize ? 110 : 80;
+        let heightOfNonImage = showSize ? 140 : 80;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
 
+        let separatorSize = 1;
         var sumPixelWidth = 0;
         for (let i = 0; i < task.train.length; i++) {
             let input = task.train[i].input;
@@ -578,12 +580,13 @@ class PageController {
             }
             sumPixelWidth += Math.max(input.width, output.width);
         }
+        sumPixelWidth += separatorSize * (task.train.length + task.test.length - 1);
 
         var maxPixelHeight = 0;
         for (let i = 0; i < task.train.length; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
-            let pixelHeight = input.height + output.height;
+            let pixelHeight = input.height + output.height + separatorSize;
             maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
         }
         for (let i = 0; i < task.test.length; i++) {
@@ -599,6 +602,7 @@ class PageController {
         let cellSizeX = Math.floor((width - widthOfNonImage) / sumPixelWidth);
         let cellSizeY = Math.floor((height - heightOfNonImage) / maxPixelHeight);
         let cellSize = Math.min(cellSizeX, cellSizeY);
+        // console.log('calcCellSize() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
         return cellSize;
     }
 
