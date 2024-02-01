@@ -554,13 +554,13 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSize(task, showSize) {
+    calcCellSize(task, dpr, showSizeAndGrid) {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
         // console.log('calcCellSize() width:', width, 'height:', height);
 
-        let heightOfNonImage = showSize ? 140 : 80;
+        let heightOfNonImage = showSizeAndGrid ? 140 : 80;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
@@ -599,17 +599,24 @@ class PageController {
             maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
         }
 
-        let cellSizeX = Math.floor((width - widthOfNonImage) / sumPixelWidth);
-        let cellSizeY = Math.floor((height - heightOfNonImage) / maxPixelHeight);
+        let cellSizeX = Math.floor((width - widthOfNonImage) * dpr / sumPixelWidth);
+        let cellSizeY = Math.floor((height - heightOfNonImage) * dpr / maxPixelHeight);
         let cellSize = Math.min(cellSizeX, cellSizeY);
-        // console.log('calcCellSize() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
+        console.log('calcCellSize() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
         return cellSize;
     }
 
     updateOverview() {
+        // Get the device pixel ratio, falling back to 1.
+        let devicePixelRatio = window.devicePixelRatio || 1;
+        // let devicePixelRatio = 1;
+        // console.log('devicePixelRatio:', devicePixelRatio);
+
         let task = this.task;
-        let showSize = this.isGridVisible;
-        let cellSize = this.calcCellSize(task, showSize);
+        let showSizeAndGrid = this.isGridVisible;
+        let cellSize = this.calcCellSize(task, devicePixelRatio, showSizeAndGrid);
+        // console.log('cellSize:', cellSize);
+        cellSize = cellSize / devicePixelRatio;
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -642,31 +649,25 @@ class PageController {
                 let el_div = document.createElement('div');
                 el_div.className = 'image-size-label';
                 el_div.innerText = `${input.width}x${input.height}`;
-                if (showSize) {
+                if (showSizeAndGrid) {
                     el_td1.appendChild(el_div);
                 }
 
-                let el_img = document.createElement('img');
-                let canvas = input.toCanvasWithStyle(cellSize, this.isGridVisible);
-                let dataURL = canvas.toDataURL();
-                el_img.src = dataURL;
-                el_td1.appendChild(el_img);
+                let canvas = input.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                el_td1.appendChild(canvas);
             }
 
             {
                 el_td2.classList.add('output-image-cell');
                 el_td2.classList.add('center-x');
 
-                let el_img = document.createElement('img');
-                let canvas = output.toCanvasWithStyle(cellSize, this.isGridVisible);
-                let dataURL = canvas.toDataURL();
-                el_img.src = dataURL;
-                el_td2.appendChild(el_img);
+                let canvas = output.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                el_td2.appendChild(canvas);
 
                 let el_div = document.createElement('div');
                 el_div.className = 'image-size-label';
                 el_div.innerText = `${output.width}x${output.height}`;
-                if (showSize) {
+                if (showSizeAndGrid) {
                     el_td2.appendChild(el_div);
                 }
             }
@@ -726,15 +727,12 @@ class PageController {
                 let el_div = document.createElement('div');
                 el_div.className = 'image-size-label';
                 el_div.innerText = `${input.width}x${input.height}`;
-                if (showSize) {
+                if (showSizeAndGrid) {
                     el_td1.appendChild(el_div);
                 }
 
-                let el_img = document.createElement('img');
-                let canvas = input.toCanvasWithStyle(cellSize, this.isGridVisible);
-                let dataURL = canvas.toDataURL();
-                el_img.src = dataURL;
-                el_td1.appendChild(el_img);
+                let canvas = input.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                el_td1.appendChild(canvas);
             }
 
             {
@@ -747,16 +745,13 @@ class PageController {
                     el_td2.innerText = `?`;
                 } else {
 
-                    let el_img = document.createElement('img');
-                    let canvas = output.toCanvasWithStyle(cellSize, this.isGridVisible);
-                    let dataURL = canvas.toDataURL();
-                    el_img.src = dataURL;
-                    el_td2.appendChild(el_img);
+                    let canvas = output.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                    el_td2.appendChild(canvas);
     
                     let el_div = document.createElement('div');
                     el_div.className = 'image-size-label';
                     el_div.innerText = `${output.width}x${output.height}`;
-                    if (showSize) {
+                    if (showSizeAndGrid) {
                         el_td2.appendChild(el_div);
                     }
     
