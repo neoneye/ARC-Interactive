@@ -303,6 +303,33 @@ class ARCImage {
     }
     
     toCanvasWithGridAndBorder(devicePixelRatio, cellSize) {
+        let canvasInner = this.toCanvasWithGridAndBorderInner(1, cellSize * devicePixelRatio);
+        if (devicePixelRatio === 1) {
+            return canvasInner;
+        }
+        let width = canvasInner.width / devicePixelRatio;
+        let height = canvasInner.height / devicePixelRatio;
+        
+        let canvas = document.createElement('canvas');
+
+        // Set the 'drawing buffer' size.
+        canvas.width = width * devicePixelRatio;
+        canvas.height = height * devicePixelRatio;
+
+        // Set the 'display' size.
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+
+        let ctx = canvas.getContext('2d');
+        // Scale the drawing context so shapes aren't stretched.
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        ctx.imageSmoothingEnabled = false; // Disable anti-aliasing
+        ctx.drawImage(canvasInner, 0, 0, width, height);
+        return canvas;
+    }
+
+    toCanvasWithGridAndBorderInner(devicePixelRatio, cellSize) {
         let borderSize = 1 / devicePixelRatio;
         let gapSize = 1 / devicePixelRatio;
         let sizeWidth = this.width * cellSize - gapSize + borderSize * 2;
