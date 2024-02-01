@@ -28,14 +28,6 @@ body {
     display: flex;
     flex-direction: column;
 }
-#page-footer {
-    border-top: 1px solid var(--ui-separator);
-    padding: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: stretch;
-}
   
 .top-banner-container-outer {
     color: #eedede;
@@ -134,13 +126,6 @@ body {
     border: 1px solid rgb(23, 23, 23);
 }
 
-.page-footer-item {
-    flex: 1;
-}
-#page-footer-item1 {
-    text-align: center;
-}
-
 #main-outer {
     flex: 1 1 auto;
     position: relative;
@@ -159,8 +144,4 @@ body {
 
 header {
     background-color: var(--ui-header-background);
-}
-
-footer {
-    background-color: var(--ui-footer-background);
 }
