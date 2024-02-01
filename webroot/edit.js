@@ -653,11 +653,7 @@ class PageController {
                     el_td1.appendChild(el_div);
                 }
 
-                let el_img = document.createElement('img');
                 let canvas = input.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
-                // let dataURL = canvas.toDataURL();
-                // el_img.src = dataURL;
-                // el_td1.appendChild(el_img);
                 el_td1.appendChild(canvas);
             }
 
@@ -665,11 +661,7 @@ class PageController {
                 el_td2.classList.add('output-image-cell');
                 el_td2.classList.add('center-x');
 
-                let el_img = document.createElement('img');
                 let canvas = output.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
-                // let dataURL = canvas.toDataURL();
-                // el_img.src = dataURL;
-                // el_td2.appendChild(el_img);
                 el_td2.appendChild(canvas);
 
                 let el_div = document.createElement('div');
@@ -739,11 +731,7 @@ class PageController {
                     el_td1.appendChild(el_div);
                 }
 
-                let el_img = document.createElement('img');
                 let canvas = input.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
-                // let dataURL = canvas.toDataURL();
-                // el_img.src = dataURL;
-                // el_td1.appendChild(el_img);
                 el_td1.appendChild(canvas);
             }
 
@@ -757,11 +745,7 @@ class PageController {
                     el_td2.innerText = `?`;
                 } else {
 
-                    let el_img = document.createElement('img');
                     let canvas = output.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
-                    // let dataURL = canvas.toDataURL();
-                    // el_img.src = dataURL;
-                    // el_td2.appendChild(el_img);
                     el_td2.appendChild(canvas);
     
                     let el_div = document.createElement('div');
