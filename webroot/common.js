@@ -260,24 +260,38 @@ class ARCImage {
         return new ARCImage(pixels);
     }
 
-    toCanvas() {
+    toCanvas(devicePixelRatio) {
         let cellSize = 1;
         let gapSize = 0;
-        return this.toCanvasWithCellSize(cellSize, gapSize);
+        return this.toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize);
     }
     
-    toCanvasWithStyle(cellSize, showGrid) {
+    toCanvasWithStyle(devicePixelRatio, cellSize, showGrid) {
         if(showGrid) {
-            return this.toCanvasWithGridAndBorder(cellSize);
+            return this.toCanvasWithGridAndBorder(devicePixelRatio, cellSize);
         }
-        return this.toCanvasWithCellSize(cellSize, 0);
+        return this.toCanvasWithCellSize(devicePixelRatio, cellSize, 0);
     }
 
-    toCanvasWithCellSize(cellSize, gapSize) {
+    toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize) {
+        let sizeWidth = this.width * cellSize - gapSize;
+        let sizeHeight = this.height * cellSize - gapSize;
+
         let canvas = document.createElement('canvas');
+
+        // Set the 'drawing buffer' size.
+        canvas.width = sizeWidth * devicePixelRatio;
+        canvas.height = sizeHeight * devicePixelRatio;
+
+        // Set the 'display' size.
+        canvas.style.width = sizeWidth + 'px';
+        canvas.style.height = sizeHeight + 'px';
+
         let ctx = canvas.getContext('2d');
-        canvas.width = this.width * cellSize - gapSize;
-        canvas.height = this.height * cellSize - gapSize;
+
+        // Scale the drawing context so shapes aren't stretched.
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
@@ -288,20 +302,41 @@ class ARCImage {
         return canvas;
     }
     
-    toCanvasWithGridAndBorder(cellSize) {
+    toCanvasWithGridAndBorder(devicePixelRatio, cellSize) {
+        let borderSize = 1 / devicePixelRatio;
+        let gapSize = 1 / devicePixelRatio;
+        let sizeWidth = this.width * cellSize - gapSize + borderSize * 2;
+        let sizeHeight = this.height * cellSize - gapSize + borderSize * 2;
+
         let canvas = document.createElement('canvas');
+
+        // Set the 'drawing buffer' size.
+        canvas.width = sizeWidth * devicePixelRatio;
+        canvas.height = sizeHeight * devicePixelRatio;
+
+        // Set the 'display' size.
+        canvas.style.width = sizeWidth + 'px';
+        canvas.style.height = sizeHeight + 'px';
+
         let ctx = canvas.getContext('2d');
-        let borderSize = 1;
-        let gapSize = 1;
-        canvas.width = this.width * cellSize - gapSize + borderSize * 2;
-        canvas.height = this.height * cellSize - gapSize + borderSize * 2;
+        ctx.imageSmoothingEnabled = false; // Disable anti-aliasing
+
+        // Some devices have a devicePixelRatio of 2 or 3.
+        // We always want the grid size to be 1 pixel, also on these high resolution devices.
+        // Thus don't scale the drawing context so shapes have to be stretched.
+
         ctx.fillStyle = '#555';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
                 ctx.fillStyle = color_palette[pixel];
-                ctx.fillRect(x * cellSize + borderSize, y * cellSize + borderSize, cellSize - gapSize, cellSize - gapSize);
+                ctx.fillRect(
+                    x * cellSize * devicePixelRatio + borderSize, 
+                    y * cellSize * devicePixelRatio + borderSize, 
+                    cellSize * devicePixelRatio - gapSize, 
+                    cellSize * devicePixelRatio - gapSize
+                );
             }
         }
         return canvas;
