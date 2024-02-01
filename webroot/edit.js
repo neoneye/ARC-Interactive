@@ -554,11 +554,11 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSize(task, dpr, showSizeAndGrid) {
+    calcCellSizeForOverview(task, dpr, showSizeAndGrid) {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
-        // console.log('calcCellSize() width:', width, 'height:', height);
+        // console.log('calcCellSizeForOverview() width:', width, 'height:', height);
 
         let heightOfNonImage = showSizeAndGrid ? 140 : 80;
         let separatorWidth = 10;
@@ -602,7 +602,7 @@ class PageController {
         let cellSizeX = Math.floor((width - widthOfNonImage) * dpr / sumPixelWidth);
         let cellSizeY = Math.floor((height - heightOfNonImage) * dpr / maxPixelHeight);
         let cellSize = Math.min(cellSizeX, cellSizeY);
-        console.log('calcCellSize() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
+        // console.log('calcCellSizeForOverview() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
         return cellSize;
     }
 
@@ -614,7 +614,7 @@ class PageController {
 
         let task = this.task;
         let showSizeAndGrid = this.isGridVisible;
-        let cellSize = this.calcCellSize(task, devicePixelRatio, showSizeAndGrid);
+        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, showSizeAndGrid);
         // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
 
