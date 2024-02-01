@@ -21,6 +21,10 @@ class PageController {
         }
 
         document.title = this.datasetId;
+
+        // Get the device pixel ratio, falling back to 1.
+        this.devicePixelRatio = window.devicePixelRatio || 1;
+        // console.log('Device pixel ratio:', this.devicePixelRatio);
     }
 
     async onload() {
@@ -163,7 +167,7 @@ class PageController {
         let height = 80;
 
         let scale = 2;
-        let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
+        let canvas = task.toCustomCanvasSize(this.devicePixelRatio, extraWide, width * scale, height * scale);
         let url = canvas.toDataURL();
         lazyImage.src = url;
     }

@@ -523,7 +523,7 @@ class ARCTask {
         this.thumbnailCacheId = thumbnailCacheId;
     }
 
-    toThumbnailCanvas(extraWide, scale) {
+    toThumbnailCanvas(devicePixelRatio, extraWide, scale) {
         var width = 320 * scale;
         if (extraWide) {
             width *= 2;
@@ -536,25 +536,32 @@ class ARCTask {
         thumbnailCanvas.height = height;
 
         let insetValue = 5;
-        let canvas = this.toCanvas(insetValue, extraWide);
+        let canvas = this.toCanvas(devicePixelRatio, insetValue, extraWide);
         thumbnailCtx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
         return thumbnailCanvas;
     }
 
-    toCustomCanvasSize(extraWide, width, height) {
+    toCustomCanvasSize(devicePixelRatio, extraWide, width, height) {
         const thumbnailCanvas = document.createElement('canvas');
         const thumbnailCtx = thumbnailCanvas.getContext('2d');
-        thumbnailCanvas.width = width;
-        thumbnailCanvas.height = height;
+        thumbnailCtx.imageSmoothingEnabled = false;
 
+        // Set the 'drawing buffer' size.
+        thumbnailCanvas.width = width * devicePixelRatio;
+        thumbnailCanvas.height = height * devicePixelRatio;
+
+        // Set the 'display' size.
+        thumbnailCanvas.style.width = width + 'px';
+        thumbnailCanvas.style.height = height + 'px';
+        
         let insetValue = 5;
-        let canvas = this.toCanvas(0, extraWide);
+        let canvas = this.toCanvas(devicePixelRatio, 0, extraWide);
         thumbnailCtx.drawImage(canvas, insetValue, insetValue, thumbnailCanvas.width - 2 * insetValue, thumbnailCanvas.height - 2 * insetValue);
         return thumbnailCanvas;
     }
 
-    toCanvas(insetValue, extraWide) {
-        let scale = 1;
+    toCanvas(devicePixelRatio, insetValue, extraWide) {
+        let scale = 2;
         var width = 320 * scale;
         if (extraWide) {
             width *= 2;
