@@ -175,7 +175,7 @@ class PageController {
     resizeOrChangeOrientation() {
         resizeCanvas();
         if (this.isOverviewHidden()) {
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
         } else {
             this.updateOverview();
         }
@@ -256,7 +256,7 @@ class PageController {
         let el = document.getElementById('tool-button');
         el.innerText = `Tool: ${toolId}`;
         this.currentTool = toolId;
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
 
         let el1 = document.getElementById('crop-selected-rectangle-button');
@@ -315,7 +315,7 @@ class PageController {
         this.pasteX = position.x;
         this.pasteY = position.y;
         // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
     }
 
     movePaste(event) {
@@ -333,7 +333,7 @@ class PageController {
         this.pasteX = position.x;
         this.pasteY = position.y;
         // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
     }
 
     stopPaste(event) {
@@ -357,7 +357,7 @@ class PageController {
             this.pasteX = position.x;
             this.pasteY = position.y;
             // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
             return;
         }
 
@@ -385,7 +385,7 @@ class PageController {
                 x1: clampedCellX,
                 y1: clampedCellY,
             };
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
             return;
         }
 
@@ -397,11 +397,11 @@ class PageController {
         }
         if(this.currentTool == 'paint') {
             this.image.pixels[celly][cellx] = this.currentColor;
-            this.updateDrawCanvas(false);
+            this.updateDrawCanvas();
         }
         if(this.currentTool == 'fill') {
             this.floodFill(cellx, celly);
-            this.updateDrawCanvas(false);
+            this.updateDrawCanvas();
         }
     }
 
@@ -423,7 +423,7 @@ class PageController {
             this.pasteX = position.x;
             this.pasteY = position.y;
             // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
             return;
         }
 
@@ -446,7 +446,7 @@ class PageController {
             let clampedCellY = Math.max(0, Math.min(celly, this.image.height - 1));
             this.selectRectangle.x1 = clampedCellX;
             this.selectRectangle.y1 = clampedCellY;
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
             return;
         }
 
@@ -458,7 +458,7 @@ class PageController {
         }
         if(this.currentTool == 'paint') {
             this.image.pixels[celly][cellx] = this.currentColor;
-            this.updateDrawCanvas(false);
+            this.updateDrawCanvas();
         }
     }
 
@@ -500,7 +500,7 @@ class PageController {
                     this.image.pixels[y][x] = this.currentColor;
                 }
             }
-            this.updateDrawCanvas(false);
+            this.updateDrawCanvas();
         }        
     }
 
@@ -530,7 +530,7 @@ class PageController {
 
         this.assignImageFromCurrentTest();
         this.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
     }
 
     assignImageFromCurrentTest() {
@@ -554,11 +554,11 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSize(task, dpr, showSizeAndGrid) {
+    calcCellSizeForOverview(task, dpr, showSizeAndGrid) {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
-        // console.log('calcCellSize() width:', width, 'height:', height);
+        // console.log('calcCellSizeForOverview() width:', width, 'height:', height);
 
         let heightOfNonImage = showSizeAndGrid ? 140 : 80;
         let separatorWidth = 10;
@@ -602,7 +602,7 @@ class PageController {
         let cellSizeX = Math.floor((width - widthOfNonImage) * dpr / sumPixelWidth);
         let cellSizeY = Math.floor((height - heightOfNonImage) * dpr / maxPixelHeight);
         let cellSize = Math.min(cellSizeX, cellSizeY);
-        console.log('calcCellSize() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
+        // console.log('calcCellSizeForOverview() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
         return cellSize;
     }
 
@@ -614,7 +614,7 @@ class PageController {
 
         let task = this.task;
         let showSizeAndGrid = this.isGridVisible;
-        let cellSize = this.calcCellSize(task, devicePixelRatio, showSizeAndGrid);
+        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, showSizeAndGrid);
         // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
 
@@ -768,7 +768,7 @@ class PageController {
         return this.currentTool == 'select';
     }
 
-    updateDrawCanvas(clear) {
+    updateDrawCanvas() {
         let isSelectTool = this.isCurrentToolSelect();
 
         const ctx = this.drawCanvas.getContext('2d');
@@ -780,9 +780,7 @@ class PageController {
         let height = canvasHeight - inset * 2;
 
         // Clear the canvas to be fully transparent
-        if(clear) {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-        }
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         let image = this.image;
         let cellSize = image.cellSize(width, height);
@@ -907,7 +905,7 @@ class PageController {
 
         // Sometimes the browser doesn't render the <canvas> after it's hidden and shown again.
         resizeCanvas();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
     }
 
     hideEditorShowOverview() {
@@ -955,7 +953,7 @@ class PageController {
     toggleGrid() {
         this.isGridVisible = !this.isGridVisible;
         localStorage.setItem(PageController.gridKey(), this.isGridVisible);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.updateOverview();
     }
 
@@ -1011,7 +1009,7 @@ class PageController {
             this.assignImageFromCurrentTest();
         }
         this.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
     }
 
     getWidthHeightFromTextfield() {
@@ -1066,7 +1064,7 @@ class PageController {
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         this.image = emptyImage.overlay(this.image, 0, 0);
         this.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
 
         this.hideToolPanel();
     }
@@ -1074,7 +1072,7 @@ class PageController {
     startOverWithInputImage() {
         this.assignImageFromCurrentTest();
         this.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1109,7 +1107,7 @@ class PageController {
         }
         this.image = this.image.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
         this.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1134,7 +1132,7 @@ class PageController {
         this.isPasteMode = true;
         this.showPasteArea();
         resizeCanvas();
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
     }
 
     showPasteArea() {
@@ -1202,14 +1200,14 @@ class PageController {
         this.selectRectangle.x1 = clampedX1;
         this.selectRectangle.y1 = clampedY1;
 
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hidePasteArea();
     }
 
     pasteFromClipboardReject() {
         console.log('Paste from clipboard reject.');
         this.isPasteMode = false;
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hidePasteArea();
     }
 
@@ -1245,7 +1243,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
         this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1255,7 +1253,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
         this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1264,7 +1262,7 @@ class PageController {
         if (!this.isCurrentToolSelect()) {
             this.image = this.image.rotateCW();
             this.assignSelectRectangleFromCurrentImage();
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
             this.hideToolPanel();
             return;
         }
@@ -1276,7 +1274,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
         this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1285,7 +1283,7 @@ class PageController {
         if (!this.isCurrentToolSelect()) {
             this.image = this.image.rotateCCW();
             this.assignSelectRectangleFromCurrentImage();
-            this.updateDrawCanvas(true);
+            this.updateDrawCanvas();
             this.hideToolPanel();
             return;
         }
@@ -1297,7 +1295,7 @@ class PageController {
         let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1312,7 +1310,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
         this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
         this.image = this.image.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1327,7 +1325,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
         this.image = this.image.overlay(image1, rectangle.x + 1, rectangle.y);
         this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1342,7 +1340,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
         this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
         this.image = this.image.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
@@ -1357,7 +1355,7 @@ class PageController {
         let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
         this.image = this.image.overlay(image1, rectangle.x, rectangle.y + 1);
         this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
-        this.updateDrawCanvas(true);
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
