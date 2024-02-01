@@ -609,12 +609,13 @@ class PageController {
     updateOverview() {
         // Get the device pixel ratio, falling back to 1.
         let devicePixelRatio = window.devicePixelRatio || 1;
-        console.log('devicePixelRatio:', devicePixelRatio);
+        // let devicePixelRatio = 1;
+        // console.log('devicePixelRatio:', devicePixelRatio);
 
         let task = this.task;
         let showSizeAndGrid = this.isGridVisible;
         let cellSize = this.calcCellSize(task, devicePixelRatio, showSizeAndGrid);
-        console.log('cellSize:', cellSize);
+        // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
