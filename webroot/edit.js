@@ -57,7 +57,7 @@ class Originator {
         this.state.image = image.clone();
     }
 
-    getImage() {
+    getImageClone() {
         return this.state.image.clone();
     }
 
@@ -586,7 +586,7 @@ class PageController {
     }
 
     setPixel(x, y, color) {
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         var image = originalImage.clone();
         try {
             image.setPixel(x, y, color);
@@ -604,7 +604,7 @@ class PageController {
     }
 
     floodFill(x, y, color) {
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         var image = originalImage.clone();
         image.floodFill(x, y, color);
         if (image.isEqualTo(originalImage)) {
@@ -634,7 +634,7 @@ class PageController {
     }
 
     fillSelectedRectangle() {
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
         if (minX > maxX || minY > maxY) {
             return;
@@ -1165,8 +1165,8 @@ class PageController {
     }
 
     takeSnapshotOfCurrentImage() {
-        let newImage = this.image.clone();
-        this.userDrawnImages[this.currentTest] = newImage;
+        let originalImage = this.originator.getImageClone();
+        this.userDrawnImages[this.currentTest] = originalImage;
     }
 
     imageForTestIndex(testIndex) {
@@ -1242,7 +1242,7 @@ class PageController {
         // console.log('Width:', size.width, 'Height:', size.height);
 
         // Resize the image, preserve the content.
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         let image = emptyImage.overlay(originalImage, 0, 0);
         if (image.isEqualTo(originalImage)) {
@@ -1259,7 +1259,7 @@ class PageController {
     }
 
     startOverWithInputImage() {
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let inputImage = this.inputImageFromCurrentTest();
         if (originalImage.isEqualTo(inputImage)) {
             console.log('The image is the same as the input image.');
@@ -1295,7 +1295,7 @@ class PageController {
             console.log('Crop is only available in select mode.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
 
         let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
         // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
@@ -1323,7 +1323,7 @@ class PageController {
 
     copyToClipboard() {
         let rectangle = this.getToolRectangle();
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.clipboard = cropImage;
         this.hideToolPanel();
@@ -1384,7 +1384,7 @@ class PageController {
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
 
-        let image = this.originator.getImage();
+        let image = this.originator.getImageClone();
 
         let cellSize = image.cellSize(width, height);
 
@@ -1456,7 +1456,7 @@ class PageController {
     // Reverse the x-axis of the selected rectangle or the entire image
     flipX() {
         let rectangle = this.getToolRectangle();
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
         let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
@@ -1474,7 +1474,7 @@ class PageController {
     // Reverse the y-axis of the selected rectangle or the entire image
     flipY() {
         let rectangle = this.getToolRectangle();
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
         let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
@@ -1504,7 +1504,7 @@ class PageController {
             console.log('Rotate is only available for square selections.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
@@ -1520,7 +1520,7 @@ class PageController {
     }
 
     rotateCW_entireImage() {
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let image = originalImage.rotateCW();
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
@@ -1549,7 +1549,7 @@ class PageController {
             console.log('Rotate is only available for square selections.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
@@ -1565,7 +1565,7 @@ class PageController {
     }
 
     rotateCCW_entireImage() {
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let image = originalImage.rotateCCW();
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
@@ -1586,7 +1586,7 @@ class PageController {
             console.log('Move is only available when the width is 2 or greater.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let image0 = originalImage.crop(rectangle.x, rectangle.y, 1, rectangle.height);
         let image1 = originalImage.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
         let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
@@ -1609,7 +1609,7 @@ class PageController {
             console.log('Move is only available when the width is 2 or greater.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let image0 = originalImage.crop(rectangle.x + rectangle.width - 1, rectangle.y, 1, rectangle.height);
         let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
         let image2 = originalImage.overlay(image1, rectangle.x + 1, rectangle.y);
@@ -1632,7 +1632,7 @@ class PageController {
             console.log('Move is only available when the height is 2 or greater.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let image0 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, 1);
         let image1 = originalImage.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
         let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
@@ -1655,7 +1655,7 @@ class PageController {
             console.log('Move is only available when the height is 2 or greater.');
             return;
         }
-        let originalImage = this.originator.getImage();
+        let originalImage = this.originator.getImageClone();
         let image0 = originalImage.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
         let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
         let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y + 1);
