@@ -477,6 +477,7 @@ class PageController {
         this.isDrawing = true;
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
+        let originalImage = this.originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -494,12 +495,12 @@ class PageController {
 
         let width = this.drawCanvas.width - this.inset * 2;
         let height = this.drawCanvas.height - this.inset * 2;
-        let cellSize = this.image.cellSize(width, height);
+        let cellSize = originalImage.cellSize(width, height);
 
         const drawX = this.inset;
         const drawY = this.inset;
-        const innerWidth = cellSize * this.image.width;
-        const innerHeight = cellSize * this.image.height;
+        const innerWidth = cellSize * originalImage.width;
+        const innerHeight = cellSize * originalImage.height;
         let x0 = Math.floor(drawX + (width - innerWidth) / 2);
         var y0 = Math.floor(drawY + (height - innerHeight) / 2);
 
@@ -508,8 +509,8 @@ class PageController {
         // console.log('cellx', cellx, 'celly', celly);
 
         if(this.currentTool == 'select') {
-            let clampedCellX = Math.max(0, Math.min(cellx, this.image.width - 1));
-            let clampedCellY = Math.max(0, Math.min(celly, this.image.height - 1));
+            let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
+            let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
             this.selectRectangle = { 
                 x0: clampedCellX, 
                 y0: clampedCellY,
@@ -520,10 +521,10 @@ class PageController {
             return;
         }
 
-        if (cellx < 0 || cellx >= this.image.width) {
+        if (cellx < 0 || cellx >= originalImage.width) {
             return;
         }
-        if (celly < 0 || celly >= this.image.height) {
+        if (celly < 0 || celly >= originalImage.height) {
             return;
         }
         if(this.currentTool == 'paint') {
@@ -545,6 +546,7 @@ class PageController {
         }
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
+        let originalImage = this.originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -562,12 +564,12 @@ class PageController {
 
         let width = this.drawCanvas.width - this.inset * 2;
         let height = this.drawCanvas.height - this.inset * 2;
-        let cellSize = this.image.cellSize(width, height);
+        let cellSize = originalImage.cellSize(width, height);
 
         const drawX = this.inset;
         const drawY = this.inset;
-        const innerWidth = cellSize * this.image.width;
-        const innerHeight = cellSize * this.image.height;
+        const innerWidth = cellSize * originalImage.width;
+        const innerHeight = cellSize * originalImage.height;
         let x0 = Math.floor(drawX + (width - innerWidth) / 2);
         var y0 = Math.floor(drawY + (height - innerHeight) / 2);
 
@@ -575,18 +577,18 @@ class PageController {
         let celly = Math.floor((position.y-y0)/cellSize);
         // console.log('cellx', cellx, 'celly', celly);
         if(this.currentTool == 'select') {
-            let clampedCellX = Math.max(0, Math.min(cellx, this.image.width - 1));
-            let clampedCellY = Math.max(0, Math.min(celly, this.image.height - 1));
+            let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
+            let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
             this.selectRectangle.x1 = clampedCellX;
             this.selectRectangle.y1 = clampedCellY;
             this.updateDrawCanvas();
             return;
         }
 
-        if (cellx < 0 || cellx >= this.image.width) {
+        if (cellx < 0 || cellx >= originalImage.width) {
             return;
         }
-        if (celly < 0 || celly >= this.image.height) {
+        if (celly < 0 || celly >= originalImage.height) {
             return;
         }
         if(this.currentTool == 'paint') {
@@ -678,10 +680,14 @@ class PageController {
         this.updateDrawCanvas();
     }
 
-    assignImageFromCurrentTest() {
+    inputImageFromCurrentTest() {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
-        this.image = image.clone();
+        return image.clone();
+    }
+
+    assignImageFromCurrentTest() {
+        let image = this.inputImageFromCurrentTest();
         this.originator.setImage(image);
         this.caretaker.clearHistory();
     }
@@ -1126,7 +1132,7 @@ class PageController {
 
     submitDrawing() {
         console.log('Submit');
-        let image = this.image;
+        let image = this.originator.getImageRef();
         let json0 = JSON.stringify(image.pixels);
 
         let testIndex = this.currentTest % this.numberOfTests;
@@ -1244,6 +1250,23 @@ class PageController {
     }
 
     startOverWithInputImage() {
+        let originalImage = this.originator.getImage();
+        let inputImage = this.inputImageFromCurrentTest();
+        if (originalImage.isEqualTo(inputImage)) {
+            console.log('The image is the same as the input image.');
+            return;
+        }
+
+        // show an alert: "Are you sure you want to start over with the input image?"
+        // If the user clicks "OK", then reset the current image to the input image.
+        // If the user clicks "Cancel", then do nothing.
+        let result = confirm('You have made changes to the image. Are you sure you want to start over with the input image?');
+        console.log('startOverWithInputImage() result:', result);
+        if (!result) {
+            return;
+        }
+
+        console.log('startOverWithInputImage() confirmed');
         this.assignImageFromCurrentTest();
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
@@ -1291,7 +1314,8 @@ class PageController {
 
     copyToClipboard() {
         let rectangle = this.getToolRectangle();
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let originalImage = this.originator.getImage();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.clipboard = cropImage;
         this.hideToolPanel();
         console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
@@ -1395,12 +1419,13 @@ class PageController {
 
     // Get either the selected rectangle or the rectangle for the entire image
     getToolRectangle() {
+        let originalImage = this.originator.getImageRef();
         if (this.isCurrentToolSelect()) {
             let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
             if (minX > maxX || minY > maxY) {
                 throw new Error(`getToolRectangle. Invalid selected rectangle: min must be smaller than max. minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
             }
-            if (minX < 0 || maxX >= this.image.width || minY < 0 || maxY >= this.image.height) {
+            if (minX < 0 || maxX >= originalImage.width || minY < 0 || maxY >= originalImage.height) {
                 throw new Error(`getToolRectangle. The selected rectangle is outside the image boundaries. minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
             }
             return { 
@@ -1413,8 +1438,8 @@ class PageController {
             return { 
                 x: 0, 
                 y: 0, 
-                width: this.image.width, 
-                height: this.image.height 
+                width: originalImage.width, 
+                height: originalImage.height 
             };
         }
     }
