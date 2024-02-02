@@ -664,7 +664,7 @@ class PageController {
     fillSelectedRectangle() {
         let drawingItem = this.currentDrawingItem();
         let originalImage = drawingItem.originator.getImageClone();
-        let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
         if (minX > maxX || minY > maxY) {
             return;
         }
@@ -1006,7 +1006,8 @@ class PageController {
         // Clear the canvas to be fully transparent
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        let image = this.currentDrawingItem().originator.getImageRef();
+        let drawingItem = this.currentDrawingItem();
+        let image = drawingItem.originator.getImageRef();
         let cellSize = image.cellSize(width, height);
 
         let gapSize = this.isGridVisible ? 1 : 0;
@@ -1029,7 +1030,7 @@ class PageController {
 
         // Draw the dashed select rectangle
         if (isSelectTool && !this.isPasteMode) {
-            let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+            let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
             // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
 
             let x = image.calcX0(0, width, cellSize) + minX * cellSize + inset;
@@ -1309,10 +1310,6 @@ class PageController {
         this.hideToolPanel();
     }
 
-    getSelectedRectangleCoordinates() {
-        return this.currentDrawingItem().getSelectedRectangleCoordinates();
-    }
-
     cropSelectedRectangle() {
         if (!this.isCurrentToolSelect()) {
             console.log('Crop is only available in select mode.');
@@ -1321,7 +1318,7 @@ class PageController {
         let drawingItem = this.currentDrawingItem();
         let originalImage = drawingItem.originator.getImageClone();
 
-        let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
         // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
         if (minX > maxX || minY > maxY) {
             return;
@@ -1453,9 +1450,10 @@ class PageController {
 
     // Get either the selected rectangle or the rectangle for the entire image
     getToolRectangle() {
-        let originalImage = this.currentDrawingItem().originator.getImageRef();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageRef();
         if (this.isCurrentToolSelect()) {
-            let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+            let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
             if (minX > maxX || minY > maxY) {
                 throw new Error(`getToolRectangle. Invalid selected rectangle: min must be smaller than max. minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
             }
