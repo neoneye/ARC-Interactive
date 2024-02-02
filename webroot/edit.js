@@ -342,38 +342,43 @@ class PageController {
                 this.toggleFullscreen();
             }
         }
-        if (event.code === 'KeyO') {
-            this.toggleOverview();
-        }
         if (event.code === 'KeyG') {
             this.toggleGrid();
         }
-        if (event.code === 'KeyC') {
-            this.copyToClipboard();
-        }
-        if (event.code === 'KeyV') {
-            this.pasteFromClipboard();
-        }
-        if (event.code === 'KeyP') {
-            this.keyboardShortcutPickTool('tool_paint');
-        }
-        if (event.code === 'KeyS') {
-            this.keyboardShortcutPickTool('tool_select');
-        }
-        if (event.code === 'KeyL') {
-            this.keyboardShortcutPickTool('tool_fill');
-        }
-        if (event.code === 'ArrowUp') {
-            this.moveUp();
-        }
-        if (event.code === 'ArrowDown') {
-            this.moveDown();
-        }
-        if (event.code === 'ArrowLeft') {
-            this.moveLeft();
-        }
-        if (event.code === 'ArrowRight') {
-            this.moveRight();
+
+        if (this.isEditorShownAndPasteModeFalse()) {
+            // Only while the "editor" is visible, and no paste layer is active, the following keys are handled.
+
+            if (event.code === 'KeyO') {
+                this.toggleOverview();
+            }
+            if (event.code === 'KeyC') {
+                this.copyToClipboard();
+            }
+            if (event.code === 'KeyV') {
+                this.pasteFromClipboard();
+            }
+            if (event.code === 'KeyP') {
+                this.keyboardShortcutPickTool('tool_paint');
+            }
+            if (event.code === 'KeyS') {
+                this.keyboardShortcutPickTool('tool_select');
+            }
+            if (event.code === 'KeyL') {
+                this.keyboardShortcutPickTool('tool_fill');
+            }
+            if (event.code === 'ArrowUp') {
+                this.moveUp();
+            }
+            if (event.code === 'ArrowDown') {
+                this.moveDown();
+            }
+            if (event.code === 'ArrowLeft') {
+                this.moveLeft();
+            }
+            if (event.code === 'ArrowRight') {
+                this.moveRight();
+            }
         }
     }
 
@@ -1103,6 +1108,21 @@ class PageController {
         ctx.lineWidth = 2;
         ctx.rect(x - 1, y - 1, width, height);
         ctx.stroke();    
+    }
+
+    isEditorShownAndPasteModeFalse() {
+        if (!this.isOverviewHidden()) {
+            // The overview is visible, the editor is hidden.
+            return false;
+        }
+        if (this.isPasteMode) {
+            // The paste canvas is visible on top of the editor.
+            return false;
+        }
+        // The editor is visible.
+        // The paste canvas is hidden.
+        // The overview is hidden.
+        return true;
     }
 
     isOverviewHidden() {
