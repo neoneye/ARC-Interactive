@@ -1517,6 +1517,7 @@ class PageController {
         let image3 = image2.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
         if (image3.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
+            this.hideToolPanel();
             return;
         }
         this.caretaker.saveState(this.originator, 'move left');
@@ -1539,6 +1540,7 @@ class PageController {
         let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
         if (image3.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
+            this.hideToolPanel();
             return;
         }
         this.caretaker.saveState(this.originator, 'move right');
@@ -1561,6 +1563,7 @@ class PageController {
         let image3 = image2.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
         if (image3.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
+            this.hideToolPanel();
             return;
         }
         this.caretaker.saveState(this.originator, 'move up');
@@ -1583,6 +1586,7 @@ class PageController {
         let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
         if (image3.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
+            this.hideToolPanel();
             return;
         }
         this.caretaker.saveState(this.originator, 'move down');
