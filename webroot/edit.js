@@ -1245,19 +1245,27 @@ class PageController {
             console.log('Crop is only available in select mode.');
             return;
         }
+        let originalImage = this.originator.getImage();
 
         let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
         // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
         if (minX > maxX || minY > maxY) {
             return;
         }
-        if (minX < 0 || maxX >= this.image.width) {
+        if (minX < 0 || maxX >= originalImage.width) {
             return;
         }
-        if (minY < 0 || maxY >= this.image.height) {
+        if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
-        this.image = this.image.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        let image = originalImage.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after crop.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'crop selection');
+        this.originator.setImage(image);
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
@@ -1433,7 +1441,7 @@ class PageController {
         let rotatedImage = cropImage.rotateCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
         if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the rotate.');
+            console.log('The image is the same after rotate.');
             this.hideToolPanel();
             return;
         }
@@ -1447,7 +1455,7 @@ class PageController {
         let originalImage = this.originator.getImage();
         let image = originalImage.rotateCW();
         if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the rotate.');
+            console.log('The image is the same after rotate.');
             this.hideToolPanel();
             return;
         }
@@ -1478,7 +1486,7 @@ class PageController {
         let rotatedImage = cropImage.rotateCCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
         if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the rotate.');
+            console.log('The image is the same after rotate.');
             this.hideToolPanel();
             return;
         }
@@ -1492,7 +1500,7 @@ class PageController {
         let originalImage = this.originator.getImage();
         let image = originalImage.rotateCCW();
         if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the rotate.');
+            console.log('The image is the same after rotate.');
             this.hideToolPanel();
             return;
         }
