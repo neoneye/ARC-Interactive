@@ -1444,22 +1444,38 @@ class PageController {
         }
     }
 
-    // Reverse the x-axis of the selected rectangle
+    // Reverse the x-axis of the selected rectangle or the entire image
     flipX() {
         let rectangle = this.getToolRectangle();
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let originalImage = this.originator.getImage();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
-        this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after flip x.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'flip x for selection or entire image');
+        this.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
-    // Reverse the y-axis of the selected rectangle
+    // Reverse the y-axis of the selected rectangle or the entire image
     flipY() {
         let rectangle = this.getToolRectangle();
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let originalImage = this.originator.getImage();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
-        this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after flip y.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'flip y for selection or entire image');
+        this.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
