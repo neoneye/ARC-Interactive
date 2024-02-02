@@ -125,6 +125,14 @@ class Caretaker {
     }
 }
 
+class DrawingItem {
+    constructor() {
+        this.id = 0;
+        this.caretaker = new Caretaker();
+        this.originator = new Originator();
+    }
+}
+
 class PageController {
     constructor() {
         this.db = null;
@@ -184,6 +192,7 @@ class PageController {
         this.currentTool = 'paint';
         this.numberOfTests = 1;
         this.userDrawnImages = {};
+        this.drawingItems = [];
         this.originator = new Originator();
         this.caretaker = new Caretaker();
         this.inset = 2;
@@ -682,23 +691,41 @@ class PageController {
         }
         this.task = task;
         this.numberOfTests = task.test.length;
+
+        if (this.numberOfTests < 1) {
+            console.error('Error there are no tests. Expected 1 or more test pairs.');
+        }
+        var drawingItems = [];
+        for (let i = 0; i < this.numberOfTests; i++) {
+            let inputImage = task.test[i].input.clone();
+            let item = new DrawingItem();
+            item.id = i;
+            item.originator.setImage(inputImage);
+            drawingItems.push(item);
+        }
+        this.drawingItems = drawingItems;
+
+        if (this.drawingItems.length > 0) {
+            this.useDrawingItem(this.drawingItems[0]);
+        } else {
+            console.error('Error there are no drawing items. Cannot make use of the first drawing item!');
+        }
+
         this.showTask(task);
 
-        this.assignImageFromCurrentTest();
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
+    }
+
+    useDrawingItem(drawingItem) {
+        this.originator = drawingItem.originator;
+        this.caretaker = drawingItem.caretaker;
     }
 
     inputImageFromCurrentTest() {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
         return image.clone();
-    }
-
-    assignImageFromCurrentTest() {
-        let image = this.inputImageFromCurrentTest();
-        this.originator.setImage(image);
-        this.caretaker.clearHistory();
     }
 
     assignSelectRectangleFromCurrentImage() {
@@ -1170,11 +1197,7 @@ class PageController {
     }
 
     imageForTestIndex(testIndex) {
-        let image = this.userDrawnImages[testIndex];
-        if (!image) {
-            return null;
-        }
-        return image.clone();
+        return this.drawingItems[testIndex].originator.getImageClone();
     }
 
     activateTestIndex(testIndex) {
@@ -1184,12 +1207,9 @@ class PageController {
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.updateOverview();
-        let image = this.imageForTestIndex(this.currentTest);
-        if (image) {
-            this.image = image;
-        } else {
-            this.assignImageFromCurrentTest();
-        }
+
+        this.useDrawingItem(this.drawingItems[this.currentTest]);
+
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
     }
@@ -1276,7 +1296,8 @@ class PageController {
         }
 
         console.log('startOverWithInputImage() confirmed');
-        this.assignImageFromCurrentTest();
+        this.originator.setImage(inputImage);
+        this.caretaker.clearHistory();
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
