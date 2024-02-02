@@ -121,12 +121,12 @@
         </div>
     </div>
 
-    <div id="page-footer-draw-mode" class="page-footer hidden">
+    <div id="page-footer-draw-mode" class="page-footer user-select-none hidden">
         <div class="page-footer-left">
             <!-- Left -->
             <button id="tool-button" class="secondary-button" onclick="gPageController.showToolPanel()">Tool: paint</button>
         </div>
-        <div id="palette" class="page-footer-center user-select-none">
+        <div id="palette" class="page-footer-center">
             <div id="palette-item0" class="arc_color_0 palette_item_selected" onpointerdown="gPageController.pickColor(0)"></div>
             <div id="palette-item1" class="arc_color_1" onpointerdown="gPageController.pickColor(1)"></div>
             <div id="palette-item2" class="arc_color_2" onpointerdown="gPageController.pickColor(2)"></div>
@@ -146,7 +146,7 @@
         </div>
     </div>
 
-    <div id="page-footer-overview-mode" class="page-footer">
+    <div id="page-footer-overview-mode" class="page-footer user-select-none">
         <div class="page-footer-left">
             <!-- Left -->
             <button id="grid-button" class="secondary-button" onclick="gPageController.toggleGrid()" title="G = Toggle grid">Grid</button>
@@ -157,6 +157,7 @@
         </div>
         <div class="page-footer-right">
             <!-- Right -->
+            <button class="secondary-button" onpointerdown="gPageController.overviewRevealSolutionsYes()" onpointerup="gPageController.overviewRevealSolutionsNo()" title="Show the solution while pressing this button">Reveal</button>
         </div>
     </div>
 </body>

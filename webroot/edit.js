@@ -108,6 +108,8 @@ class PageController {
             y1: 0,
         };
 
+        this.overviewRevealSolutions = false;
+
         {
             // Select the radio button with the id 'tool_paint'
             // Sometimes the browser remembers the last selected radio button, across sessions.
@@ -606,6 +608,19 @@ class PageController {
         return cellSize;
     }
 
+    // The user is pressing down the button that reveals the solutions.
+    overviewRevealSolutionsYes() {
+        this.overviewRevealSolutions = true;
+        this.updateOverview();
+    }
+
+    // The user is releasing the button that reveals the solutions.
+    overviewRevealSolutionsNo() {
+        this.overviewRevealSolutions = false;
+        this.updateOverview();
+    }
+
+    // Rebuild the overview table, so it shows what the user has drawn so far.
     updateOverview() {
         // Get the device pixel ratio, falling back to 1.
         let devicePixelRatio = window.devicePixelRatio || 1;
@@ -627,6 +642,7 @@ class PageController {
         el_tr1.innerText = '';
         el_tr2.innerText = '';
 
+        // Populate table for `train` pairs.
         for (let i = 0; i < task.train.length; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
@@ -676,6 +692,7 @@ class PageController {
             el_tr2.appendChild(el_td2);
         }
 
+        // Separate the `train` pairs and the `test` pairs.
         {
             let el_td0 = document.createElement('td');
             el_td0.innerHTML = '&nbsp;';
@@ -684,8 +701,10 @@ class PageController {
             el_tr0.appendChild(el_td0);
         }
 
+        // Populate table for `test` pairs.
         for (let i = 0; i < task.test.length; i++) {
             let input = task.test[i].input;
+            let output = task.test[i].output;
             let el_td0 = document.createElement('td');
             let el_td1 = document.createElement('td');
             let el_td2 = document.createElement('td');
@@ -740,21 +759,23 @@ class PageController {
                 el_td2.classList.add('center-x');
                 el_td2.classList.add('test-output-cell');
 
-                var output = this.imageForTestIndex(i);
-                if (!output) {
+                var image = this.imageForTestIndex(i);
+                if (this.overviewRevealSolutions) {
+                    image = output;
+                }
+                if (!image) {
                     el_td2.innerText = `?`;
                 } else {
 
-                    let canvas = output.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                    let canvas = image.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
                     el_td2.appendChild(canvas);
     
                     let el_div = document.createElement('div');
                     el_div.className = 'image-size-label';
-                    el_div.innerText = `${output.width}x${output.height}`;
+                    el_div.innerText = `${image.width}x${image.height}`;
                     if (showSizeAndGrid) {
                         el_td2.appendChild(el_div);
                     }
-    
                 }
     
             }
