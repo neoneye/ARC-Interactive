@@ -130,6 +130,30 @@ class DrawingItem {
         this.id = 0;
         this.caretaker = new Caretaker();
         this.originator = new Originator();
+        this.selectRectangle = { 
+            x0: 0, 
+            y0: 0,
+            x1: 0,
+            y1: 0,
+        };
+    }
+
+    getSelectedRectangleCoordinates() {
+        let minX = Math.min(this.selectRectangle.x0, this.selectRectangle.x1);
+        let maxX = Math.max(this.selectRectangle.x0, this.selectRectangle.x1);
+        let minY = Math.min(this.selectRectangle.y0, this.selectRectangle.y1);
+        let maxY = Math.max(this.selectRectangle.y0, this.selectRectangle.y1);
+        return { minX, maxX, minY, maxY };
+    }
+
+    assignSelectRectangleFromCurrentImage() {
+        let image = this.originator.getImageRef();
+        this.selectRectangle = {
+            x0: 0,
+            y0: 0,
+            x1: image.width - 1,
+            y1: image.height - 1,
+        };
     }
 }
 
@@ -207,13 +231,6 @@ class PageController {
 
         this.isFullscreen = false;
         this.isGridVisible = PageController.getItemIsGridVisible();
-
-        this.selectRectangle = { 
-            x0: 0, 
-            y0: 0,
-            x1: 0,
-            y1: 0,
-        };
 
         this.overviewRevealSolutions = false;
 
@@ -469,7 +486,9 @@ class PageController {
         this.isDrawing = true;
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
-        let originalImage = this.currentDrawingItem().originator.getImageRef();
+
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -503,12 +522,10 @@ class PageController {
         if(this.currentTool == 'select') {
             let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
             let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
-            this.selectRectangle = { 
-                x0: clampedCellX, 
-                y0: clampedCellY,
-                x1: clampedCellX,
-                y1: clampedCellY,
-            };
+            drawingItem.selectRectangle.x0 = clampedCellX;
+            drawingItem.selectRectangle.y0 = clampedCellY;
+            drawingItem.selectRectangle.x1 = clampedCellX;
+            drawingItem.selectRectangle.y1 = clampedCellY;
             this.updateDrawCanvas();
             return;
         }
@@ -534,7 +551,8 @@ class PageController {
         }
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
-        let originalImage = this.currentDrawingItem().originator.getImageRef();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -567,8 +585,8 @@ class PageController {
         if(this.currentTool == 'select') {
             let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
             let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
-            this.selectRectangle.x1 = clampedCellX;
-            this.selectRectangle.y1 = clampedCellY;
+            drawingItem.selectRectangle.x1 = clampedCellX;
+            drawingItem.selectRectangle.y1 = clampedCellY;
             this.updateDrawCanvas();
             return;
         }
@@ -703,6 +721,7 @@ class PageController {
             let item = new DrawingItem();
             item.id = i;
             item.originator.setImage(inputImage);
+            item.assignSelectRectangleFromCurrentImage();
             drawingItems.push(item);
         }
         this.drawingItems = drawingItems;
@@ -711,8 +730,6 @@ class PageController {
         }
 
         this.showTask(task);
-
-        this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
     }
 
@@ -728,16 +745,6 @@ class PageController {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
         return image.clone();
-    }
-
-    assignSelectRectangleFromCurrentImage() {
-        let image = this.currentDrawingItem().originator.getImageRef();
-        this.selectRectangle = {
-            x0: 0,
-            y0: 0,
-            x1: image.width - 1,
-            y1: image.height - 1,
-        };
     }
 
     showTask(task) {
@@ -1208,7 +1215,6 @@ class PageController {
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.updateOverview();
-        this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
     }
 
@@ -1272,7 +1278,7 @@ class PageController {
 
         drawingItem.caretaker.saveState(drawingItem.originator, 'resize image');
         drawingItem.originator.setImage(image);
-        this.assignSelectRectangleFromCurrentImage();
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1298,17 +1304,13 @@ class PageController {
         console.log('startOverWithInputImage() confirmed');
         drawingItem.originator.setImage(inputImage);
         drawingItem.caretaker.clearHistory();
-        this.assignSelectRectangleFromCurrentImage();
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     getSelectedRectangleCoordinates() {
-        let minX = Math.min(this.selectRectangle.x0, this.selectRectangle.x1);
-        let maxX = Math.max(this.selectRectangle.x0, this.selectRectangle.x1);
-        let minY = Math.min(this.selectRectangle.y0, this.selectRectangle.y1);
-        let maxY = Math.max(this.selectRectangle.y0, this.selectRectangle.y1);
-        return { minX, maxX, minY, maxY };
+        return this.currentDrawingItem().getSelectedRectangleCoordinates();
     }
 
     cropSelectedRectangle() {
@@ -1338,7 +1340,7 @@ class PageController {
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'crop selection');
         drawingItem.originator.setImage(image);
-        this.assignSelectRectangleFromCurrentImage();
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1430,10 +1432,10 @@ class PageController {
         let clampedY0 = Math.max(0, Math.min(minY, image2.height - 1));
         let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, image2.width - 1));
         let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, image2.height - 1));
-        this.selectRectangle.x0 = clampedX0;
-        this.selectRectangle.y0 = clampedY0;
-        this.selectRectangle.x1 = clampedX1;
-        this.selectRectangle.y1 = clampedY1;
+        drawingItem.selectRectangle.x0 = clampedX0;
+        drawingItem.selectRectangle.y0 = clampedY0;
+        drawingItem.selectRectangle.x1 = clampedX1;
+        drawingItem.selectRectangle.y1 = clampedY1;
 
         drawingItem.caretaker.saveState(drawingItem.originator, 'paste');
         drawingItem.originator.setImage(image2);
@@ -1556,7 +1558,7 @@ class PageController {
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise entire image');
         drawingItem.originator.setImage(image);
-        this.assignSelectRectangleFromCurrentImage();
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1603,7 +1605,7 @@ class PageController {
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise entire image');
         drawingItem.originator.setImage(image);
-        this.assignSelectRectangleFromCurrentImage();
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
