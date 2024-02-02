@@ -53,8 +53,16 @@ class Originator {
         this.state = state;
     }
 
-    setInitialImage(image) {
+    setImage(image) {
         this.state.image = image.clone();
+    }
+
+    getImage() {
+        return this.state.image.clone();
+    }
+
+    getImageRef() {
+        return this.state.image;
     }
 
     saveStateToMemento(actionName) {
@@ -663,7 +671,7 @@ class PageController {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
         this.image = image.clone();
-        this.originator.setInitialImage(image);
+        this.originator.setImage(image);
         this.caretaker.clearHistory();
     }
 
@@ -929,8 +937,7 @@ class PageController {
         // Clear the canvas to be fully transparent
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        // let image = this.image;
-        let image = this.originator.state.image;
+        let image = this.originator.getImageRef();
         let cellSize = image.cellSize(width, height);
 
         let gapSize = this.isGridVisible ? 1 : 0;
@@ -1317,7 +1324,8 @@ class PageController {
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
 
-        let image = this.image;
+        let image = this.originator.getImage();
+
         let cellSize = image.cellSize(width, height);
 
         let pasteX = this.pasteX;
@@ -1332,17 +1340,20 @@ class PageController {
         var minX = Math.floor((pasteX - halfWidth - x0) / cellSize + 0.5);
         var minY = Math.floor((pasteY - halfHeight - y0) / cellSize + 0.5);
 
-        this.image = this.image.overlay(clipboardImage, minX, minY);
+        let image2 = image.overlay(clipboardImage, minX, minY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(minX, this.image.width - 1));
-        let clampedY0 = Math.max(0, Math.min(minY, this.image.height - 1));
-        let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, this.image.width - 1));
-        let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, this.image.height - 1));
+        let clampedX0 = Math.max(0, Math.min(minX, image2.width - 1));
+        let clampedY0 = Math.max(0, Math.min(minY, image2.height - 1));
+        let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, image2.width - 1));
+        let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, image2.height - 1));
         this.selectRectangle.x0 = clampedX0;
         this.selectRectangle.y0 = clampedY0;
         this.selectRectangle.x1 = clampedX1;
         this.selectRectangle.y1 = clampedY1;
+
+        this.caretaker.saveState(this.originator, 'paste');
+        this.originator.setImage(image2);
 
         this.updateDrawCanvas();
         this.hidePasteArea();
