@@ -75,10 +75,6 @@ class Originator {
     getStateFromMemento(memento) {
         this.state = memento.getState();
     }
-
-    floodFill(x, y, color) {
-        this.state.image.floodFill(x, y, color);
-    }
 }
 
 class Caretaker {
@@ -519,9 +515,7 @@ class PageController {
             this.setPixel(cellx, celly, this.currentColor);
         }
         if(this.currentTool == 'fill') {
-            this.caretaker.saveState(this.originator, 'flood fill');
-            this.originator.floodFill(cellx, celly, this.currentColor);
-            this.updateDrawCanvas();
+            this.floodFill(cellx, celly, this.currentColor);
         }
     }
 
@@ -605,6 +599,19 @@ class PageController {
             return;
         }
         this.caretaker.saveState(this.originator, 'set pixel');
+        this.originator.setImage(image);
+        this.updateDrawCanvas();
+    }
+
+    floodFill(x, y, color) {
+        let originalImage = this.originator.getImage();
+        var image = originalImage.clone();
+        image.floodFill(x, y, color);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after floodFill.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'flood fill');
         this.originator.setImage(image);
         this.updateDrawCanvas();
     }
