@@ -1664,8 +1664,9 @@ class PageController {
 
     showToolPanel() {
         {
+            let originalImage = this.originator.getImageRef();
             var el = document.getElementById('canvas-size-input');
-            el.value = `${this.image.width}x${this.image.height}`;
+            el.value = `${originalImage.width}x${originalImage.height}`;
         }
         {
             var el = document.getElementById('tool-panel');
