@@ -764,7 +764,7 @@ class PageController {
                     image = output;
                 }
                 if (!image) {
-                    el_td2.innerText = `?`;
+                    el_td2.innerText = '?';
                 } else {
 
                     let canvas = image.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
