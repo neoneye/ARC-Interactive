@@ -76,18 +76,6 @@ class Originator {
         this.state = memento.getState();
     }
 
-    setPixel(x, y, color) {
-        let pixels = this.state.image.pixels;
-
-        // Check if the coordinates are within the bounds of the pixel array
-        if (pixels[y] !== undefined && pixels[y][x] !== undefined) {
-            // Perform action
-            pixels[y][x] = color;
-        } else {
-            console.error(`Invalid coordinates: (${x}, ${y})`);
-        }
-    }
-
     floodFill(x, y, color) {
         this.state.image.floodFill(x, y, color);
     }
@@ -528,9 +516,7 @@ class PageController {
             return;
         }
         if(this.currentTool == 'paint') {
-            this.caretaker.saveState(this.originator, 'set pixel');
-            this.originator.setPixel(cellx, celly, this.currentColor);
-            this.updateDrawCanvas();
+            this.setPixel(cellx, celly, this.currentColor);
         }
         if(this.currentTool == 'fill') {
             this.caretaker.saveState(this.originator, 'flood fill');
@@ -592,9 +578,7 @@ class PageController {
             return;
         }
         if(this.currentTool == 'paint') {
-            this.caretaker.saveState(this.originator, 'set pixel');
-            this.originator.setPixel(cellx, celly, this.currentColor);
-            this.updateDrawCanvas();
+            this.setPixel(cellx, celly, this.currentColor);
         }
     }
 
@@ -605,6 +589,24 @@ class PageController {
         // let cellSize = 100;
         // ctx.fillStyle = 'white';
         // ctx.fillRect(0, 0, cellSize, cellSize);
+    }
+
+    setPixel(x, y, color) {
+        let originalImage = this.originator.getImage();
+        var image = originalImage.clone();
+        try {
+            image.setPixel(x, y, color);
+        } catch (error) {
+            console.error('Error setting pixel', error);
+            return;
+        }
+        if (image.isEqualTo(originalImage)) {
+            // console.log('The image is the same after setPixel.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'set pixel');
+        this.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     pickColor(colorValue) {

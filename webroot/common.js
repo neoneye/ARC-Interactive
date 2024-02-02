@@ -414,6 +414,17 @@ class ARCImage {
         }
     }
 
+    // Change color of a single pixel
+    setPixel(x, y, color) {
+        if (color < 0 || color > 11) {
+            throw new Error(`Invalid color: ${color}`);
+        }
+        if (this.pixels[y] === undefined || this.pixels[y][x] === undefined) {
+            throw new Error(`Invalid setPixel coordinates: (${x}, ${y})`);
+        }
+        this.pixels[y][x] = color;
+    }
+
     // Extract a sub-image from the image
     crop(x, y, width, height) {
         if (width < 1 || height < 1) {
