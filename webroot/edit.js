@@ -676,11 +676,12 @@ class PageController {
     }
 
     assignSelectRectangleFromCurrentImage() {
+        let image = this.originator.getImageRef();
         this.selectRectangle = {
             x0: 0,
             y0: 0,
-            x1: this.image.width - 1,
-            y1: this.image.height - 1,
+            x1: image.width - 1,
+            y1: image.height - 1,
         };
     }
 
@@ -1414,42 +1415,90 @@ class PageController {
 
     // Rotate clockwise
     rotateCW() {
-        if (!this.isCurrentToolSelect()) {
-            this.image = this.image.rotateCW();
-            this.assignSelectRectangleFromCurrentImage();
-            this.updateDrawCanvas();
-            this.hideToolPanel();
-            return;
+        if (this.isCurrentToolSelect()) {
+            this.rotateCW_selection();
+        } else {
+            this.rotateCW_entireImage();
         }
+    }
+
+    rotateCW_selection() {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
             return;
         }
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let originalImage = this.originator.getImage();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
-        this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after the rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'rotate clockwise selection');
+        this.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
+    }
+
+    rotateCW_entireImage() {
+        let originalImage = this.originator.getImage();
+        let image = originalImage.rotateCW();
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after the rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'rotate clockwise entire image');
+        this.originator.setImage(image);
+        this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     // Rotate counter clockwise
     rotateCCW() {
-        if (!this.isCurrentToolSelect()) {
-            this.image = this.image.rotateCCW();
-            this.assignSelectRectangleFromCurrentImage();
-            this.updateDrawCanvas();
-            this.hideToolPanel();
-            return;
+        if (this.isCurrentToolSelect()) {
+            this.rotateCCW_selection();
+        } else {
+            this.rotateCCW_entireImage();
         }
+    }
+
+    rotateCCW_selection() {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
             return;
         }
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let originalImage = this.originator.getImage();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
-        this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after the rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'rotate counter-clockwise selection');
+        this.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
+    }
+
+    rotateCCW_entireImage() {
+        let originalImage = this.originator.getImage();
+        let image = originalImage.rotateCCW();
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after the rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'rotate counter-clockwise entire image');
+        this.originator.setImage(image);
+        this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
