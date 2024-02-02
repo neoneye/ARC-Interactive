@@ -1224,15 +1224,22 @@ class PageController {
             console.error('Unable to determine the size');
             return;
         }
-
-        console.log('Width:', size.width, 'Height:', size.height);
+        // console.log('Width:', size.width, 'Height:', size.height);
 
         // Resize the image, preserve the content.
+        let originalImage = this.originator.getImage();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
-        this.image = emptyImage.overlay(this.image, 0, 0);
+        let image = emptyImage.overlay(originalImage, 0, 0);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after resize.');
+            this.hideToolPanel();
+            return;
+        }
+
+        this.caretaker.saveState(this.originator, 'resize image');
+        this.originator.setImage(image);
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
-
         this.hideToolPanel();
     }
 
