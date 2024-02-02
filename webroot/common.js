@@ -260,6 +260,15 @@ class ARCImage {
         return new ARCImage(pixels);
     }
 
+    isEqualTo(other) {
+        if (!(other instanceof ARCImage)) {
+            throw new Error("ARCImage.isEqual() 'other' is not an instance of ARCImage");
+        }
+        let s0 = JSON.stringify(this.pixels);
+        let s1 = JSON.stringify(other.pixels);
+        return s0 === s1;
+    }
+
     toCanvas(devicePixelRatio) {
         let cellSize = 1;
         let gapSize = 0;

@@ -1461,10 +1461,17 @@ class PageController {
             console.log('Move is only available when the width is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x, rectangle.y, 1, rectangle.height);
-        let image1 = this.image.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
-        this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
-        this.image = this.image.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
+        let originalImage = this.originator.getImage();
+        let image0 = originalImage.crop(rectangle.x, rectangle.y, 1, rectangle.height);
+        let image1 = originalImage.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
+        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
+        let image3 = image2.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'move left');
+        this.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1476,10 +1483,17 @@ class PageController {
             console.log('Move is only available when the width is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x + rectangle.width - 1, rectangle.y, 1, rectangle.height);
-        let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
-        this.image = this.image.overlay(image1, rectangle.x + 1, rectangle.y);
-        this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
+        let originalImage = this.originator.getImage();
+        let image0 = originalImage.crop(rectangle.x + rectangle.width - 1, rectangle.y, 1, rectangle.height);
+        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
+        let image2 = originalImage.overlay(image1, rectangle.x + 1, rectangle.y);
+        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'move right');
+        this.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1491,10 +1505,17 @@ class PageController {
             console.log('Move is only available when the height is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x, rectangle.y, rectangle.width, 1);
-        let image1 = this.image.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
-        this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
-        this.image = this.image.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
+        let originalImage = this.originator.getImage();
+        let image0 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, 1);
+        let image1 = originalImage.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
+        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
+        let image3 = image2.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'move up');
+        this.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1506,10 +1527,17 @@ class PageController {
             console.log('Move is only available when the height is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
-        let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
-        this.image = this.image.overlay(image1, rectangle.x, rectangle.y + 1);
-        this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
+        let originalImage = this.originator.getImage();
+        let image0 = originalImage.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
+        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
+        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y + 1);
+        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'move down');
+        this.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
