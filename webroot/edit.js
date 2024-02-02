@@ -26,6 +26,113 @@ function enableFullscreenMode() {
     return true;
 }
 
+class Memento {
+    constructor(state, actionName) {
+        this.state = state;
+        this.actionName = actionName;
+    }
+
+    getState() {
+        return this.state;
+    }
+
+    getActionName() {
+        return this.actionName;
+    }
+}
+
+class Originator {
+    constructor() {
+        let emptyImage = ARCImage.color(100, 100, 0);
+        this.state = {
+            image: emptyImage,
+        };
+    }
+
+    setState(state) {
+        this.state = state;
+    }
+
+    setInitialImage(image) {
+        this.state.image = image.clone();
+    }
+
+    saveStateToMemento(actionName) {
+        let savedState = {
+            image: this.state.image.clone(),
+        };
+        return new Memento(savedState, actionName);
+    }
+
+    getStateFromMemento(memento) {
+        this.state = memento.getState();
+    }
+
+    setPixel(x, y, color) {
+        let pixels = this.state.image.pixels;
+
+        // Check if the coordinates are within the bounds of the pixel array
+        if (pixels[y] !== undefined && pixels[y][x] !== undefined) {
+            // Perform action
+            pixels[y][x] = color;
+        } else {
+            console.error(`Invalid coordinates: (${x}, ${y})`);
+        }
+    }
+
+    floodFill(x, y, color) {
+        this.state.image.floodFill(x, y, color);
+    }
+}
+
+class Caretaker {
+    constructor() {
+        this.undoList = [];
+        this.redoList = [];
+    }
+
+    saveState(originator, actionName) {
+        this.redoList = []; // Clear the redoList because new action invalidates the redo history
+        this.undoList.push(originator.saveStateToMemento(actionName));
+    }
+
+    clearHistory() {
+        this.undoList = [];
+        this.redoList = [];
+    }
+
+    printHistory() {
+        console.log("Action History:");
+        this.undoList.forEach((memento, index) => {
+            console.log(`${index + 1}: ${memento.getActionName()}`);
+        });
+    }
+
+    undo(originator) {
+        if (this.undoList.length > 0) {
+            const memento = this.undoList.pop();
+            const actionName = memento.getActionName();
+            this.redoList.push(originator.saveStateToMemento(`Undo ${actionName}`)); // save current state before undoing
+            originator.getStateFromMemento(memento);
+            console.log(`Undid action: ${actionName}`);
+        } else {
+            console.log('No actions to undo.');
+        }
+    }
+
+    redo(originator) {
+        if (this.redoList.length > 0) {
+            const memento = this.redoList.pop();
+            const actionName = memento.getActionName();
+            this.undoList.push(originator.saveStateToMemento(`Redo ${actionName}`)); // save current state before redoing
+            originator.getStateFromMemento(memento);
+            console.log(`Redid action: ${actionName}`);
+        } else {
+            console.log('No actions to redo.');
+        }
+    }
+}
+
 class PageController {
     constructor() {
         this.db = null;
@@ -85,6 +192,8 @@ class PageController {
         this.currentTool = 'paint';
         this.numberOfTests = 1;
         this.userDrawnImages = {};
+        this.originator = new Originator();
+        this.caretaker = new Caretaker();
         this.inset = 2;
         this.clipboard = null;
         this.isPasteMode = false;
@@ -269,6 +378,18 @@ class PageController {
         }
     }
 
+    undoAction() {
+        console.log('Undo action');
+        this.caretaker.undo(this.originator);
+        this.updateDrawCanvas();
+    }
+
+    redoAction() {
+        console.log('Redo action');
+        this.caretaker.redo(this.originator);
+        this.updateDrawCanvas();
+    }
+
     getPosition(event) {
         let rect = this.drawCanvas.getBoundingClientRect();
         var x, y;
@@ -398,11 +519,13 @@ class PageController {
             return;
         }
         if(this.currentTool == 'paint') {
-            this.image.pixels[celly][cellx] = this.currentColor;
+            this.caretaker.saveState(this.originator, 'set pixel');
+            this.originator.setPixel(cellx, celly, this.currentColor);
             this.updateDrawCanvas();
         }
         if(this.currentTool == 'fill') {
-            this.floodFill(cellx, celly);
+            this.caretaker.saveState(this.originator, 'flood fill');
+            this.originator.floodFill(cellx, celly, this.currentColor);
             this.updateDrawCanvas();
         }
     }
@@ -459,7 +582,8 @@ class PageController {
             return;
         }
         if(this.currentTool == 'paint') {
-            this.image.pixels[celly][cellx] = this.currentColor;
+            this.caretaker.saveState(this.originator, 'set pixel');
+            this.originator.setPixel(cellx, celly, this.currentColor);
             this.updateDrawCanvas();
         }
     }
@@ -539,6 +663,8 @@ class PageController {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
         this.image = image.clone();
+        this.originator.setInitialImage(image);
+        this.caretaker.clearHistory();
     }
 
     assignSelectRectangleFromCurrentImage() {
@@ -803,7 +929,8 @@ class PageController {
         // Clear the canvas to be fully transparent
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        let image = this.image;
+        // let image = this.image;
+        let image = this.originator.state.image;
         let cellSize = image.cellSize(width, height);
 
         let gapSize = this.isGridVisible ? 1 : 0;
@@ -1095,10 +1222,6 @@ class PageController {
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
-    }
-
-    floodFill(x, y) {
-        this.image.floodFill(x, y, this.currentColor);
     }
 
     getSelectedRectangleCoordinates() {
