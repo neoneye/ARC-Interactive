@@ -721,6 +721,14 @@ class PageController {
         this.caretaker = drawingItem.caretaker;
     }
 
+    currentDrawingItem() {
+        let testIndex = this.currentTest % this.numberOfTests;
+        if (testIndex < 0 || testIndex >= this.drawingItems.length) {
+            throw new Error(`Error drawingItemForCurrentTest() testIndex: ${testIndex} is out of range. currentTest: ${this.currentTest} numberOfTests: ${this.numberOfTests}`);
+        }
+        return this.drawingItems[testIndex];
+    }
+
     inputImageFromCurrentTest() {
         let testIndex = this.currentTest % this.numberOfTests;
         let image = this.task.test[testIndex].input;
@@ -728,7 +736,7 @@ class PageController {
     }
 
     assignSelectRectangleFromCurrentImage() {
-        let image = this.originator.getImageRef();
+        let image = this.currentDrawingItem().originator.getImageRef();
         this.selectRectangle = {
             x0: 0,
             y0: 0,
@@ -996,7 +1004,7 @@ class PageController {
         // Clear the canvas to be fully transparent
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        let image = this.originator.getImageRef();
+        let image = this.currentDrawingItem().originator.getImageRef();
         let cellSize = image.cellSize(width, height);
 
         let gapSize = this.isGridVisible ? 1 : 0;
@@ -1172,7 +1180,7 @@ class PageController {
 
     submitDrawing() {
         console.log('Submit');
-        let image = this.originator.getImageRef();
+        let image = this.currentDrawingItem().originator.getImageRef();
         let json0 = JSON.stringify(image.pixels);
 
         let testIndex = this.currentTest % this.numberOfTests;
@@ -1260,7 +1268,8 @@ class PageController {
         // console.log('Width:', size.width, 'Height:', size.height);
 
         // Resize the image, preserve the content.
-        let originalImage = this.originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         let image = emptyImage.overlay(originalImage, 0, 0);
         if (image.isEqualTo(originalImage)) {
@@ -1269,15 +1278,16 @@ class PageController {
             return;
         }
 
-        this.caretaker.saveState(this.originator, 'resize image');
-        this.originator.setImage(image);
+        drawingItem.caretaker.saveState(drawingItem.originator, 'resize image');
+        drawingItem.originator.setImage(image);
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     startOverWithInputImage() {
-        let originalImage = this.originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
         let inputImage = this.inputImageFromCurrentTest();
         if (originalImage.isEqualTo(inputImage)) {
             console.log('The image is the same as the input image.');
@@ -1294,8 +1304,8 @@ class PageController {
         }
 
         console.log('startOverWithInputImage() confirmed');
-        this.originator.setImage(inputImage);
-        this.caretaker.clearHistory();
+        drawingItem.originator.setImage(inputImage);
+        drawingItem.caretaker.clearHistory();
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
@@ -1314,7 +1324,8 @@ class PageController {
             console.log('Crop is only available in select mode.');
             return;
         }
-        let originalImage = this.originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
 
         let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
         // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
@@ -1333,8 +1344,8 @@ class PageController {
             this.hideToolPanel();
             return;
         }
-        this.caretaker.saveState(this.originator, 'crop selection');
-        this.originator.setImage(image);
+        drawingItem.caretaker.saveState(drawingItem.originator, 'crop selection');
+        drawingItem.originator.setImage(image);
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
@@ -1342,7 +1353,7 @@ class PageController {
 
     copyToClipboard() {
         let rectangle = this.getToolRectangle();
-        let originalImage = this.originator.getImageClone();
+        let originalImage = this.currentDrawingItem().originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.clipboard = cropImage;
         this.hideToolPanel();
