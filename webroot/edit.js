@@ -617,25 +617,36 @@ class PageController {
 
         this.currentColor = colorValue;
 
-        let fillSelectedRectangle = this.isCurrentToolSelect();
-        if (fillSelectedRectangle) {
-            let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
-            if (minX > maxX || minY > maxY) {
-                return;
-            }
-            if (minX < 0 || maxX >= this.image.width) {
-                return;
-            }
-            if (minY < 0 || maxY >= this.image.height) {
-                return;
-            }
-            for (let y = minY; y <= maxY; y++) {
-                for (let x = minX; x <= maxX; x++) {
-                    this.image.pixels[y][x] = this.currentColor;
-                }
-            }
-            this.updateDrawCanvas();
+        if (this.isCurrentToolSelect()) {
+            this.fillSelectedRectangle();
         }        
+    }
+
+    fillSelectedRectangle() {
+        let originalImage = this.originator.getImage();
+        let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+        if (minX > maxX || minY > maxY) {
+            return;
+        }
+        if (minX < 0 || maxX >= originalImage.width) {
+            return;
+        }
+        if (minY < 0 || maxY >= originalImage.height) {
+            return;
+        }
+        var image = originalImage.clone();
+        for (let y = minY; y <= maxY; y++) {
+            for (let x = minX; x <= maxX; x++) {
+                image.pixels[y][x] = this.currentColor;
+            }
+        }
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after filling the selection.');
+            return;
+        }
+        this.caretaker.saveState(this.originator, 'fill selection');
+        this.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     async loadTask() {
