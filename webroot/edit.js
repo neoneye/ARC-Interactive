@@ -947,8 +947,14 @@ class PageController {
                 el_td2.classList.add('center-x');
                 el_td2.classList.add('test-output-cell');
 
-                var image = this.imageForTestIndex(i);
+                var image = null;
+                if (this.drawingItems[i].caretaker.undoList.length > 0) {
+                    // Only show an image when the user have drawn something.
+                    // If there are no actions to undo, then the user have not drawn anything.
+                    image = this.drawingItems[i].originator.getImageRef();
+                }
                 if (this.overviewRevealSolutions) {
+                    // The user is holding down the button that reveals the solutions.
                     image = output;
                 }
                 if (!image) {
