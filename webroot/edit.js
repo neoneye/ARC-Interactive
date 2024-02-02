@@ -192,8 +192,6 @@ class PageController {
         this.currentTool = 'paint';
         this.numberOfTests = 1;
         this.drawingItems = [];
-        this.originator = new Originator();
-        this.caretaker = new Caretaker();
         this.inset = 2;
         this.clipboard = null;
         this.isPasteMode = false;
@@ -380,13 +378,15 @@ class PageController {
 
     undoAction() {
         console.log('Undo action');
-        this.caretaker.undo(this.originator);
+        let drawingItem = this.currentDrawingItem();
+        drawingItem.caretaker.undo(drawingItem.originator);
         this.updateDrawCanvas();
     }
 
     redoAction() {
         console.log('Redo action');
-        this.caretaker.redo(this.originator);
+        let drawingItem = this.currentDrawingItem();
+        drawingItem.caretaker.redo(drawingItem.originator);
         this.updateDrawCanvas();
     }
 
@@ -469,7 +469,7 @@ class PageController {
         this.isDrawing = true;
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
-        let originalImage = this.originator.getImageRef();
+        let originalImage = this.currentDrawingItem().originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -534,7 +534,7 @@ class PageController {
         }
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
-        let originalImage = this.originator.getImageRef();
+        let originalImage = this.currentDrawingItem().originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -594,7 +594,8 @@ class PageController {
     }
 
     setPixel(x, y, color) {
-        let originalImage = this.originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         try {
             image.setPixel(x, y, color);
@@ -606,21 +607,22 @@ class PageController {
             // console.log('The image is the same after setPixel.');
             return;
         }
-        this.caretaker.saveState(this.originator, 'set pixel');
-        this.originator.setImage(image);
+        drawingItem.caretaker.saveState(drawingItem.originator, 'set pixel');
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
     }
 
     floodFill(x, y, color) {
-        let originalImage = this.originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         image.floodFill(x, y, color);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after floodFill.');
             return;
         }
-        this.caretaker.saveState(this.originator, 'flood fill');
-        this.originator.setImage(image);
+        drawingItem.caretaker.saveState(drawingItem.originator, 'flood fill');
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
     }
 
@@ -642,7 +644,8 @@ class PageController {
     }
 
     fillSelectedRectangle() {
-        let originalImage = this.originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
         let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
         if (minX > maxX || minY > maxY) {
             return;
@@ -663,8 +666,8 @@ class PageController {
             console.log('The image is the same after filling the selection.');
             return;
         }
-        this.caretaker.saveState(this.originator, 'fill selection');
-        this.originator.setImage(image);
+        drawingItem.caretaker.saveState(drawingItem.originator, 'fill selection');
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
     }
 
@@ -703,22 +706,14 @@ class PageController {
             drawingItems.push(item);
         }
         this.drawingItems = drawingItems;
-
-        if (this.drawingItems.length > 0) {
-            this.useDrawingItem(this.drawingItems[0]);
-        } else {
-            console.error('Error there are no drawing items. Cannot make use of the first drawing item!');
+        if (this.drawingItems.length < 1) {
+            console.error('Error there are no drawing items. Cannot make use of the first drawing item! currentDrawingItem() will fail.');
         }
 
         this.showTask(task);
 
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
-    }
-
-    useDrawingItem(drawingItem) {
-        this.originator = drawingItem.originator;
-        this.caretaker = drawingItem.caretaker;
     }
 
     currentDrawingItem() {
@@ -1213,9 +1208,6 @@ class PageController {
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.updateOverview();
-
-        this.useDrawingItem(this.drawingItems[this.currentTest]);
-
         this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
     }
