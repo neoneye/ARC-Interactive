@@ -191,7 +191,6 @@ class PageController {
         this.currentTest = 0;
         this.currentTool = 'paint';
         this.numberOfTests = 1;
-        this.userDrawnImages = {};
         this.drawingItems = [];
         this.originator = new Originator();
         this.caretaker = new Caretaker();
@@ -1133,7 +1132,6 @@ class PageController {
         el2.classList.add('hidden');
         el3.classList.add('hidden');
 
-        this.takeSnapshotOfCurrentImage();
         this.updateOverview();
     }
 
@@ -1197,17 +1195,11 @@ class PageController {
         }, 3000);
     }
 
-    takeSnapshotOfCurrentImage() {
-        let originalImage = this.originator.getImageClone();
-        this.userDrawnImages[this.currentTest] = originalImage;
-    }
-
     imageForTestIndex(testIndex) {
         return this.drawingItems[testIndex].originator.getImageClone();
     }
 
     activateTestIndex(testIndex) {
-        this.takeSnapshotOfCurrentImage();
         let value0 = this.currentTest;
         this.currentTest = testIndex % this.numberOfTests;
         let value1 = this.currentTest;
