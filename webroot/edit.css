@@ -114,7 +114,7 @@ body {
 
 #tool-panel-inner {
     width: 60vw;
-    height: 70vh;
+    height: 60vh;
     display: block;
     background-color: grey;
     opacity: 1;
@@ -153,6 +153,12 @@ body {
 
 #tool-with-undo-redo-buttons button {
     flex: 1; /* Each button will take equal space */
+}
+
+@media only screen and (min-height: 800px) {
+    #tool-panel-widthheight-header.hidden {
+        display: block;
+    }
 }
 
 @media only screen and (min-width: 1400px) {

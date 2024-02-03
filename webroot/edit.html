@@ -25,7 +25,7 @@
                 <button class="secondary-button" onclick="gPageController.startOverWithInputImage()" title="Go back to the original image">Start over 🥶🙀🙈</button>
                 <hr>
                 <div>
-                    <h4>Change image size (width x height)</h4>
+                    <h4 id="tool-panel-widthheight-header" class="hidden">Change image size (width x height)</h4>
                     <div>
                         <input type="text" id="canvas-size-input" maxlength="10" value="3x3" placeholder="widthxheight" onkeydown="gPageController.resizeImageOnKeyDown(event)">
                         <button class="secondary-button" onclick="gPageController.resizeImage()" id="resize_btn" title="Apply the new size to the image">Resize</button>
@@ -69,7 +69,7 @@
                     </button>
                 </div>
 
-                <hr>
+                <!-- <hr> -->
 
                 <div id="tool-radio-buttons">
                     <ul class="segmented-control">
