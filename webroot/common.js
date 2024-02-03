@@ -221,6 +221,43 @@ class Dataset {
     }
 }
 
+class Theme {
+    // Load the selected theme from local storage.
+    static getThemeRaw() {
+        return localStorage.getItem('theme');
+    }
+
+    // Load the selected theme from local storage, and sanity check that it's among the available themes.
+    // If the theme is not among the available themes, then switch to the theme, named "default"
+    static getTheme() {
+        let theme = Theme.getThemeRaw();
+        if (theme == null) {
+            theme = "default";
+        }
+        let availableThemes = Theme.getAvailableThemes();
+        if (!availableThemes.includes(theme)) {
+            theme = "default";
+        }
+        return theme;
+    }
+
+    // Save the selected theme to local storage
+    static setTheme(theme) {
+        localStorage.setItem('theme', theme);
+    }
+
+    static getAvailableThemes() {
+        return ["default", "paultolmuted", "paultolsequential", "bluecyanwhite", "greyscale"];
+    }
+
+    // Assign the theme to the <body> element.
+    static assignBodyClassName() {
+        let theme = Theme.getTheme();
+        var body = document.getElementsByTagName('body')[0];
+        body.className = `theme-${theme}`;
+    }
+}
+
 class ARCImage {
     constructor(pixels) {
         var min_length = 1000000;

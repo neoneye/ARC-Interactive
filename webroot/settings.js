@@ -5,23 +5,10 @@ class PageController {
     async onload() {
         // console.log("PageController.onload()");
 
-        // Load the selected theme from local storage
-        var theme = localStorage.getItem('theme');
-        // if unknown theme, then switch to the theme, named "default"
-        if (theme == null) {
-            theme = "default";
-        }
-        // if the theme is not among the available themes, then switch to the theme, named "default"
-        let availableThemes = ["default", "paultolmuted", "paultolsequential", "bluecyanwhite", "greyscale"];
-        if (!availableThemes.includes(theme)) {
-            theme = "default";
-        }
-
-        var body = document.getElementsByTagName('body')[0];
-        body.className = `theme-${theme}`;
+        Theme.assignBodyClassName();
 
         var select = document.getElementById('select-theme');
-        select.value = theme;
+        select.value = Theme.getTheme();
 
         // Callback when user make changes to the "select-theme" dropdown
         select.addEventListener('change', () => {
@@ -36,11 +23,9 @@ class PageController {
         let select = document.getElementById('select-theme');
         let theme = select.value;
         console.log("theme:", theme);
-        var body = document.getElementsByTagName('body')[0];
-        body.className = `theme-${theme}`;
 
-        // Save the selected theme to local storage
-        localStorage.setItem('theme', theme);
+        Theme.setTheme(theme);
+        Theme.assignBodyClassName();
 
         this.updateColorPreview(false);
     }

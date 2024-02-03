@@ -5,6 +5,84 @@
     --ui-text-color: #cfcfcf;
     --ui-header-background: #2c2c2c;
     --ui-footer-background: #2c2c2c;
+
+    /* The original ARC colors */
+    --arc-color-0: #000000; /* black */
+    --arc-color-1: #0074D9; /* blue */
+    --arc-color-2: #FF4136; /* red */
+    --arc-color-3: #2ECC40; /* green */
+    --arc-color-4: #FFDC00; /* yellow */
+    --arc-color-5: #AAAAAA; /* grey */
+    --arc-color-6: #F012BE; /* fuschia */
+    --arc-color-7: #FF851B; /* orange */
+    --arc-color-8: #7FDBFF; /* teal */
+    --arc-color-9: #870C25; /* brown */
+}
+
+body.theme-bluecyanwhite {
+    /*
+    Dark blue, medium cyan, light white
+    */
+    --arc-color-0: #03045e;
+    --arc-color-1: #023e8a;
+    --arc-color-2: #0077b6;
+    --arc-color-3: #0096c7;
+    --arc-color-4: #00b4d8;
+    --arc-color-5: #48cae4;
+    --arc-color-6: #90e0ef;
+    --arc-color-7: #ade8f4;
+    --arc-color-8: #caf0f8;
+    --arc-color-9: #f6fbfc;
+}
+
+body.theme-paultolmuted {
+    /* 
+    Paul Tol's Muted qualitative color scheme 
+    https://personal.sron.nl/~pault/#sec:qualitative
+    */
+    --arc-color-0: #cc6677;
+    --arc-color-1: #332288;
+    --arc-color-2: #ddcc77;
+    --arc-color-3: #117733;
+    --arc-color-4: #88ccee;
+    --arc-color-5: #882255;
+    --arc-color-6: #44aa99;
+    --arc-color-7: #999933;
+    --arc-color-8: #aa4499;
+    --arc-color-9: #dddddd;
+}
+
+body.theme-paultolsequential {
+    /* 
+    Paul Tol's Sequential color scheme 
+    https://google.github.io/palette.js/
+    */
+    --arc-color-0: #662404;
+    --arc-color-1: #923004;
+    --arc-color-2: #c24406;
+    --arc-color-3: #e5610c;
+    --arc-color-4: #f7861c;
+    --arc-color-5: #fdac3a;
+    --arc-color-6: #ffce65;
+    --arc-color-7: #ffe798;
+    --arc-color-8: #fff7c5;
+    --arc-color-9: #ffffe4;
+}
+
+body.theme-greyscale {
+    /* 
+    Greyscale color scheme
+    */
+    --arc-color-0: #000000;
+    --arc-color-1: #1c1c1c;
+    --arc-color-2: #393939;
+    --arc-color-3: #555555;
+    --arc-color-4: #717171;
+    --arc-color-5: #8e8e8e;
+    --arc-color-6: #aaaaaa;
+    --arc-color-7: #c6c6c6;
+    --arc-color-8: #e3e3e3;
+    --arc-color-9: #ffffff;
 }
 
 * {
