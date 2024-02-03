@@ -40,16 +40,16 @@ body.theme-paultolmuted {
     Paul Tol's Muted qualitative color scheme 
     https://personal.sron.nl/~pault/#sec:qualitative
     */
-    --arc-color-0: #cc6677;
-    --arc-color-1: #332288;
-    --arc-color-2: #ddcc77;
+    --arc-color-0: #332288;
+    --arc-color-1: #44aa99;
+    --arc-color-2: #cc6677;
     --arc-color-3: #117733;
-    --arc-color-4: #88ccee;
-    --arc-color-5: #882255;
-    --arc-color-6: #44aa99;
+    --arc-color-4: #ddcc77;
+    --arc-color-5: #dddddd;
+    --arc-color-6: #aa4499;
     --arc-color-7: #999933;
-    --arc-color-8: #aa4499;
-    --arc-color-9: #dddddd;
+    --arc-color-8: #88ccee;
+    --arc-color-9: #882255;
 }
 
 body.theme-paultolsequential {
