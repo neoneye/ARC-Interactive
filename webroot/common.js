@@ -260,6 +260,15 @@ class ARCImage {
         return new ARCImage(pixels);
     }
 
+    isEqualTo(other) {
+        if (!(other instanceof ARCImage)) {
+            throw new Error("ARCImage.isEqual() 'other' is not an instance of ARCImage");
+        }
+        let s0 = JSON.stringify(this.pixels);
+        let s1 = JSON.stringify(other.pixels);
+        return s0 === s1;
+    }
+
     toCanvas(devicePixelRatio) {
         let cellSize = 1;
         let gapSize = 0;
@@ -403,6 +412,17 @@ class ARCImage {
                 ctx.fillRect(Math.floor(x0 + (x * cellSize)), Math.floor(y0 + (y * cellSize)), cellSizeCeilInt, cellSizeCeilInt);
             }
         }
+    }
+
+    // Change color of a single pixel
+    setPixel(x, y, color) {
+        if (color < 0 || color > 11) {
+            throw new Error(`Invalid color: ${color}`);
+        }
+        if (this.pixels[y] === undefined || this.pixels[y][x] === undefined) {
+            throw new Error(`Invalid setPixel coordinates: (${x}, ${y})`);
+        }
+        this.pixels[y][x] = color;
     }
 
     // Extract a sub-image from the image

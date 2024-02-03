@@ -145,6 +145,32 @@ body {
     flex: 1; /* Each button will take equal space */
 }
 
+#tool-with-undo-redo-buttons {
+    display: flex;
+    justify-content: space-between; /* Aligns children with space between them */
+    gap: 10px; /* Space between the buttons */
+}
+
+#tool-with-undo-redo-buttons button {
+    flex: 1; /* Each button will take equal space */
+}
+
+@media only screen and (min-height: 800px) {
+    #tool-panel-widthheight-header.hidden {
+        display: block;
+    }
+}
+
+@media only screen and (min-width: 1400px) {
+    #undo-button-footer.hidden,
+    #redo-button-footer.hidden {
+        display: inline-block;
+    }
+    #tool-with-undo-redo-buttons {
+        display: none;
+    } 
+}
+
 .page-footer {
     background-color: var(--ui-footer-background);
     border-top: 1px solid var(--ui-separator);
@@ -280,7 +306,7 @@ body {
 .segmented-control {
     display: flex;
     width: 100%;
-    margin: 2em 0;
+    margin: 0.5em 0;
     padding: 0;
     box-sizing: border-box;
 }
@@ -302,22 +328,24 @@ body {
     display: block;
     margin: 0 -1px -1px 0; /* -1px margin removes double-thickness borders between items */
     padding: 1em .25em;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ui-button-background);
     font: 14px/1.5 sans-serif; 
     text-align: center;  
     cursor: pointer;
     box-sizing: border-box;
+    color: var(--ui-button-background); 
 }
 
 .segmented-control__input:checked + .segmented-control__label {
-    background: #eee;
-    color: #333; 
+    background: var(--ui-button-background);
+    color: var(--ui-text-color); 
 }
 
 @media (hover: hover) and (pointer: fine) {
     /* Desktops with mouse */
     .segmented-control__label:hover {
-        background: #fafafa;
+        background: var(--ui-text-color);
+        color: var(--ui-background);
     }
 }
 
