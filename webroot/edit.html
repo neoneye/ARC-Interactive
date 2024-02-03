@@ -125,8 +125,8 @@
         <div class="page-footer-left">
             <!-- Left -->
             <button id="tool-button" class="secondary-button" onclick="gPageController.showToolPanel()">Tool: paint</button>
-            <button id="undo-button" class="secondary-button" onclick="gPageController.undoAction()">Undo</button>
-            <button id="redo-button" class="secondary-button" onclick="gPageController.redoAction()">Redo</button>
+            <button id="undo-button" class="secondary-button" onclick="gPageController.undoAction()" title="CTRL Z = Undo">Undo</button>
+            <button id="redo-button" class="secondary-button" onclick="gPageController.redoAction()" title="CTRL SHIFT Z = Redo">Redo</button>
         </div>
         <div id="palette" class="page-footer-center">
             <div id="palette-item0" class="arc_color_0 palette_item_selected" onpointerdown="gPageController.pickColor(0)"></div>

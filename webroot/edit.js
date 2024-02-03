@@ -349,6 +349,13 @@ class PageController {
         if (this.isEditorShownAndPasteModeFalse()) {
             // Only while the "editor" is visible, and no paste layer is active, the following keys are handled.
 
+            if (event.code === 'KeyZ' && event.ctrlKey) {
+                if (event.shiftKey) {
+                    this.redoAction();
+                } else {
+                    this.undoAction();
+                }
+            }
             if (event.code === 'KeyO') {
                 this.toggleOverview();
             }
