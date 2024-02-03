@@ -1,18 +1,3 @@
-const color_palette = [
-    "#000000", // 0 = black
-    "#0074d9", // 1 = blue
-    "#ff4136", // 2 = red
-    "#2ecc40", // 3 = green
-    "#ffdc00", // 4 = yellow
-    "#aaaaaa", // 5 = gray
-    "#f012be", // 6 = fuchsia
-    "#ff851b", // 7 = orange
-    "#7fdbff", // 8 = teal
-    "#870c25", // 9 = brown
-    "#282828", // 10 = dark gray
-    "#ffffff", // 11 = white
-];
-
 const indexdb_database_name = 'ARCDatabase';
 const indexdb_store_name_image = 'image';
 const indexdb_store_name_other = 'other';
@@ -222,6 +207,46 @@ class Dataset {
 }
 
 class Theme {
+    constructor(palette) {
+        this.palette = palette;
+    }
+
+    getColorString(index) {
+        return this.palette[index];
+    }
+
+    static defaultColorPalette() {
+        return [
+            "#000000", // 0 = black
+            "#0074d9", // 1 = blue
+            "#ff4136", // 2 = red
+            "#2ecc40", // 3 = green
+            "#ffdc00", // 4 = yellow
+            "#aaaaaa", // 5 = gray
+            "#f012be", // 6 = fuchsia
+            "#ff851b", // 7 = orange
+            "#7fdbff", // 8 = teal
+            "#870c25", // 9 = brown
+            "#282828", // 10 = dark gray
+            "#ffffff", // 11 = white
+        ];
+    }
+
+    static themeFromBody() {
+        // Get the computed style of the <body> element or the element you applied the variable to
+        const style = getComputedStyle(document.body);
+    
+        let palette = Theme.defaultColorPalette();
+
+        // Get the value of --arc-color-0, --arc-color-1, ..., --arc-color-9.
+        for (let i = 0; i <= 9; i++) {
+            const color = style.getPropertyValue(`--arc-color-${i}`).trim(); // .trim() to remove any potential white spaces
+            palette[i] = color;
+        }
+
+        return new Theme(palette);
+    }
+
     // Load the selected theme from local storage.
     static getThemeRaw() {
         return localStorage.getItem('theme');
@@ -320,6 +345,8 @@ class ARCImage {
     }
 
     toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize) {
+        let theme = Theme.themeFromBody();
+
         let sizeWidth = this.width * cellSize - gapSize;
         let sizeHeight = this.height * cellSize - gapSize;
 
@@ -341,7 +368,7 @@ class ARCImage {
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
-                ctx.fillStyle = color_palette[pixel];
+                ctx.fillStyle = theme.getColorString(pixel);
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize - gapSize, cellSize - gapSize);
             }
         }
@@ -378,6 +405,7 @@ class ARCImage {
     }
 
     toCanvasWithGridAndBorderInner(cellSize) {
+        let theme = Theme.themeFromBody();
         let borderSize = 1;
         let gapSize = 1;
         let sizeWidth = this.width * cellSize - gapSize + borderSize * 2;
@@ -393,7 +421,7 @@ class ARCImage {
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
-                ctx.fillStyle = color_palette[pixel];
+                ctx.fillStyle = theme.getColorString(pixel);
                 ctx.fillRect(
                     x * cellSize + borderSize, 
                     y * cellSize + borderSize, 
@@ -441,11 +469,13 @@ class ARCImage {
     }
 
     drawInner(ctx, x0, y0, cellSize, gapSize) {
+        let theme = Theme.themeFromBody();
+
         let cellSizeCeilInt = Math.ceil(cellSize) - gapSize;
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
-                ctx.fillStyle = color_palette[pixel];
+                ctx.fillStyle = theme.getColorString(pixel);
                 ctx.fillRect(Math.floor(x0 + (x * cellSize)), Math.floor(y0 + (y * cellSize)), cellSizeCeilInt, cellSizeCeilInt);
             }
         }

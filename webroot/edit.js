@@ -243,6 +243,8 @@ class PageController {
     }
 
     async onload() {
+        Theme.assignBodyClassName();
+        
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         await this.loadTask();
