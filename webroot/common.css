@@ -85,6 +85,22 @@ body.theme-greyscale {
     --arc-color-9: #ffffff;
 }
 
+body.theme-c64 {
+    /* 
+    C64 color scheme
+    */
+    --arc-color-0: #626262;
+    --arc-color-1: #50459b;
+    --arc-color-2: #cb7e75;
+    --arc-color-3: #5cab5e;
+    --arc-color-4: #c9d487;
+    --arc-color-5: #adadad;
+    --arc-color-6: #a057a3;
+    --arc-color-7: #a1683c;
+    --arc-color-8: #6abfc6;
+    --arc-color-9: #9f4e44;
+}
+
 * {
   margin: 0;
   padding: 0;
