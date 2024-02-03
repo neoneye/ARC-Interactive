@@ -240,35 +240,35 @@ body {
     box-shadow: 0 5px 24px 1px rgb(0 0 0/33%);
 }
 
-.arc_color_0 {
-    background-color: #000;
+.background-color-0 {
+    background-color: var(--arc-color-0);
 }
-.arc_color_1 {
-    background-color: #0074D9; /* blue */
+.background-color-1 {
+    background-color: var(--arc-color-1);
 }
-.arc_color_2 {
-    background-color: #FF4136; /* red */
+.background-color-2 {
+    background-color: var(--arc-color-2);
 }
-.arc_color_3 {
-    background-color: #2ECC40; /* green */
+.background-color-3 {
+    background-color: var(--arc-color-3);
 }
-.arc_color_4 {
-    background-color: #FFDC00; /* yellow */
+.background-color-4 {
+    background-color: var(--arc-color-4);
 }
-.arc_color_5 {
-    background-color: #AAAAAA; /* grey */
+.background-color-5 {
+    background-color: var(--arc-color-5);
 }
-.arc_color_6 {
-    background-color: #F012BE; /* fuschia */
+.background-color-6 {
+    background-color: var(--arc-color-6);
 }
-.arc_color_7 {
-    background-color: #FF851B; /* orange */
+.background-color-7 {
+    background-color: var(--arc-color-7);
 }
-.arc_color_8 {
-    background-color: #7FDBFF; /* teal */
+.background-color-8 {
+    background-color: var(--arc-color-8);
 }
-.arc_color_9 {
-    background-color: #870C25; /* brown */
+.background-color-9 {
+    background-color: var(--arc-color-9);
 }
 
 .tool-with-icon-container {
