@@ -208,6 +208,9 @@ class Dataset {
 
 class Theme {
     constructor(palette) {
+        if (palette.length !== 10) {
+            throw new Error(`Palette must have 10 colors. Length: ${palette.length}`);
+        }
         this.palette = palette;
     }
 
@@ -215,7 +218,7 @@ class Theme {
         return this.palette[index];
     }
 
-    static defaultColorPalette() {
+    static originalARCPalette() {
         return [
             "#000000", // 0 = black
             "#0074d9", // 1 = blue
@@ -227,8 +230,6 @@ class Theme {
             "#ff851b", // 7 = orange
             "#7fdbff", // 8 = teal
             "#870c25", // 9 = brown
-            "#282828", // 10 = dark gray
-            "#ffffff", // 11 = white
         ];
     }
 
@@ -236,11 +237,11 @@ class Theme {
         // Get the computed style of the <body> element or the element you applied the variable to
         const style = getComputedStyle(document.body);
     
-        let palette = Theme.defaultColorPalette();
+        let palette = Theme.originalARCPalette();
 
         // Get the value of --arc-color-0, --arc-color-1, ..., --arc-color-9.
         for (let i = 0; i <= 9; i++) {
-            const color = style.getPropertyValue(`--arc-color-${i}`).trim(); // .trim() to remove any potential white spaces
+            const color = style.getPropertyValue(`--arc-color-${i}`).trim(); // .trim() to remove any potential blank spaces
             palette[i] = color;
         }
 
