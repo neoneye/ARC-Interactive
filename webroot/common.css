@@ -165,6 +165,22 @@ body.theme-applerainbow {
     --arc-color-9: #235134; /* Brown is not in the original Apple rainbow logo  */
 }
 
+body.theme-romanfresco {
+    /* 
+    Well-preserved wall paintings from which many of the classic Roman colors are known.
+    */
+    --arc-color-0: #000000; /* black */
+    --arc-color-1: #1034A6; /* blue, https://en.wikipedia.org/wiki/Egyptian_blue */
+    --arc-color-2: #E34234; /* red, https://en.wikipedia.org/wiki/Shades_of_red#Vermilion */
+    --arc-color-3: #0BDA51; /* green, https://en.wikipedia.org/wiki/Malachite */
+    --arc-color-4: #F9BF50; /* yellow, https://en.wikipedia.org/wiki/Ochre */
+    --arc-color-5: #635147; /* grey, https://en.wikipedia.org/wiki/Sienna#Raw_sienna */
+    --arc-color-6: #5A1030; /* fuschia, https://en.wikipedia.org/wiki/Tyrian_purple */
+    --arc-color-7: #CC7722; /* orange, https://en.wikipedia.org/wiki/Ochre */
+    --arc-color-8: #43B3AE; /* teal, https://en.wikipedia.org/wiki/Verdigris */
+    --arc-color-9: #965434; /* brown, https://en.wikipedia.org/wiki/Umber */
+}
+
 * {
   margin: 0;
   padding: 0;
