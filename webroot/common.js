@@ -272,7 +272,7 @@ class Theme {
     }
 
     static getAvailableThemes() {
-        return ["default", "paultolmuted", "paultolsequential", "bluecyanwhite", "greyscale", "c64", "secam", "applerainbow", "ega"];
+        return ["default", "paultolmuted", "paultolsequential", "bluecyanwhite", "greyscale", "c64", "secam", "ega", "applerainbow"];
     }
 
     // Assign the theme to the <body> element.
