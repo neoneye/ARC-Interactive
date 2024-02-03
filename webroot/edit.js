@@ -160,6 +160,7 @@ class DrawingItem {
 class PageController {
     constructor() {
         this.db = null;
+        this.theme = null;
 
         // Get the full URL
         const url = window.location.href;
@@ -244,6 +245,7 @@ class PageController {
 
     async onload() {
         Theme.assignBodyClassName();
+        this.theme = Theme.themeFromBody();
         
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
@@ -882,7 +884,7 @@ class PageController {
                     el_td1.appendChild(el_div);
                 }
 
-                let canvas = input.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                 el_td1.appendChild(canvas);
             }
 
@@ -890,7 +892,7 @@ class PageController {
                 el_td2.classList.add('output-image-cell');
                 el_td2.classList.add('center-x');
 
-                let canvas = output.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                 el_td2.appendChild(canvas);
 
                 let el_div = document.createElement('div');
@@ -963,7 +965,7 @@ class PageController {
                     el_td1.appendChild(el_div);
                 }
 
-                let canvas = input.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                 el_td1.appendChild(canvas);
             }
 
@@ -986,7 +988,7 @@ class PageController {
                     el_td2.innerText = '?';
                 } else {
 
-                    let canvas = image.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
+                    let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                     el_td2.appendChild(canvas);
     
                     let el_div = document.createElement('div');
@@ -1042,7 +1044,7 @@ class PageController {
         let options = {
             gapSize: gapSize,
         };
-        image.draw(ctx, inset, inset, width, height, cellSize, options);
+        image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
 
         // Draw the dashed select rectangle
         if (isSelectTool && !this.isPasteMode) {
@@ -1075,7 +1077,7 @@ class PageController {
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
                 ctx.globalAlpha = 0.75;
-                clipboardImage.drawInner(ctx2, drawX, drawY, cellSize, gapSize);
+                clipboardImage.drawInner(this.theme, ctx2, drawX, drawY, cellSize, gapSize);
                 ctx.globalAlpha = 1;
 
                 let x0 = image.calcX0(0, width, cellSize) + inset;

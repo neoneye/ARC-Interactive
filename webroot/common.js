@@ -332,22 +332,20 @@ class ARCImage {
         return s0 === s1;
     }
 
-    toCanvas(devicePixelRatio) {
+    toCanvas(theme, devicePixelRatio) {
         let cellSize = 1;
         let gapSize = 0;
-        return this.toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize);
+        return this.toCanvasWithCellSize(theme, devicePixelRatio, cellSize, gapSize);
     }
     
-    toCanvasWithStyle(devicePixelRatio, cellSize, showGrid) {
+    toCanvasWithStyle(theme, devicePixelRatio, cellSize, showGrid) {
         if(showGrid) {
-            return this.toCanvasWithGridAndBorder(devicePixelRatio, cellSize);
+            return this.toCanvasWithGridAndBorder(theme, devicePixelRatio, cellSize);
         }
-        return this.toCanvasWithCellSize(devicePixelRatio, cellSize, 0);
+        return this.toCanvasWithCellSize(theme, devicePixelRatio, cellSize, 0);
     }
 
-    toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize) {
-        let theme = Theme.themeFromBody();
-
+    toCanvasWithCellSize(theme, devicePixelRatio, cellSize, gapSize) {
         let sizeWidth = this.width * cellSize - gapSize;
         let sizeHeight = this.height * cellSize - gapSize;
 
@@ -376,8 +374,8 @@ class ARCImage {
         return canvas;
     }
 
-    toCanvasWithGridAndBorder(devicePixelRatio, cellSize) {
-        let canvasInner = this.toCanvasWithGridAndBorderInner(cellSize * devicePixelRatio);
+    toCanvasWithGridAndBorder(theme, devicePixelRatio, cellSize) {
+        let canvasInner = this.toCanvasWithGridAndBorderInner(theme, cellSize * devicePixelRatio);
         if (devicePixelRatio === 1) {
             return canvasInner;
         }
@@ -405,8 +403,7 @@ class ARCImage {
         return canvas;
     }
 
-    toCanvasWithGridAndBorderInner(cellSize) {
-        let theme = Theme.themeFromBody();
+    toCanvasWithGridAndBorderInner(theme, cellSize) {
         let borderSize = 1;
         let gapSize = 1;
         let sizeWidth = this.width * cellSize - gapSize + borderSize * 2;
@@ -452,7 +449,7 @@ class ARCImage {
         return Math.floor(drawY + (height - innerHeight) / 2);
     }
 
-    draw(ctx, drawX, drawY, width, height, cellSize, options) {
+    draw(theme, ctx, drawX, drawY, width, height, cellSize, options) {
         let x0 = this.calcX0(drawX, width, cellSize);
         var y0 = this.calcY0(drawY, height, cellSize);
         if (options.alignTop) {
@@ -466,12 +463,10 @@ class ARCImage {
         if (options.gapSize) {
             gapSize = options.gapSize;
         }
-        this.drawInner(ctx, x0, y0, cellSize, gapSize);
+        this.drawInner(theme, ctx, x0, y0, cellSize, gapSize);
     }
 
-    drawInner(ctx, x0, y0, cellSize, gapSize) {
-        let theme = Theme.themeFromBody();
-
+    drawInner(theme, ctx, x0, y0, cellSize, gapSize) {
         let cellSizeCeilInt = Math.ceil(cellSize) - gapSize;
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
@@ -611,7 +606,7 @@ class ARCTask {
         this.thumbnailCacheId = thumbnailCacheId;
     }
 
-    toThumbnailCanvas(extraWide, scale) {
+    toThumbnailCanvas(theme, extraWide, scale) {
         var width = 320 * scale;
         if (extraWide) {
             width *= 2;
@@ -624,24 +619,24 @@ class ARCTask {
         thumbnailCanvas.height = height;
 
         let insetValue = 5;
-        let canvas = this.toCanvas(insetValue, extraWide);
+        let canvas = this.toCanvas(theme, insetValue, extraWide);
         thumbnailCtx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
         return thumbnailCanvas;
     }
 
-    toCustomCanvasSize(extraWide, width, height) {
+    toCustomCanvasSize(theme, extraWide, width, height) {
         const thumbnailCanvas = document.createElement('canvas');
         const thumbnailCtx = thumbnailCanvas.getContext('2d');
         thumbnailCanvas.width = width;
         thumbnailCanvas.height = height;
 
         let insetValue = 5;
-        let canvas = this.toCanvas(0, extraWide);
+        let canvas = this.toCanvas(theme, 0, extraWide);
         thumbnailCtx.drawImage(canvas, insetValue, insetValue, thumbnailCanvas.width - 2 * insetValue, thumbnailCanvas.height - 2 * insetValue);
         return thumbnailCanvas;
     }
 
-    toCanvas(insetValue, extraWide) {
+    toCanvas(theme, insetValue, extraWide) {
         let scale = 1;
         var width = 320 * scale;
         if (extraWide) {
@@ -717,15 +712,15 @@ class ARCTask {
             let x = (i * cellWidthTotalAvailable) / count + inset;
             let y0 = inset;
             let y1 = height / 2;
-            this.train[i].input.draw(ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
-            this.train[i].output.draw(ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
+            this.train[i].input.draw(theme, ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
+            this.train[i].output.draw(theme, ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
         }
         for (let i = 0; i < this.test.length; i++) {
             let x = ((n_train + i) * cellWidthTotalAvailable) / count + inset;
             let y0 = inset;
             let y1 = height / 2;
-            this.test[i].input.draw(ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
-            // this.test[i].output.draw(ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
+            this.test[i].input.draw(theme, ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
+            // this.test[i].output.draw(theme, ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
         }
 
         // for (let i = 1; i < count; i++) {
