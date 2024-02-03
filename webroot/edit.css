@@ -8,6 +8,16 @@ body {
     /* background-color: red; */
 }
 
+@media only screen and (min-width: 1400px) {
+    #undo-button-footer.hidden,
+    #redo-button-footer.hidden {
+        display: inline-block;
+    }
+    .tool-with-undo-redo-buttons {
+        display: none;
+    } 
+}
+
 @media only screen and (min-width: 700px) {
     body {
         /* background-color: red; */

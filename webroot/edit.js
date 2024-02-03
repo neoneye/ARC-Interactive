@@ -410,6 +410,7 @@ class PageController {
         let drawingItem = this.currentDrawingItem();
         drawingItem.caretaker.undo(drawingItem.originator);
         this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     redoAction() {
@@ -417,6 +418,7 @@ class PageController {
         let drawingItem = this.currentDrawingItem();
         drawingItem.caretaker.redo(drawingItem.originator);
         this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     getPosition(event) {
