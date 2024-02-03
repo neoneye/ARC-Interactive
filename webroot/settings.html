@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="settings.css">
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+    <script src="common.js"></script>
+    <script src="settings.js"></script>
+    <title>Settings - ARC-Interactive</title>
+</head>
+<body onload="body_onload()">
+    <!-- <div id="overlay">
+        <div id="overlay-message">Initializing&hellip;</div>
+    </div> -->
+
+    <header class="titlebar-container">
+        <div class="titlebar-item titlebar-item-left">
+            <a class="secondary-button" href=".">Tasks</a>
+        </div>
+        
+        <div class="titlebar-item titlebar-item-center">Settings</div>
+        
+        <div class="titlebar-item titlebar-item-right">
+            <!-- <a class="secondary-button" href="">Do nothing</a> -->
+        </div>
+    </header>
+
+    <main id="main-outer">
+        <div id="main-inner">
+
+            <label for="theme" id="theme-label">Theme:</label>
+            <select name="theme" id="select-theme">
+                <option value="default">Original ARC Colors</option>
+                <option value="paultolmuted">Tol Muted</option>
+                <option value="paultolsequential">Tol Sequential</option>
+                <option value="bluecyanwhite">Blue Cyan White</option>
+                <option value="greyscale">Grey Scale</option>
+            </select> 
+
+            <div>
+                <button id="shuffle-colors-button" onclick="gPageController.shuffleColors()" title="Shuffle colors"><div id="preview-theme-table">empty</div></button>
+    
+                <div>10 different colors</div>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>
