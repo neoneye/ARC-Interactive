@@ -117,6 +117,22 @@ body.theme-secam {
     --arc-color-9: #870C25; /* Brown is not in SECAM */
 }
 
+body.theme-applerainbow {
+    /* 
+    The rainbow in the Apple logo
+    */
+    --arc-color-0: #000000;
+    --arc-color-1: #3C88DB;
+    --arc-color-2: #CD2C23;
+    --arc-color-3: #5AC53A;
+    --arc-color-4: #F2EA4E;
+    --arc-color-5: #6d6d6d; /* Grey is not in the original Apple rainbow logo */
+    --arc-color-6: #9D1F6C;
+    --arc-color-7: #EE8D34;
+    --arc-color-8: #ffffff; /* Teal is not in the original Apple rainbow logo */
+    --arc-color-9: #235134; /* Brown is not in the original Apple rainbow logo  */
+}
+
 * {
   margin: 0;
   padding: 0;
