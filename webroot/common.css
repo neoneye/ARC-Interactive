@@ -101,6 +101,22 @@ body.theme-c64 {
     --arc-color-9: #9f4e44;
 }
 
+body.theme-secam {
+    /* 
+    SECAM color scheme
+    */
+    --arc-color-0: #000000;
+    --arc-color-1: #2121ff;
+    --arc-color-2: #f03c79;
+    --arc-color-3: #7fff00;
+    --arc-color-4: #ffff3f;
+    --arc-color-5: #ffffff;
+    --arc-color-6: #ff50ff;
+    --arc-color-7: #FF851B; /* Orange is not in SECAM */
+    --arc-color-8: #7fffff;
+    --arc-color-9: #870C25; /* Brown is not in SECAM */
+}
+
 * {
   margin: 0;
   padding: 0;
