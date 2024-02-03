@@ -322,16 +322,17 @@ body {
     display: block;
     margin: 0 -1px -1px 0; /* -1px margin removes double-thickness borders between items */
     padding: 1em .25em;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ui-button-background);
     font: 14px/1.5 sans-serif; 
     text-align: center;  
     cursor: pointer;
     box-sizing: border-box;
+    color: var(--ui-button-background); 
 }
 
 .segmented-control__input:checked + .segmented-control__label {
-    background: #eee;
-    color: #333; 
+    background: var(--ui-button-background);
+    color: var(--ui-text-color); 
 }
 
 @media (hover: hover) and (pointer: fine) {
