@@ -133,6 +133,22 @@ body.theme-applerainbow {
     --arc-color-9: #235134; /* Brown is not in the original Apple rainbow logo  */
 }
 
+body.theme-ega {
+    /* 
+    EGA color scheme
+    */
+    --arc-color-0: #000000;
+    --arc-color-1: #0000AA;
+    --arc-color-2: #AA0000;
+    --arc-color-3: #00AA00;
+    --arc-color-4: #FFFF55;
+    --arc-color-5: #AAAAAA;
+    --arc-color-6: #AA00AA;
+    --arc-color-7: #FF5555;
+    --arc-color-8: #55FFFF;
+    --arc-color-9: #AA5500;
+}
+
 * {
   margin: 0;
   padding: 0;
