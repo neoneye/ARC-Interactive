@@ -345,6 +345,9 @@ class PageController {
         if (event.code === 'KeyG') {
             this.toggleGrid();
         }
+        if (event.code === 'KeyO') {
+            this.toggleOverview();
+        }
 
         if (this.isEditorShownAndPasteModeFalse()) {
             // Only while the "editor" is visible, and no paste layer is active, the following keys are handled.
@@ -355,9 +358,6 @@ class PageController {
                 } else {
                     this.undoAction();
                 }
-            }
-            if (event.code === 'KeyO') {
-                this.toggleOverview();
             }
             if (event.code === 'KeyC') {
                 this.copyToClipboard();
