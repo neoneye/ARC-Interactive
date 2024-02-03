@@ -133,6 +133,22 @@ body.theme-ega {
     --arc-color-9: #AA5500;
 }
 
+body.theme-amigaworkbench13 {
+    /* 
+    Amiga workbench 1.3 color scheme
+    */
+    --arc-color-0: #000020;
+    --arc-color-1: #2354A4;
+    --arc-color-2: #CB382F;
+    --arc-color-3: #4B6F38; /* I have not seen green in workbench 1.3 */
+    --arc-color-4: #FDFEFF;
+    --arc-color-5: #8E9192;
+    --arc-color-6: #A020A9; /* I have not seen purple in workbench 1.3 */
+    --arc-color-7: #EE8F34;
+    --arc-color-8: #7777C6;
+    --arc-color-9: #854F1D; /* I have not seen brown in workbench 1.3. */
+}
+
 body.theme-applerainbow {
     /* 
     The rainbow in the Apple logo
