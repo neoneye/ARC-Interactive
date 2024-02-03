@@ -26,6 +26,137 @@ function enableFullscreenMode() {
     return true;
 }
 
+class Memento {
+    constructor(state, actionName) {
+        this.state = state;
+        this.actionName = actionName;
+    }
+
+    getState() {
+        return this.state;
+    }
+
+    getActionName() {
+        return this.actionName;
+    }
+}
+
+class Originator {
+    constructor() {
+        let emptyImage = ARCImage.color(100, 100, 0);
+        this.state = {
+            image: emptyImage,
+        };
+    }
+
+    setState(state) {
+        this.state = state;
+    }
+
+    setImage(image) {
+        this.state.image = image.clone();
+    }
+
+    getImageClone() {
+        return this.state.image.clone();
+    }
+
+    getImageRef() {
+        return this.state.image;
+    }
+
+    saveStateToMemento(actionName) {
+        let savedState = {
+            image: this.state.image.clone(),
+        };
+        return new Memento(savedState, actionName);
+    }
+
+    getStateFromMemento(memento) {
+        this.state = memento.getState();
+    }
+}
+
+class Caretaker {
+    constructor() {
+        this.undoList = [];
+        this.redoList = [];
+    }
+
+    saveState(originator, actionName) {
+        this.redoList = []; // Clear the redoList because new action invalidates the redo history
+        this.undoList.push(originator.saveStateToMemento(actionName));
+    }
+
+    clearHistory() {
+        this.undoList = [];
+        this.redoList = [];
+    }
+
+    printHistory() {
+        console.log("Action History:");
+        this.undoList.forEach((memento, index) => {
+            console.log(`${index + 1}: ${memento.getActionName()}`);
+        });
+    }
+
+    undo(originator) {
+        if (this.undoList.length > 0) {
+            const memento = this.undoList.pop();
+            const actionName = memento.getActionName();
+            this.redoList.push(originator.saveStateToMemento(`Undo ${actionName}`)); // save current state before undoing
+            originator.getStateFromMemento(memento);
+            console.log(`Undid action: ${actionName}`);
+        } else {
+            console.log('No actions to undo.');
+        }
+    }
+
+    redo(originator) {
+        if (this.redoList.length > 0) {
+            const memento = this.redoList.pop();
+            const actionName = memento.getActionName();
+            this.undoList.push(originator.saveStateToMemento(`Redo ${actionName}`)); // save current state before redoing
+            originator.getStateFromMemento(memento);
+            console.log(`Redid action: ${actionName}`);
+        } else {
+            console.log('No actions to redo.');
+        }
+    }
+}
+
+class DrawingItem {
+    constructor() {
+        this.id = 0;
+        this.caretaker = new Caretaker();
+        this.originator = new Originator();
+        this.selectRectangle = { 
+            x0: 0, 
+            y0: 0,
+            x1: 0,
+            y1: 0,
+        };
+    }
+
+    getSelectedRectangleCoordinates() {
+        let minX = Math.min(this.selectRectangle.x0, this.selectRectangle.x1);
+        let maxX = Math.max(this.selectRectangle.x0, this.selectRectangle.x1);
+        let minY = Math.min(this.selectRectangle.y0, this.selectRectangle.y1);
+        let maxY = Math.max(this.selectRectangle.y0, this.selectRectangle.y1);
+        return { minX, maxX, minY, maxY };
+    }
+
+    assignSelectRectangleFromCurrentImage() {
+        let image = this.originator.getImageRef();
+        this.selectRectangle = {
+            x0: 0,
+            y0: 0,
+            x1: image.width - 1,
+            y1: image.height - 1,
+        };
+    }
+}
+
 class PageController {
     constructor() {
         this.db = null;
@@ -84,7 +215,7 @@ class PageController {
         this.currentTest = 0;
         this.currentTool = 'paint';
         this.numberOfTests = 1;
-        this.userDrawnImages = {};
+        this.drawingItems = [];
         this.inset = 2;
         this.clipboard = null;
         this.isPasteMode = false;
@@ -100,13 +231,6 @@ class PageController {
 
         this.isFullscreen = false;
         this.isGridVisible = PageController.getItemIsGridVisible();
-
-        this.selectRectangle = { 
-            x0: 0, 
-            y0: 0,
-            x1: 0,
-            y1: 0,
-        };
 
         this.overviewRevealSolutions = false;
 
@@ -218,38 +342,50 @@ class PageController {
                 this.toggleFullscreen();
             }
         }
-        if (event.code === 'KeyO') {
-            this.toggleOverview();
-        }
         if (event.code === 'KeyG') {
             this.toggleGrid();
         }
-        if (event.code === 'KeyC') {
-            this.copyToClipboard();
-        }
-        if (event.code === 'KeyV') {
-            this.pasteFromClipboard();
-        }
-        if (event.code === 'KeyP') {
-            this.keyboardShortcutPickTool('tool_paint');
-        }
-        if (event.code === 'KeyS') {
-            this.keyboardShortcutPickTool('tool_select');
-        }
-        if (event.code === 'KeyL') {
-            this.keyboardShortcutPickTool('tool_fill');
-        }
-        if (event.code === 'ArrowUp') {
-            this.moveUp();
-        }
-        if (event.code === 'ArrowDown') {
-            this.moveDown();
-        }
-        if (event.code === 'ArrowLeft') {
-            this.moveLeft();
-        }
-        if (event.code === 'ArrowRight') {
-            this.moveRight();
+
+        if (this.isEditorShownAndPasteModeFalse()) {
+            // Only while the "editor" is visible, and no paste layer is active, the following keys are handled.
+
+            if (event.code === 'KeyZ' && event.ctrlKey) {
+                if (event.shiftKey) {
+                    this.redoAction();
+                } else {
+                    this.undoAction();
+                }
+            }
+            if (event.code === 'KeyO') {
+                this.toggleOverview();
+            }
+            if (event.code === 'KeyC') {
+                this.copyToClipboard();
+            }
+            if (event.code === 'KeyV') {
+                this.pasteFromClipboard();
+            }
+            if (event.code === 'KeyP') {
+                this.keyboardShortcutPickTool('tool_paint');
+            }
+            if (event.code === 'KeyS') {
+                this.keyboardShortcutPickTool('tool_select');
+            }
+            if (event.code === 'KeyL') {
+                this.keyboardShortcutPickTool('tool_fill');
+            }
+            if (event.code === 'ArrowUp') {
+                this.moveUp();
+            }
+            if (event.code === 'ArrowDown') {
+                this.moveDown();
+            }
+            if (event.code === 'ArrowLeft') {
+                this.moveLeft();
+            }
+            if (event.code === 'ArrowRight') {
+                this.moveRight();
+            }
         }
     }
 
@@ -267,6 +403,22 @@ class PageController {
         } else {
             el1.classList.add('hidden');
         }
+    }
+
+    undoAction() {
+        console.log('Undo action');
+        let drawingItem = this.currentDrawingItem();
+        drawingItem.caretaker.undo(drawingItem.originator);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
+    }
+
+    redoAction() {
+        console.log('Redo action');
+        let drawingItem = this.currentDrawingItem();
+        drawingItem.caretaker.redo(drawingItem.originator);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     getPosition(event) {
@@ -349,6 +501,9 @@ class PageController {
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
 
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageRef();
+
         if (this.enablePlotDraw) {
             let plotSize = 5;
             ctx.fillStyle = 'white';
@@ -365,12 +520,12 @@ class PageController {
 
         let width = this.drawCanvas.width - this.inset * 2;
         let height = this.drawCanvas.height - this.inset * 2;
-        let cellSize = this.image.cellSize(width, height);
+        let cellSize = originalImage.cellSize(width, height);
 
         const drawX = this.inset;
         const drawY = this.inset;
-        const innerWidth = cellSize * this.image.width;
-        const innerHeight = cellSize * this.image.height;
+        const innerWidth = cellSize * originalImage.width;
+        const innerHeight = cellSize * originalImage.height;
         let x0 = Math.floor(drawX + (width - innerWidth) / 2);
         var y0 = Math.floor(drawY + (height - innerHeight) / 2);
 
@@ -379,31 +534,27 @@ class PageController {
         // console.log('cellx', cellx, 'celly', celly);
 
         if(this.currentTool == 'select') {
-            let clampedCellX = Math.max(0, Math.min(cellx, this.image.width - 1));
-            let clampedCellY = Math.max(0, Math.min(celly, this.image.height - 1));
-            this.selectRectangle = { 
-                x0: clampedCellX, 
-                y0: clampedCellY,
-                x1: clampedCellX,
-                y1: clampedCellY,
-            };
+            let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
+            let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
+            drawingItem.selectRectangle.x0 = clampedCellX;
+            drawingItem.selectRectangle.y0 = clampedCellY;
+            drawingItem.selectRectangle.x1 = clampedCellX;
+            drawingItem.selectRectangle.y1 = clampedCellY;
             this.updateDrawCanvas();
             return;
         }
 
-        if (cellx < 0 || cellx >= this.image.width) {
+        if (cellx < 0 || cellx >= originalImage.width) {
             return;
         }
-        if (celly < 0 || celly >= this.image.height) {
+        if (celly < 0 || celly >= originalImage.height) {
             return;
         }
         if(this.currentTool == 'paint') {
-            this.image.pixels[celly][cellx] = this.currentColor;
-            this.updateDrawCanvas();
+            this.setPixel(cellx, celly, this.currentColor);
         }
         if(this.currentTool == 'fill') {
-            this.floodFill(cellx, celly);
-            this.updateDrawCanvas();
+            this.floodFill(cellx, celly, this.currentColor);
         }
     }
 
@@ -414,6 +565,8 @@ class PageController {
         }
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageRef();
 
         if (this.enablePlotDraw) {
             let plotSize = 5;
@@ -431,12 +584,12 @@ class PageController {
 
         let width = this.drawCanvas.width - this.inset * 2;
         let height = this.drawCanvas.height - this.inset * 2;
-        let cellSize = this.image.cellSize(width, height);
+        let cellSize = originalImage.cellSize(width, height);
 
         const drawX = this.inset;
         const drawY = this.inset;
-        const innerWidth = cellSize * this.image.width;
-        const innerHeight = cellSize * this.image.height;
+        const innerWidth = cellSize * originalImage.width;
+        const innerHeight = cellSize * originalImage.height;
         let x0 = Math.floor(drawX + (width - innerWidth) / 2);
         var y0 = Math.floor(drawY + (height - innerHeight) / 2);
 
@@ -444,23 +597,22 @@ class PageController {
         let celly = Math.floor((position.y-y0)/cellSize);
         // console.log('cellx', cellx, 'celly', celly);
         if(this.currentTool == 'select') {
-            let clampedCellX = Math.max(0, Math.min(cellx, this.image.width - 1));
-            let clampedCellY = Math.max(0, Math.min(celly, this.image.height - 1));
-            this.selectRectangle.x1 = clampedCellX;
-            this.selectRectangle.y1 = clampedCellY;
+            let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
+            let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
+            drawingItem.selectRectangle.x1 = clampedCellX;
+            drawingItem.selectRectangle.y1 = clampedCellY;
             this.updateDrawCanvas();
             return;
         }
 
-        if (cellx < 0 || cellx >= this.image.width) {
+        if (cellx < 0 || cellx >= originalImage.width) {
             return;
         }
-        if (celly < 0 || celly >= this.image.height) {
+        if (celly < 0 || celly >= originalImage.height) {
             return;
         }
         if(this.currentTool == 'paint') {
-            this.image.pixels[celly][cellx] = this.currentColor;
-            this.updateDrawCanvas();
+            this.setPixel(cellx, celly, this.currentColor);
         }
     }
 
@@ -471,6 +623,39 @@ class PageController {
         // let cellSize = 100;
         // ctx.fillStyle = 'white';
         // ctx.fillRect(0, 0, cellSize, cellSize);
+    }
+
+    setPixel(x, y, color) {
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        var image = originalImage.clone();
+        try {
+            image.setPixel(x, y, color);
+        } catch (error) {
+            console.error('Error setting pixel', error);
+            return;
+        }
+        if (image.isEqualTo(originalImage)) {
+            // console.log('The image is the same after setPixel.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'set pixel');
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+    }
+
+    floodFill(x, y, color) {
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        var image = originalImage.clone();
+        image.floodFill(x, y, color);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after floodFill.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'flood fill');
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     pickColor(colorValue) {
@@ -485,25 +670,37 @@ class PageController {
 
         this.currentColor = colorValue;
 
-        let fillSelectedRectangle = this.isCurrentToolSelect();
-        if (fillSelectedRectangle) {
-            let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
-            if (minX > maxX || minY > maxY) {
-                return;
-            }
-            if (minX < 0 || maxX >= this.image.width) {
-                return;
-            }
-            if (minY < 0 || maxY >= this.image.height) {
-                return;
-            }
-            for (let y = minY; y <= maxY; y++) {
-                for (let x = minX; x <= maxX; x++) {
-                    this.image.pixels[y][x] = this.currentColor;
-                }
-            }
-            this.updateDrawCanvas();
+        if (this.isCurrentToolSelect()) {
+            this.fillSelectedRectangle();
         }        
+    }
+
+    fillSelectedRectangle() {
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
+        if (minX > maxX || minY > maxY) {
+            return;
+        }
+        if (minX < 0 || maxX >= originalImage.width) {
+            return;
+        }
+        if (minY < 0 || maxY >= originalImage.height) {
+            return;
+        }
+        var image = originalImage.clone();
+        for (let y = minY; y <= maxY; y++) {
+            for (let x = minX; x <= maxX; x++) {
+                image.pixels[y][x] = this.currentColor;
+            }
+        }
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after filling the selection.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'fill selection');
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     async loadTask() {
@@ -528,26 +725,40 @@ class PageController {
         }
         this.task = task;
         this.numberOfTests = task.test.length;
-        this.showTask(task);
 
-        this.assignImageFromCurrentTest();
-        this.assignSelectRectangleFromCurrentImage();
+        if (this.numberOfTests < 1) {
+            console.error('Error there are no tests. Expected 1 or more test pairs.');
+        }
+        var drawingItems = [];
+        for (let i = 0; i < this.numberOfTests; i++) {
+            let inputImage = task.test[i].input.clone();
+            let item = new DrawingItem();
+            item.id = i;
+            item.originator.setImage(inputImage);
+            item.assignSelectRectangleFromCurrentImage();
+            drawingItems.push(item);
+        }
+        this.drawingItems = drawingItems;
+        if (this.drawingItems.length < 1) {
+            console.error('Error there are no drawing items. Cannot make use of the first drawing item! currentDrawingItem() will fail.');
+        }
+
+        this.showTask(task);
         this.updateDrawCanvas();
     }
 
-    assignImageFromCurrentTest() {
+    currentDrawingItem() {
         let testIndex = this.currentTest % this.numberOfTests;
-        let image = this.task.test[testIndex].input;
-        this.image = image.clone();
+        if (testIndex < 0 || testIndex >= this.drawingItems.length) {
+            throw new Error(`Error drawingItemForCurrentTest() testIndex: ${testIndex} is out of range. currentTest: ${this.currentTest} numberOfTests: ${this.numberOfTests}`);
+        }
+        return this.drawingItems[testIndex];
     }
 
-    assignSelectRectangleFromCurrentImage() {
-        this.selectRectangle = {
-            x0: 0,
-            y0: 0,
-            x1: this.image.width - 1,
-            y1: this.image.height - 1,
-        };
+    inputImageFromCurrentTest() {
+        let testIndex = this.currentTest % this.numberOfTests;
+        let image = this.task.test[testIndex].input;
+        return image.clone();
     }
 
     showTask(task) {
@@ -759,12 +970,18 @@ class PageController {
                 el_td2.classList.add('center-x');
                 el_td2.classList.add('test-output-cell');
 
-                var image = this.imageForTestIndex(i);
+                var image = null;
+                if (this.drawingItems[i].caretaker.undoList.length > 0) {
+                    // Only show an image when the user have drawn something.
+                    // If there are no actions to undo, then the user have not drawn anything.
+                    image = this.drawingItems[i].originator.getImageRef();
+                }
                 if (this.overviewRevealSolutions) {
+                    // The user is holding down the button that reveals the solutions.
                     image = output;
                 }
                 if (!image) {
-                    el_td2.innerText = `?`;
+                    el_td2.innerText = '?';
                 } else {
 
                     let canvas = image.toCanvasWithStyle(devicePixelRatio, cellSize, this.isGridVisible);
@@ -803,7 +1020,8 @@ class PageController {
         // Clear the canvas to be fully transparent
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        let image = this.image;
+        let drawingItem = this.currentDrawingItem();
+        let image = drawingItem.originator.getImageRef();
         let cellSize = image.cellSize(width, height);
 
         let gapSize = this.isGridVisible ? 1 : 0;
@@ -826,7 +1044,7 @@ class PageController {
 
         // Draw the dashed select rectangle
         if (isSelectTool && !this.isPasteMode) {
-            let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+            let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
             // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
 
             let x = image.calcX0(0, width, cellSize) + minX * cellSize + inset;
@@ -901,6 +1119,21 @@ class PageController {
         ctx.stroke();    
     }
 
+    isEditorShownAndPasteModeFalse() {
+        if (!this.isOverviewHidden()) {
+            // The overview is visible, the editor is hidden.
+            return false;
+        }
+        if (this.isPasteMode) {
+            // The paste canvas is visible on top of the editor.
+            return false;
+        }
+        // The editor is visible.
+        // The paste canvas is hidden.
+        // The overview is hidden.
+        return true;
+    }
+
     isOverviewHidden() {
         let el = document.getElementById("task-overview");
         return el.classList.contains('hidden');
@@ -939,7 +1172,6 @@ class PageController {
         el2.classList.add('hidden');
         el3.classList.add('hidden');
 
-        this.takeSnapshotOfCurrentImage();
         this.updateOverview();
     }
 
@@ -980,7 +1212,7 @@ class PageController {
 
     submitDrawing() {
         console.log('Submit');
-        let image = this.image;
+        let image = this.currentDrawingItem().originator.getImageRef();
         let json0 = JSON.stringify(image.pixels);
 
         let testIndex = this.currentTest % this.numberOfTests;
@@ -1003,33 +1235,16 @@ class PageController {
         }, 3000);
     }
 
-    takeSnapshotOfCurrentImage() {
-        let newImage = this.image.clone();
-        this.userDrawnImages[this.currentTest] = newImage;
-    }
-
     imageForTestIndex(testIndex) {
-        let image = this.userDrawnImages[testIndex];
-        if (!image) {
-            return null;
-        }
-        return image.clone();
+        return this.drawingItems[testIndex].originator.getImageClone();
     }
 
     activateTestIndex(testIndex) {
-        this.takeSnapshotOfCurrentImage();
         let value0 = this.currentTest;
         this.currentTest = testIndex % this.numberOfTests;
         let value1 = this.currentTest;
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.updateOverview();
-        let image = this.imageForTestIndex(this.currentTest);
-        if (image) {
-            this.image = image;
-        } else {
-            this.assignImageFromCurrentTest();
-        }
-        this.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
     }
 
@@ -1078,35 +1293,50 @@ class PageController {
             console.error('Unable to determine the size');
             return;
         }
-
-        console.log('Width:', size.width, 'Height:', size.height);
+        // console.log('Width:', size.width, 'Height:', size.height);
 
         // Resize the image, preserve the content.
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
-        this.image = emptyImage.overlay(this.image, 0, 0);
-        this.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas();
+        let image = emptyImage.overlay(originalImage, 0, 0);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after resize.');
+            this.hideToolPanel();
+            return;
+        }
 
+        drawingItem.caretaker.saveState(drawingItem.originator, 'resize image');
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
+        this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     startOverWithInputImage() {
-        this.assignImageFromCurrentTest();
-        this.assignSelectRectangleFromCurrentImage();
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let inputImage = this.inputImageFromCurrentTest();
+        if (originalImage.isEqualTo(inputImage)) {
+            console.log('The image is the same as the input image.');
+            return;
+        }
+
+        // show an alert: "Are you sure you want to start over with the input image?"
+        // If the user clicks "OK", then reset the current image to the input image.
+        // If the user clicks "Cancel", then do nothing.
+        let result = confirm('You have made changes to the image. Are you sure you want to start over with the input image?');
+        console.log('startOverWithInputImage() result:', result);
+        if (!result) {
+            return;
+        }
+
+        console.log('startOverWithInputImage() confirmed');
+        drawingItem.originator.setImage(inputImage);
+        drawingItem.caretaker.clearHistory();
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
-    }
-
-    floodFill(x, y) {
-        this.image.floodFill(x, y, this.currentColor);
-    }
-
-    getSelectedRectangleCoordinates() {
-        let minX = Math.min(this.selectRectangle.x0, this.selectRectangle.x1);
-        let maxX = Math.max(this.selectRectangle.x0, this.selectRectangle.x1);
-        let minY = Math.min(this.selectRectangle.y0, this.selectRectangle.y1);
-        let maxY = Math.max(this.selectRectangle.y0, this.selectRectangle.y1);
-        return { minX, maxX, minY, maxY };
     }
 
     cropSelectedRectangle() {
@@ -1114,27 +1344,37 @@ class PageController {
             console.log('Crop is only available in select mode.');
             return;
         }
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
 
-        let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
         // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY);
         if (minX > maxX || minY > maxY) {
             return;
         }
-        if (minX < 0 || maxX >= this.image.width) {
+        if (minX < 0 || maxX >= originalImage.width) {
             return;
         }
-        if (minY < 0 || maxY >= this.image.height) {
+        if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
-        this.image = this.image.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
-        this.assignSelectRectangleFromCurrentImage();
+        let image = originalImage.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after crop.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'crop selection');
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     copyToClipboard() {
         let rectangle = this.getToolRectangle();
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let originalImage = this.currentDrawingItem().originator.getImageClone();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.clipboard = cropImage;
         this.hideToolPanel();
         console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
@@ -1194,7 +1434,9 @@ class PageController {
         let width = canvasWidth - inset * 2;
         let height = canvasHeight - inset * 2;
 
-        let image = this.image;
+        let drawingItem = this.currentDrawingItem();
+        let image = drawingItem.originator.getImageClone();
+
         let cellSize = image.cellSize(width, height);
 
         let pasteX = this.pasteX;
@@ -1209,17 +1451,20 @@ class PageController {
         var minX = Math.floor((pasteX - halfWidth - x0) / cellSize + 0.5);
         var minY = Math.floor((pasteY - halfHeight - y0) / cellSize + 0.5);
 
-        this.image = this.image.overlay(clipboardImage, minX, minY);
+        let image2 = image.overlay(clipboardImage, minX, minY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(minX, this.image.width - 1));
-        let clampedY0 = Math.max(0, Math.min(minY, this.image.height - 1));
-        let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, this.image.width - 1));
-        let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, this.image.height - 1));
-        this.selectRectangle.x0 = clampedX0;
-        this.selectRectangle.y0 = clampedY0;
-        this.selectRectangle.x1 = clampedX1;
-        this.selectRectangle.y1 = clampedY1;
+        let clampedX0 = Math.max(0, Math.min(minX, image2.width - 1));
+        let clampedY0 = Math.max(0, Math.min(minY, image2.height - 1));
+        let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, image2.width - 1));
+        let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, image2.height - 1));
+        drawingItem.selectRectangle.x0 = clampedX0;
+        drawingItem.selectRectangle.y0 = clampedY0;
+        drawingItem.selectRectangle.x1 = clampedX1;
+        drawingItem.selectRectangle.y1 = clampedY1;
+
+        drawingItem.caretaker.saveState(drawingItem.originator, 'paste');
+        drawingItem.originator.setImage(image2);
 
         this.updateDrawCanvas();
         this.hidePasteArea();
@@ -1234,12 +1479,14 @@ class PageController {
 
     // Get either the selected rectangle or the rectangle for the entire image
     getToolRectangle() {
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageRef();
         if (this.isCurrentToolSelect()) {
-            let { minX, maxX, minY, maxY } = this.getSelectedRectangleCoordinates();
+            let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
             if (minX > maxX || minY > maxY) {
                 throw new Error(`getToolRectangle. Invalid selected rectangle: min must be smaller than max. minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
             }
-            if (minX < 0 || maxX >= this.image.width || minY < 0 || maxY >= this.image.height) {
+            if (minX < 0 || maxX >= originalImage.width || minY < 0 || maxY >= originalImage.height) {
                 throw new Error(`getToolRectangle. The selected rectangle is outside the image boundaries. minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
             }
             return { 
@@ -1252,70 +1499,140 @@ class PageController {
             return { 
                 x: 0, 
                 y: 0, 
-                width: this.image.width, 
-                height: this.image.height 
+                width: originalImage.width, 
+                height: originalImage.height 
             };
         }
     }
 
-    // Reverse the x-axis of the selected rectangle
+    // Reverse the x-axis of the selected rectangle or the entire image
     flipX() {
         let rectangle = this.getToolRectangle();
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
-        this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after flip x.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'flip x for selection or entire image');
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
-    // Reverse the y-axis of the selected rectangle
+    // Reverse the y-axis of the selected rectangle or the entire image
     flipY() {
         let rectangle = this.getToolRectangle();
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
-        this.image = this.image.overlay(flippedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after flip y.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'flip y for selection or entire image');
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     // Rotate clockwise
     rotateCW() {
-        if (!this.isCurrentToolSelect()) {
-            this.image = this.image.rotateCW();
-            this.assignSelectRectangleFromCurrentImage();
-            this.updateDrawCanvas();
-            this.hideToolPanel();
-            return;
+        if (this.isCurrentToolSelect()) {
+            this.rotateCW_selection();
+        } else {
+            this.rotateCW_entireImage();
         }
+    }
+
+    rotateCW_selection() {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
             return;
         }
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
-        this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise selection');
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
+    }
+
+    rotateCW_entireImage() {
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let image = originalImage.rotateCW();
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise entire image');
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     // Rotate counter clockwise
     rotateCCW() {
-        if (!this.isCurrentToolSelect()) {
-            this.image = this.image.rotateCCW();
-            this.assignSelectRectangleFromCurrentImage();
-            this.updateDrawCanvas();
-            this.hideToolPanel();
-            return;
+        if (this.isCurrentToolSelect()) {
+            this.rotateCCW_selection();
+        } else {
+            this.rotateCCW_entireImage();
         }
+    }
+
+    rotateCCW_selection() {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
             return;
         }
-        let cropImage = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
-        this.image = this.image.overlay(rotatedImage, rectangle.x, rectangle.y);
+        let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise selection');
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
+    }
+
+    rotateCCW_entireImage() {
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let image = originalImage.rotateCCW();
+        if (image.isEqualTo(originalImage)) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise entire image');
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1327,10 +1644,19 @@ class PageController {
             console.log('Move is only available when the width is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x, rectangle.y, 1, rectangle.height);
-        let image1 = this.image.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
-        this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
-        this.image = this.image.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let image0 = originalImage.crop(rectangle.x, rectangle.y, 1, rectangle.height);
+        let image1 = originalImage.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
+        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
+        let image3 = image2.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'move left');
+        drawingItem.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1342,10 +1668,19 @@ class PageController {
             console.log('Move is only available when the width is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x + rectangle.width - 1, rectangle.y, 1, rectangle.height);
-        let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
-        this.image = this.image.overlay(image1, rectangle.x + 1, rectangle.y);
-        this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let image0 = originalImage.crop(rectangle.x + rectangle.width - 1, rectangle.y, 1, rectangle.height);
+        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
+        let image2 = originalImage.overlay(image1, rectangle.x + 1, rectangle.y);
+        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'move right');
+        drawingItem.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1357,10 +1692,19 @@ class PageController {
             console.log('Move is only available when the height is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x, rectangle.y, rectangle.width, 1);
-        let image1 = this.image.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
-        this.image = this.image.overlay(image1, rectangle.x, rectangle.y);
-        this.image = this.image.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let image0 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, 1);
+        let image1 = originalImage.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
+        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
+        let image3 = image2.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'move up');
+        drawingItem.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
@@ -1372,18 +1716,28 @@ class PageController {
             console.log('Move is only available when the height is 2 or greater.');
             return;
         }
-        let image0 = this.image.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
-        let image1 = this.image.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
-        this.image = this.image.overlay(image1, rectangle.x, rectangle.y + 1);
-        this.image = this.image.overlay(image0, rectangle.x, rectangle.y);
+        let drawingItem = this.currentDrawingItem();
+        let originalImage = drawingItem.originator.getImageClone();
+        let image0 = originalImage.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
+        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
+        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y + 1);
+        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
+        if (image3.isEqualTo(originalImage)) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, 'move down');
+        drawingItem.originator.setImage(image3);
         this.updateDrawCanvas();
         this.hideToolPanel();
     }
 
     showToolPanel() {
         {
+            let originalImage = this.currentDrawingItem().originator.getImageRef();
             var el = document.getElementById('canvas-size-input');
-            el.value = `${this.image.width}x${this.image.height}`;
+            el.value = `${originalImage.width}x${originalImage.height}`;
         }
         {
             var el = document.getElementById('tool-panel');

@@ -25,7 +25,7 @@
                 <button class="secondary-button" onclick="gPageController.startOverWithInputImage()" title="Go back to the original image">Start over 🥶🙀🙈</button>
                 <hr>
                 <div>
-                    <h4>Change image size (width x height)</h4>
+                    <h4 id="tool-panel-widthheight-header" class="hidden">Change image size (width x height)</h4>
                     <div>
                         <input type="text" id="canvas-size-input" maxlength="10" value="3x3" placeholder="widthxheight" onkeydown="gPageController.resizeImageOnKeyDown(event)">
                         <button class="secondary-button" onclick="gPageController.resizeImage()" id="resize_btn" title="Apply the new size to the image">Resize</button>
@@ -69,7 +69,7 @@
                     </button>
                 </div>
 
-                <hr>
+                <!-- <hr> -->
 
                 <div id="tool-radio-buttons">
                     <ul class="segmented-control">
@@ -86,6 +86,11 @@
                             <label class="segmented-control__label" for="tool_fill" title="L = Fill tool">Fill</label>
                         </li>
                     </ul>
+                </div>
+                
+                <div id="tool-with-undo-redo-buttons">
+                    <button class="secondary-button" onclick="gPageController.undoAction()" title="CTRL Z = Undo">Undo</button>
+                    <button class="secondary-button" onclick="gPageController.redoAction()" title="CTRL SHIFT Z = Redo">Redo</button>
                 </div>
             </div>
         </div>
@@ -125,6 +130,8 @@
         <div class="page-footer-left">
             <!-- Left -->
             <button id="tool-button" class="secondary-button" onclick="gPageController.showToolPanel()">Tool: paint</button>
+            <button id="undo-button-footer" class="secondary-button hidden" onclick="gPageController.undoAction()" title="CTRL Z = Undo">Undo</button>
+            <button id="redo-button-footer" class="secondary-button hidden" onclick="gPageController.redoAction()" title="CTRL SHIFT Z = Redo">Redo</button>
         </div>
         <div id="palette" class="page-footer-center">
             <div id="palette-item0" class="arc_color_0 palette_item_selected" onpointerdown="gPageController.pickColor(0)"></div>
