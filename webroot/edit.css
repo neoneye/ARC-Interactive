@@ -8,16 +8,6 @@ body {
     /* background-color: red; */
 }
 
-@media only screen and (min-width: 1400px) {
-    #undo-button-footer.hidden,
-    #redo-button-footer.hidden {
-        display: inline-block;
-    }
-    .tool-with-undo-redo-buttons {
-        display: none;
-    } 
-}
-
 @media only screen and (min-width: 700px) {
     body {
         /* background-color: red; */
@@ -124,7 +114,7 @@ body {
 
 #tool-panel-inner {
     width: 60vw;
-    height: 60vh;
+    height: 70vh;
     display: block;
     background-color: grey;
     opacity: 1;
@@ -153,6 +143,26 @@ body {
 
 #tool-panel-crop-copy-paste button {
     flex: 1; /* Each button will take equal space */
+}
+
+#tool-with-undo-redo-buttons {
+    display: flex;
+    justify-content: space-between; /* Aligns children with space between them */
+    gap: 10px; /* Space between the buttons */
+}
+
+#tool-with-undo-redo-buttons button {
+    flex: 1; /* Each button will take equal space */
+}
+
+@media only screen and (min-width: 1400px) {
+    #undo-button-footer.hidden,
+    #redo-button-footer.hidden {
+        display: inline-block;
+    }
+    #tool-with-undo-redo-buttons {
+        display: none;
+    } 
 }
 
 .page-footer {
