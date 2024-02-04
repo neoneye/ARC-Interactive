@@ -1,0 +1,96 @@
+.background-color-0 {
+    background-color: var(--arc-color-0);
+}
+.background-color-1 {
+    background-color: var(--arc-color-1);
+}
+.background-color-2 {
+    background-color: var(--arc-color-2);
+}
+.background-color-3 {
+    background-color: var(--arc-color-3);
+}
+.background-color-4 {
+    background-color: var(--arc-color-4);
+}
+.background-color-5 {
+    background-color: var(--arc-color-5);
+}
+.background-color-6 {
+    background-color: var(--arc-color-6);
+}
+.background-color-7 {
+    background-color: var(--arc-color-7);
+}
+.background-color-8 {
+    background-color: var(--arc-color-8);
+}
+.background-color-9 {
+    background-color: var(--arc-color-9);
+}
+
+#preview-theme-table {
+    display: grid;
+    grid-template-columns: repeat(5, 50px); /* 5 columns, each 50px wide */
+    grid-gap: 0; /* This ensures that there is no gap between the grid items */
+    padding: 0; /* Ensures that the container itself has no padding */
+    margin: 0; /* Ensures that the container itself has no margin */
+    width: max-content; /* Ensures the grid container is only as wide as it needs to be */
+}
+
+#preview-theme-table div {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    width: 50px;
+    height: 50px;
+    box-sizing: border-box; /* Ensures that padding and borders are included in the element's total width and height */
+}
+
+#shuffle-colors-button {
+    padding: 10px;
+    background-color: transparent;
+}
+
+#main-outer {
+    width: 100%;
+}
+
+#main-inner {
+    width: 100%;
+    padding: 2em;
+    background-color: var(--ui-footer-background);
+}
+
+@media (min-width: 600px) { 
+    #main-inner {
+        width: 550px;
+        /* background-color: yellow; */
+
+        /* This centers #main-inner horizontally */
+        margin-left: auto;
+        margin-right: auto;
+
+        border-left: 1px solid var(--ui-separator);
+        border-right: 1px solid var(--ui-separator);
+    }
+}
+
+#select-theme-outer {
+    padding-top: 2em;
+    padding-bottom: 3em;
+}
+
+#theme-preview-outer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em;
+    margin-bottom: 1em;
+    border: 1px solid var(--ui-separator);
+    border-radius: 5px;
+}
+
+#shuffle-colors-button {
+    border: none;
+}
