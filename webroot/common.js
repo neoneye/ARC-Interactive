@@ -1,18 +1,3 @@
-const color_palette = [
-    "#000000", // 0 = black
-    "#0074d9", // 1 = blue
-    "#ff4136", // 2 = red
-    "#2ecc40", // 3 = green
-    "#ffdc00", // 4 = yellow
-    "#aaaaaa", // 5 = gray
-    "#f012be", // 6 = fuchsia
-    "#ff851b", // 7 = orange
-    "#7fdbff", // 8 = teal
-    "#870c25", // 9 = brown
-    "#282828", // 10 = dark gray
-    "#ffffff", // 11 = white
-];
-
 const indexdb_database_name = 'ARCDatabase';
 const indexdb_store_name_image = 'image';
 const indexdb_store_name_other = 'other';
@@ -221,6 +206,84 @@ class Dataset {
     }
 }
 
+class Theme {
+    constructor(palette) {
+        if (palette.length !== 10) {
+            throw new Error(`Palette must have 10 colors. Length: ${palette.length}`);
+        }
+        this.palette = palette;
+    }
+
+    getColorString(index) {
+        return this.palette[index];
+    }
+
+    static originalARCPalette() {
+        return [
+            "#000000", // 0 = black
+            "#0074d9", // 1 = blue
+            "#ff4136", // 2 = red
+            "#2ecc40", // 3 = green
+            "#ffdc00", // 4 = yellow
+            "#aaaaaa", // 5 = gray
+            "#f012be", // 6 = fuchsia
+            "#ff851b", // 7 = orange
+            "#7fdbff", // 8 = teal
+            "#870c25", // 9 = brown
+        ];
+    }
+
+    static themeFromBody() {
+        // Get the computed style of the <body> element or the element you applied the variable to
+        const style = getComputedStyle(document.body);
+    
+        let palette = Theme.originalARCPalette();
+
+        // Get the value of --arc-color-0, --arc-color-1, ..., --arc-color-9.
+        for (let i = 0; i <= 9; i++) {
+            const color = style.getPropertyValue(`--arc-color-${i}`).trim(); // .trim() to remove any potential blank spaces
+            palette[i] = color;
+        }
+
+        return new Theme(palette);
+    }
+
+    // Load the selected theme from local storage.
+    static getThemeRaw() {
+        return localStorage.getItem('theme');
+    }
+
+    // Load the selected theme from local storage, and sanity check that it's among the available themes.
+    // If the theme is not among the available themes, then switch to the theme, named "default"
+    static getTheme() {
+        let theme = Theme.getThemeRaw();
+        if (theme == null) {
+            theme = "default";
+        }
+        let availableThemes = Theme.getAvailableThemes();
+        if (!availableThemes.includes(theme)) {
+            theme = "default";
+        }
+        return theme;
+    }
+
+    // Save the selected theme to local storage
+    static setTheme(theme) {
+        localStorage.setItem('theme', theme);
+    }
+
+    static getAvailableThemes() {
+        return ["default", "paultolmuted", "paultolsequential", "bluecyanwhite", "greyscale", "c64", "secam", "ega", "amigaworkbench13", "applerainbow", "romanfresco"];
+    }
+
+    // Assign the theme to the <body> element.
+    static assignBodyClassName() {
+        let theme = Theme.getTheme();
+        var body = document.getElementsByTagName('body')[0];
+        body.className = `theme-${theme}`;
+    }
+}
+
 class ARCImage {
     constructor(pixels) {
         var min_length = 1000000;
@@ -269,20 +332,20 @@ class ARCImage {
         return s0 === s1;
     }
 
-    toCanvas(devicePixelRatio) {
+    toCanvas(theme, devicePixelRatio) {
         let cellSize = 1;
         let gapSize = 0;
-        return this.toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize);
+        return this.toCanvasWithCellSize(theme, devicePixelRatio, cellSize, gapSize);
     }
     
-    toCanvasWithStyle(devicePixelRatio, cellSize, showGrid) {
+    toCanvasWithStyle(theme, devicePixelRatio, cellSize, showGrid) {
         if(showGrid) {
-            return this.toCanvasWithGridAndBorder(devicePixelRatio, cellSize);
+            return this.toCanvasWithGridAndBorder(theme, devicePixelRatio, cellSize);
         }
-        return this.toCanvasWithCellSize(devicePixelRatio, cellSize, 0);
+        return this.toCanvasWithCellSize(theme, devicePixelRatio, cellSize, 0);
     }
 
-    toCanvasWithCellSize(devicePixelRatio, cellSize, gapSize) {
+    toCanvasWithCellSize(theme, devicePixelRatio, cellSize, gapSize) {
         let sizeWidth = this.width * cellSize - gapSize;
         let sizeHeight = this.height * cellSize - gapSize;
 
@@ -304,15 +367,15 @@ class ARCImage {
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
-                ctx.fillStyle = color_palette[pixel];
+                ctx.fillStyle = theme.getColorString(pixel);
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize - gapSize, cellSize - gapSize);
             }
         }
         return canvas;
     }
 
-    toCanvasWithGridAndBorder(devicePixelRatio, cellSize) {
-        let canvasInner = this.toCanvasWithGridAndBorderInner(cellSize * devicePixelRatio);
+    toCanvasWithGridAndBorder(theme, devicePixelRatio, cellSize) {
+        let canvasInner = this.toCanvasWithGridAndBorderInner(theme, cellSize * devicePixelRatio);
         if (devicePixelRatio === 1) {
             return canvasInner;
         }
@@ -340,7 +403,7 @@ class ARCImage {
         return canvas;
     }
 
-    toCanvasWithGridAndBorderInner(cellSize) {
+    toCanvasWithGridAndBorderInner(theme, cellSize) {
         let borderSize = 1;
         let gapSize = 1;
         let sizeWidth = this.width * cellSize - gapSize + borderSize * 2;
@@ -356,7 +419,7 @@ class ARCImage {
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
-                ctx.fillStyle = color_palette[pixel];
+                ctx.fillStyle = theme.getColorString(pixel);
                 ctx.fillRect(
                     x * cellSize + borderSize, 
                     y * cellSize + borderSize, 
@@ -386,7 +449,7 @@ class ARCImage {
         return Math.floor(drawY + (height - innerHeight) / 2);
     }
 
-    draw(ctx, drawX, drawY, width, height, cellSize, options) {
+    draw(theme, ctx, drawX, drawY, width, height, cellSize, options) {
         let x0 = this.calcX0(drawX, width, cellSize);
         var y0 = this.calcY0(drawY, height, cellSize);
         if (options.alignTop) {
@@ -400,15 +463,15 @@ class ARCImage {
         if (options.gapSize) {
             gapSize = options.gapSize;
         }
-        this.drawInner(ctx, x0, y0, cellSize, gapSize);
+        this.drawInner(theme, ctx, x0, y0, cellSize, gapSize);
     }
 
-    drawInner(ctx, x0, y0, cellSize, gapSize) {
+    drawInner(theme, ctx, x0, y0, cellSize, gapSize) {
         let cellSizeCeilInt = Math.ceil(cellSize) - gapSize;
         for (let y = 0; y < this.height; y += 1) {
             for (let x = 0; x < this.width; x += 1) {
                 let pixel = this.pixels[y][x];
-                ctx.fillStyle = color_palette[pixel];
+                ctx.fillStyle = theme.getColorString(pixel);
                 ctx.fillRect(Math.floor(x0 + (x * cellSize)), Math.floor(y0 + (y * cellSize)), cellSizeCeilInt, cellSizeCeilInt);
             }
         }
@@ -543,7 +606,7 @@ class ARCTask {
         this.thumbnailCacheId = thumbnailCacheId;
     }
 
-    toThumbnailCanvas(extraWide, scale) {
+    toThumbnailCanvas(theme, extraWide, scale) {
         var width = 320 * scale;
         if (extraWide) {
             width *= 2;
@@ -556,24 +619,24 @@ class ARCTask {
         thumbnailCanvas.height = height;
 
         let insetValue = 5;
-        let canvas = this.toCanvas(insetValue, extraWide);
+        let canvas = this.toCanvas(theme, insetValue, extraWide);
         thumbnailCtx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
         return thumbnailCanvas;
     }
 
-    toCustomCanvasSize(extraWide, width, height) {
+    toCustomCanvasSize(theme, extraWide, width, height) {
         const thumbnailCanvas = document.createElement('canvas');
         const thumbnailCtx = thumbnailCanvas.getContext('2d');
         thumbnailCanvas.width = width;
         thumbnailCanvas.height = height;
 
         let insetValue = 5;
-        let canvas = this.toCanvas(0, extraWide);
+        let canvas = this.toCanvas(theme, 0, extraWide);
         thumbnailCtx.drawImage(canvas, insetValue, insetValue, thumbnailCanvas.width - 2 * insetValue, thumbnailCanvas.height - 2 * insetValue);
         return thumbnailCanvas;
     }
 
-    toCanvas(insetValue, extraWide) {
+    toCanvas(theme, insetValue, extraWide) {
         let scale = 1;
         var width = 320 * scale;
         if (extraWide) {
@@ -649,15 +712,15 @@ class ARCTask {
             let x = (i * cellWidthTotalAvailable) / count + inset;
             let y0 = inset;
             let y1 = height / 2;
-            this.train[i].input.draw(ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
-            this.train[i].output.draw(ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
+            this.train[i].input.draw(theme, ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
+            this.train[i].output.draw(theme, ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
         }
         for (let i = 0; i < this.test.length; i++) {
             let x = ((n_train + i) * cellWidthTotalAvailable) / count + inset;
             let y0 = inset;
             let y1 = height / 2;
-            this.test[i].input.draw(ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
-            // this.test[i].output.draw(ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
+            this.test[i].input.draw(theme, ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
+            // this.test[i].output.draw(theme, ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
         }
 
         // for (let i = 1; i < count; i++) {

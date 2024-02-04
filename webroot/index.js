@@ -1,8 +1,8 @@
 class PageController {
     constructor() {
         this.db = null;
-
         this.dataset = null;
+        this.theme = null;
 
         // Create URLSearchParams object
         const urlParams = new URLSearchParams(window.location.search);
@@ -24,6 +24,9 @@ class PageController {
     }
 
     async onload() {
+        Theme.assignBodyClassName();
+        this.theme = Theme.themeFromBody();
+
         this.db = await DatabaseWrapper.create();
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
@@ -163,7 +166,7 @@ class PageController {
         let height = 80;
 
         let scale = 2;
-        let canvas = task.toCustomCanvasSize(extraWide, width * scale, height * scale);
+        let canvas = task.toCustomCanvasSize(this.theme, extraWide, width * scale, height * scale);
         let url = canvas.toDataURL();
         lazyImage.src = url;
     }
