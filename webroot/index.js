@@ -177,6 +177,7 @@ class PageController {
 
     showTasks(tasks) {
         console.log('Show tasks:', tasks.length);
+        let openInNewTab = false;
 
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
@@ -201,6 +202,9 @@ class PageController {
                 el_a.className = 'gallery_cell gallery_cell_normal';
             }
             el_a.href = task.openUrl;
+            if (openInNewTab) {
+                el_a.target = "_blank";
+            }
             el_a.appendChild(el_img);
     
             const el_gallery = document.getElementById('gallery');

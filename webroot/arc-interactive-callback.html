@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="arc-interactive-callback.css">
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+    <script src="common.js"></script>
+    <script src="arc-interactive-callback.js"></script>
+    <title>Callback from ARC-Interactive</title>
+</head>
+<body onload="body_onload()">
+    <header class="titlebar-container">
+        <div class="titlebar-item titlebar-item-left">
+            <a class="secondary-button" href=".">Tasks</a>
+            <a class="secondary-button" href="settings.html">Settings</a>
+        </div>
+        
+        <div class="titlebar-item titlebar-item-center">Callback</div>
+        
+        <div class="titlebar-item titlebar-item-right">
+        </div>
+    </header>
+
+    <main id="main-outer">
+        <div id="main-inner">
+            <h2>Callback from ARC-Interactive</h2>
+
+            <p>Jump to your own server via: <a id="redirect-link" href="#">this link.</a></p>
+            <p>Go to settings and insert an url where your: <pre>arc-interactive-callback.html</pre> can be found.</p>
+
+            <h3>Parameters</h3>
+            <div id="parameter-pair-list"></div>
+        </div>
+    </main>
+</body>
+</html>
