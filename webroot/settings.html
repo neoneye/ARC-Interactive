@@ -27,20 +27,22 @@
     <main id="main-outer">
         <div id="main-inner">
 
-            <label for="theme" id="theme-label">Theme:</label>
-            <select name="theme" id="select-theme">
-                <option value="default">Original ARC Colors</option>
-                <option value="paultolmuted">Tol Muted</option>
-                <option value="c64">C64</option>
-                <option value="secam">SECAM</option>
-                <option value="ega">EGA</option>
-                <option value="amigaworkbench13">Amiga Workbench 1.3</option>
-                <option value="applerainbow">Apple Rainbow Logo</option>
-                <option value="romanfresco">Roman Fresco</option>
-                <option value="paultolsequential">Brown Orange White</option>
-                <option value="bluecyanwhite">Blue Cyan White</option>
-                <option value="greyscale">Grey Scale</option>
-            </select> 
+            <div id="select-theme-outer">
+                <label for="theme" id="theme-label">Theme:</label>
+                <select name="theme" id="select-theme">
+                    <option value="default">Original ARC Colors</option>
+                    <option value="paultolmuted">Tol Muted</option>
+                    <option value="c64">C64</option>
+                    <option value="secam">SECAM</option>
+                    <option value="ega">EGA</option>
+                    <option value="amigaworkbench13">Amiga Workbench 1.3</option>
+                    <option value="applerainbow">Apple Rainbow Logo</option>
+                    <option value="romanfresco">Roman Fresco</option>
+                    <option value="paultolsequential">Brown Orange White</option>
+                    <option value="bluecyanwhite">Blue Cyan White</option>
+                    <option value="greyscale">Grey Scale</option>
+                </select> 
+            </div>
 
             <div>
                 <button id="shuffle-colors-button" onclick="gPageController.shuffleColors()" title="Shuffle colors"><div id="preview-theme-table">empty</div></button>
