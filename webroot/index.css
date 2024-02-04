@@ -103,17 +103,49 @@ html {
 #dataset-label {
   display: none;
 }
-
-#discord-link {
-  display: none;
-}
-
 @media only screen and (min-width: 800px) {
   #dataset-label {
     display: inline-block;
   }
+}
+
+#settings-button,
+#github-link,
+#discord-link {
+  font-size: 10px;
+}
+
+#github-link,
+#discord-link {
+  display: none;
+}
+
+@media only screen and (min-width: 600px) {
+  #github-link {
+    display: inline-block;
+  }
+}
+@media only screen and (min-width: 800px) {
   #discord-link {
     display: inline-block;
+  }
+}
+
+@media only screen and (min-width: 850px) {
+  #settings-button,
+  #github-link,
+  #discord-link {
+    font-size: 12px;
+    /* background-color: green; */
+  }
+}
+
+@media only screen and (min-width: 1000px) {
+  #settings-button,
+  #github-link,
+  #discord-link {
+    font-size: 15px;
+    /* background-color: red; */
   }
 }
 
