@@ -27,8 +27,10 @@
     <main id="main-outer">
         <div id="main-inner">
 
+            <h2>Color Theme</h2>
+
             <div id="select-theme-outer">
-                <label for="theme" id="theme-label">Theme:</label>
+                <label for="theme" id="theme-label">Please select:</label><br>
                 <select name="theme" id="select-theme">
                     <option value="default">Original ARC Colors</option>
                     <option value="paultolmuted">Tol Muted</option>
@@ -44,7 +46,7 @@
                 </select> 
             </div>
 
-            <div>
+            <div id="theme-preview-outer">
                 <button id="shuffle-colors-button" onclick="gPageController.shuffleColors()" title="Shuffle colors"><div id="preview-theme-table">empty</div></button>
     
                 <div>10 different colors</div>
