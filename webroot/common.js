@@ -187,9 +187,7 @@ class Dataset {
             let taskId = taskJsonData.id;
             let encodedId = encodeURIComponent(taskId);
             // let openUrl = `edit.html?dataset=${datasetId}&task=${encodedId}`;
-            // TODO: encode the datasetId in the openUrl.
-            // TODO: don't use encodeURIComponent for the taskId, since it's part of the url slug.
-            let openUrl = `http://localhost:8090/task/${encodedId}`;
+            let openUrl = `arc-interactive-callback.html?action=edittask&dataset=${datasetId}&task=${encodedId}`;
             let thumbnailCacheId = `task_thumbnail_${datasetId}_${taskId}`;
             let task = new ARCTask(taskJsonData, openUrl, thumbnailCacheId);
             tasks.push(task);
