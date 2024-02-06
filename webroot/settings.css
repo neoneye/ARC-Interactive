@@ -94,3 +94,16 @@
 #shuffle-colors-button {
     border: none;
 }
+
+#advanced-settings {
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
+#callback-url {
+    width: 100%;
+    padding: 1em;
+    margin-bottom: 1em;
+    border: 1px solid var(--ui-separator);
+    border-radius: 5px;
+}

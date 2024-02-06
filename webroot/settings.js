@@ -16,7 +16,10 @@ class PageController {
         });
 
         this.updateColorPreview(false);
+        this.updateCallbackUrl();
     }
+
+    // Theme handling
 
     onThemeChange() {
         // console.log("PageController.onThemeChange()");
@@ -53,6 +56,23 @@ class PageController {
             let el_cell = document.createElement('div');
             el_cell.className = `background-color-${color}`;
             el.appendChild(el_cell);
+        }
+    }
+
+    // Callback URL handling
+
+    callbackUrlOnKeyDown(event) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            let url = document.getElementById('callback-url').value;
+            localStorage.setItem('arc-interactive-callback-url', url);
+            console.log("set callback-url:", url);
+        }
+    }
+
+    updateCallbackUrl() {
+        let url = localStorage.getItem('arc-interactive-callback-url');
+        if (url) {
+            document.getElementById('callback-url').value = url;
         }
     }
 }

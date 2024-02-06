@@ -3,9 +3,7 @@ class PageController {
         // Create URLSearchParams object
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Get the 'task' parameter
-        const urlParamTask = urlParams.get('task');
-
+        // Present a list of key-value pairs in the URL
         {
             let el = document.getElementById('parameter-pair-list');
             for (const [key, value] of urlParams) {
@@ -26,10 +24,21 @@ class PageController {
             }
         }
 
+        // Create a callback URL
         {
-            // Take all url params and insert into url. Should there be unknown params, they will be inserted as is.
-            // let url = "http://localhost:8090/task?";
-            let url = "http://localhost:8090/task/" + urlParamTask + "?";
+            const urlParamTask = urlParams.get('task');
+            const urlParamDataset = urlParams.get('dataset');
+
+            let url = localStorage.getItem('arc-interactive-callback-url');
+            url = url.replace(/\bTASKID\b/g, urlParamTask);
+            url = url.replace(/\bDATASETID\b/g, urlParamDataset);
+
+            // append ? if needed
+            if (url.indexOf('?') === -1) {
+                url += "?";
+            }
+
+            // Take all url params and append into the new url. Should there be unknown params, they will be inserted as is.
             for (const [key, value] of urlParams) {
                 url += key + "=" + value + "&";
             }
