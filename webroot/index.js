@@ -30,6 +30,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
+        this.setupToolPicker();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -111,6 +112,18 @@ class PageController {
         select.addEventListener('change', () => {
             this.scrollTopSetZero();
             window.location.href = `index.html?dataset=${encodeURIComponent(select.value)}`;
+        });
+    }
+
+    setupToolPicker() {
+        var select = document.getElementById('select-tool');
+
+        // Set the selected option in the dropdown
+        select.value = "edit";
+
+        // Listen for changes to the selected option
+        select.addEventListener('change', () => {
+            console.log('select-tool change', select.value);
         });
     }
 
