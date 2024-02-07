@@ -181,6 +181,10 @@ body.theme-romanfresco {
     --arc-color-9: #965434; /* brown, https://en.wikipedia.org/wiki/Umber */
 }
 
+.hidden {
+    display: none;
+}
+
 * {
   margin: 0;
   padding: 0;

@@ -52,7 +52,26 @@
                 <div>10 different colors</div>
             </div>
 
-        </div>
+            <hr>
+            <button id="simple-advanced-toggle-button">Switch to Advanced Mode</button>
+            <div id="advanced-settings" class="hidden">
+                <h1>Advanced Settings</h1>
+                <div id="callback-url-outer">
+                    <label for="callback-url" id="callback-url-label">Callback URL</label><br>
+                    <input type="text" id="callback-url" name="callback-url" maxlength="100" placeholder="arc-interactive-callback.html" onkeydown="gPageController.callbackUrlOnKeyDown(event)">
+                    <p>Redirect to your own server:</p>
+                    <ul id="callback-url-examples">
+                        <li>https://example.com/arc-interactive-callback.html</li>
+                        <li>http://192.168.1.5:8000/arc-interactive-callback</li>
+                        <li>http://localhost:8000/task/TASKID</li>
+                        <li>http://localhost:8000/dataset/DATASETID/</li>
+                    </ul>
+                    <p>TASKID gets replaced with the task id.</p>
+                    <p>DATASETID gets replaced with the dataset id.</p>
+                </div>
+    
+            </div>
+            </div>
     </main>
 </body>
 </html>

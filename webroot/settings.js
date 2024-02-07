@@ -16,7 +16,50 @@ class PageController {
         });
 
         this.updateColorPreview(false);
+        this.updateCallbackUrl();
+
+    
+        this.setupSimpleAdvancedToggle();
     }
+
+    // Simple / Advanced mode handling
+
+    setupSimpleAdvancedToggle() {
+        if (Settings.getAdvancedModeEnabled()) {
+            this.showAdvancedSettings();
+        } else {
+            this.hideAdvancedSettings();
+        }
+
+        document.getElementById('simple-advanced-toggle-button').addEventListener('click', () => {
+            var el_advanced = document.getElementById('advanced-settings');
+            var advanceModeEnabled = false;
+            if (el_advanced.classList.contains('hidden')) {
+                this.showAdvancedSettings();
+                advanceModeEnabled = true;
+            } else {
+                this.hideAdvancedSettings();
+                advanceModeEnabled = false;
+            }
+            Settings.setAdvancedModeEnabled(advanceModeEnabled);
+        });
+    }
+
+    hideAdvancedSettings() {
+        var el_advanced = document.getElementById('advanced-settings');
+        el_advanced.classList.add('hidden');
+        var button = document.getElementById('simple-advanced-toggle-button');
+        button.textContent = "Switch to Advanced Mode";
+    }
+
+    showAdvancedSettings() {
+        var el_advanced = document.getElementById('advanced-settings');
+        el_advanced.classList.remove('hidden');
+        var button = document.getElementById('simple-advanced-toggle-button');
+        button.textContent = "Switch to Simple Mode";
+    }
+
+    // Theme handling
 
     onThemeChange() {
         // console.log("PageController.onThemeChange()");
@@ -53,6 +96,25 @@ class PageController {
             let el_cell = document.createElement('div');
             el_cell.className = `background-color-${color}`;
             el.appendChild(el_cell);
+        }
+    }
+
+    // Callback URL handling
+
+    callbackUrlOnKeyDown(event) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            let el = document.getElementById('callback-url');
+            let url = el.value;
+            localStorage.setItem('arc-interactive-callback-url', url);
+            console.log("set callback-url:", url);
+            el.blur();
+        }
+    }
+
+    updateCallbackUrl() {
+        let url = localStorage.getItem('arc-interactive-callback-url');
+        if (url) {
+            document.getElementById('callback-url').value = url;
         }
     }
 }
