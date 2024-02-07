@@ -25,8 +25,7 @@ class PageController {
     // Simple / Advanced mode handling
 
     setupSimpleAdvancedToggle() {
-        let advancedModeEnabled = localStorage.getItem('settings-advanced-mode-enabled');
-        if ((advancedModeEnabled === "true") || (advancedModeEnabled === true)) {
+        if (Settings.getAdvancedModeEnabled()) {
             this.showAdvancedSettings();
         } else {
             this.hideAdvancedSettings();
@@ -42,7 +41,7 @@ class PageController {
                 this.hideAdvancedSettings();
                 advanceModeEnabled = false;
             }
-            localStorage.setItem('settings-advanced-mode-enabled', advanceModeEnabled);
+            Settings.setAdvancedModeEnabled(advanceModeEnabled);
         });
     }
 

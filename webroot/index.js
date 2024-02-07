@@ -30,7 +30,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
-        this.setupToolPicker();
+        this.setupAdvancedToolPicker();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -115,7 +115,18 @@ class PageController {
         });
     }
 
-    setupToolPicker() {
+    setupAdvancedToolPicker() {
+        if (!Settings.getAdvancedModeEnabled()) {
+            // Advanced mode is not enabled, so we don't show the tool picker.
+            return;
+        }
+
+        // Show the advanced tool picker
+        {
+            var el = document.getElementById('advanced-tool');
+            el.classList.remove('hidden');
+        }
+
         var select = document.getElementById('select-tool');
 
         // Set the selected option in the dropdown
@@ -245,6 +256,9 @@ class PageController {
         let toolIdentifier = localStorage.getItem('task-gallery-tool');
         let availableTools = ['edit', 'custom-a', 'custom-b'];
         if (!availableTools.includes(toolIdentifier)) {
+            toolIdentifier = 'edit';
+        }
+        if (!Settings.getAdvancedModeEnabled()) {
             toolIdentifier = 'edit';
         }
 

@@ -198,3 +198,6 @@ html {
   }
 }
 
+#advanced-tool.hidden {
+  display: none !important;
+}

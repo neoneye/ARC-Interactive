@@ -838,3 +838,19 @@ class ARCTask {
         return aspectRatio >= 3;
     }
 }
+
+class Settings {
+    static getAdvancedModeEnabled() {
+        let value = localStorage.getItem('settings-advanced-mode-enabled');
+        let isEnabled = ((value === 'true') || (value === true));
+        // by default the advanced mode is disabled
+        return isEnabled;
+    }
+
+    static setAdvancedModeEnabled(enabled) {
+        if (typeof enabled !== 'boolean') {
+            throw new Error(`Invalid enabled: ${enabled}`);
+        }
+        localStorage.setItem('settings-advanced-mode-enabled', enabled);
+    }
+}
