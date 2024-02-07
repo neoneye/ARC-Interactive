@@ -133,6 +133,7 @@ class PageController {
             let toolIdentifier = select.value;
             console.log('select-tool change', toolIdentifier);
             localStorage.setItem('task-gallery-tool', toolIdentifier);
+            this.assignThumbnailUrlsBasedOnCurrentTool();
         });
     }
 
@@ -145,6 +146,7 @@ class PageController {
             console.error('Error loading bundle', error);
         }
         this.showTasks(this.dataset.tasks);
+        this.assignThumbnailUrlsBasedOnCurrentTool();
         this.hideOverlay();
 
         if ("IntersectionObserver" in window) {
@@ -201,6 +203,10 @@ class PageController {
         console.log('Show tasks:', tasks.length);
         let openInNewTab = false;
 
+        let customUrl = localStorage.getItem('arc-interactive-callback-url');
+
+        const el_gallery = document.getElementById('gallery');
+
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
 
@@ -224,14 +230,29 @@ class PageController {
                 el_a.className = 'gallery_cell gallery_cell_normal';
             }
             el_a.href = task.openUrl;
+            el_a.setAttribute("data-tool-edit", task.openUrl);
+            el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a'));
+            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b'));
             if (openInNewTab) {
                 el_a.target = "_blank";
             }
-            el_a.appendChild(el_img);
-    
-            const el_gallery = document.getElementById('gallery');
+            el_a.appendChild(el_img);    
             el_gallery.appendChild(el_a);
         }
+    }
+
+    assignThumbnailUrlsBasedOnCurrentTool() {
+        let toolIdentifier = localStorage.getItem('task-gallery-tool');
+        let availableTools = ['edit', 'custom-a', 'custom-b'];
+        if (!availableTools.includes(toolIdentifier)) {
+            toolIdentifier = 'edit';
+        }
+
+        let links = document.querySelectorAll('a[data-tool-edit]'); // Assuming all links have a `data-tool-edit` attribute
+        let attributeName = `data-tool-${toolIdentifier}`;
+        links.forEach(link => {
+            link.href = link.getAttribute(attributeName);
+        });
     }
 }
 
