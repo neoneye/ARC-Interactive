@@ -20,7 +20,7 @@ class PageController {
             // console.log("URLSearchParams does not contain 'dataset' parameter. Using 'ARC' dataset.");
         }
 
-        document.title = this.datasetId;
+        document.title = this.datasetId + " - ARC-Interactive";
     }
 
     async onload() {
