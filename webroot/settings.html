@@ -53,23 +53,26 @@
             </div>
 
             <hr>
-            <h1 id="advanced-settings">Advanced Settings</h1>
-            <div id="callback-url-outer">
-                <h3>Callback URL</h3>
-                <label for="callback-url" id="callback-url-label">Please insert:</label><br>
-                <input type="text" id="callback-url" name="callback-url" maxlength="100" placeholder="https://example.com:1234/arc-interactive-callback.html" onkeydown="gPageController.callbackUrlOnKeyDown(event)">
-                <p>Examples:</p>
-                <ul>
-                    <li>https://example.com/arc-interactive-callback.html</li>
-                    <li>http://localhost:8080/task/TASKID</li>
-                    <li>http://localhost:8080/dataset/DATASETID/task/TASKID</li>
-                    <li>http://192.168.1.5:1234/arc-interactive-callback</li>
-                </ul>
-                <p>TASKID gets replaced with the task id.</p>
-                <p>DATASETID gets replaced with the dataset id.</p>
+            <button id="simple-advanced-toggle-button">Switch to Advanced Mode</button>
+            <div id="advanced-settings" class="hidden">
+                <h1>Advanced Settings</h1>
+                <div id="callback-url-outer">
+                    <h3>Callback URL</h3>
+                    <label for="callback-url" id="callback-url-label">Please insert:</label><br>
+                    <input type="text" id="callback-url" name="callback-url" maxlength="100" placeholder="https://example.com:1234/arc-interactive-callback.html" onkeydown="gPageController.callbackUrlOnKeyDown(event)">
+                    <p>Examples:</p>
+                    <ul>
+                        <li>https://example.com/arc-interactive-callback.html</li>
+                        <li>http://localhost:8080/task/TASKID</li>
+                        <li>http://localhost:8080/dataset/DATASETID/task/TASKID</li>
+                        <li>http://192.168.1.5:1234/arc-interactive-callback</li>
+                    </ul>
+                    <p>TASKID gets replaced with the task id.</p>
+                    <p>DATASETID gets replaced with the dataset id.</p>
+                </div>
+    
             </div>
-
-        </div>
+            </div>
     </main>
 </body>
 </html>

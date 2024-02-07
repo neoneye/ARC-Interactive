@@ -17,6 +17,20 @@ class PageController {
 
         this.updateColorPreview(false);
         this.updateCallbackUrl();
+
+        document.getElementById('simple-advanced-toggle-button').addEventListener('click', function() {
+            var el_advanced = document.getElementById('advanced-settings');
+            var button = document.getElementById('simple-advanced-toggle-button');
+            
+            if (el_advanced.classList.contains('hidden')) {
+                el_advanced.classList.remove('hidden');
+                button.textContent = "Switch to Simple Mode";
+            } else {
+                el_advanced.classList.add('hidden');
+                button.textContent = "Switch to Advanced Mode";
+            }
+        });
+        
     }
 
     // Theme handling
