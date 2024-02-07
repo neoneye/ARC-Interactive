@@ -109,6 +109,15 @@ html {
   }
 }
 
+#tool-label {
+  display: none;
+}
+@media only screen and (min-width: 800px) {
+  #tool-label {
+    display: inline-block;
+  }
+}
+
 #settings-button,
 #github-link,
 #discord-link {
