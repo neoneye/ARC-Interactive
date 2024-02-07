@@ -20,7 +20,7 @@ class PageController {
             // console.log("URLSearchParams does not contain 'dataset' parameter. Using 'ARC' dataset.");
         }
 
-        document.title = this.datasetId;
+        document.title = this.datasetId + " - ARC-Interactive";
     }
 
     async onload() {
@@ -30,6 +30,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
+        this.setupAdvancedToolPicker();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -114,6 +115,39 @@ class PageController {
         });
     }
 
+    setupAdvancedToolPicker() {
+        if (!Settings.getAdvancedModeEnabled()) {
+            // Advanced mode is not enabled, so we don't show the tool picker.
+            return;
+        }
+
+        // Show the advanced tool picker
+        {
+            var el = document.getElementById('advanced-tool');
+            el.classList.remove('hidden');
+        }
+
+        var select = document.getElementById('select-tool');
+
+        // Set the selected option in the dropdown
+        {
+            let toolIdentifier = localStorage.getItem('task-gallery-tool');
+            let availableTools = ['edit', 'custom-a', 'custom-b'];
+            if (!availableTools.includes(toolIdentifier)) {
+                toolIdentifier = 'edit';
+            }
+            select.value = toolIdentifier;
+        }
+
+        // Listen for changes to the selected option
+        select.addEventListener('change', () => {
+            let toolIdentifier = select.value;
+            console.log('select-tool change', toolIdentifier);
+            localStorage.setItem('task-gallery-tool', toolIdentifier);
+            this.assignThumbnailUrlsBasedOnCurrentTool();
+        });
+    }
+
     async loadTasks() {
         console.log('PageController.loadTasks()');
         try {
@@ -123,6 +157,7 @@ class PageController {
             console.error('Error loading bundle', error);
         }
         this.showTasks(this.dataset.tasks);
+        this.assignThumbnailUrlsBasedOnCurrentTool();
         this.hideOverlay();
 
         if ("IntersectionObserver" in window) {
@@ -177,6 +212,11 @@ class PageController {
 
     showTasks(tasks) {
         console.log('Show tasks:', tasks.length);
+        let openInNewTab = false;
+
+        let customUrl = localStorage.getItem('arc-interactive-callback-url');
+
+        const el_gallery = document.getElementById('gallery');
 
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
@@ -201,30 +241,32 @@ class PageController {
                 el_a.className = 'gallery_cell gallery_cell_normal';
             }
             el_a.href = task.openUrl;
-            el_a.appendChild(el_img);
-    
-            const el_gallery = document.getElementById('gallery');
+            el_a.setAttribute("data-tool-edit", task.openUrl);
+            el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a'));
+            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b'));
+            if (openInNewTab) {
+                el_a.target = "_blank";
+            }
+            el_a.appendChild(el_img);    
             el_gallery.appendChild(el_a);
         }
     }
 
-    flushIndexedDB() {
-        const openRequest = indexedDB.open(indexdb_database_name, 1);
+    assignThumbnailUrlsBasedOnCurrentTool() {
+        let toolIdentifier = localStorage.getItem('task-gallery-tool');
+        let availableTools = ['edit', 'custom-a', 'custom-b'];
+        if (!availableTools.includes(toolIdentifier)) {
+            toolIdentifier = 'edit';
+        }
+        if (!Settings.getAdvancedModeEnabled()) {
+            toolIdentifier = 'edit';
+        }
 
-        openRequest.onsuccess = function() {
-            let db = openRequest.result;
-            let transaction = db.transaction('images', 'readwrite');
-            let images = transaction.objectStore('images');
-            let request = images.clear();
-
-            request.onsuccess = function() {
-                console.log("IndexedDB flushed");
-            };
-
-            request.onerror = function() {
-                console.log("Error", request.error);
-            };
-        };
+        let links = document.querySelectorAll('a[data-tool-edit]'); // Assuming all links have a `data-tool-edit` attribute
+        let attributeName = `data-tool-${toolIdentifier}`;
+        links.forEach(link => {
+            link.href = link.getAttribute(attributeName);
+        });
     }
 }
 
