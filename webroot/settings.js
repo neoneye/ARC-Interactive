@@ -103,9 +103,11 @@ class PageController {
 
     callbackUrlOnKeyDown(event) {
         if (event.key === 'Enter' || event.keyCode === 13) {
-            let url = document.getElementById('callback-url').value;
+            let el = document.getElementById('callback-url');
+            let url = el.value;
             localStorage.setItem('arc-interactive-callback-url', url);
             console.log("set callback-url:", url);
+            el.blur();
         }
     }
 

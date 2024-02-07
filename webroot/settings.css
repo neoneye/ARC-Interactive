@@ -116,3 +116,8 @@
     border: 1px solid var(--ui-separator);
     border-radius: 5px;
 }
+
+#callback-url-examples li {
+    font-size: small;
+    font-family: monospace;
+}
