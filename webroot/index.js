@@ -119,11 +119,20 @@ class PageController {
         var select = document.getElementById('select-tool');
 
         // Set the selected option in the dropdown
-        select.value = "edit";
+        {
+            let toolIdentifier = localStorage.getItem('task-gallery-tool');
+            let availableTools = ['edit', 'custom-a', 'custom-b'];
+            if (!availableTools.includes(toolIdentifier)) {
+                toolIdentifier = 'edit';
+            }
+            select.value = toolIdentifier;
+        }
 
         // Listen for changes to the selected option
         select.addEventListener('change', () => {
-            console.log('select-tool change', select.value);
+            let toolIdentifier = select.value;
+            console.log('select-tool change', toolIdentifier);
+            localStorage.setItem('task-gallery-tool', toolIdentifier);
         });
     }
 
