@@ -185,11 +185,7 @@ class Dataset {
         for (let key of Object.keys(jsonData)) {
             let taskJsonData = jsonData[key];
             let taskId = taskJsonData.id;
-            let encodedId = encodeURIComponent(taskId);
-            // let openUrl = `edit.html?dataset=${datasetId}&task=${encodedId}`;
-            let openUrl = `arc-interactive-callback.html?action=edittask&dataset=${datasetId}&task=${encodedId}`;
-            let thumbnailCacheId = `task_thumbnail_${datasetId}_${taskId}`;
-            let task = new ARCTask(taskJsonData, openUrl, thumbnailCacheId);
+            let task = new ARCTask(datasetId, taskId, taskJsonData);
             tasks.push(task);
         }
         console.log('Loaded tasks:', tasks.length);
@@ -599,12 +595,43 @@ class ARCPair {
 }
 
 class ARCTask {
-    constructor(jsonData, openUrl, thumbnailCacheId) {
+    constructor(datasetId, taskId, jsonData) {
+        if (typeof datasetId !== 'string') {
+            throw new Error(`datasetId is not a string. datasetId: ${datasetId}`);
+        }
+        if (typeof taskId !== 'string') {
+            throw new Error(`taskId is not a string. taskId: ${taskId}`);
+        }
+        this.datasetId = datasetId;
+        this.taskId = taskId;
         this.jsonData = jsonData;
         this.train = jsonData.train.map(pair => new ARCPair(pair.input, pair.output));
         this.test = jsonData.test.map(pair => new ARCPair(pair.input, pair.output));
-        this.openUrl = openUrl;
-        this.thumbnailCacheId = thumbnailCacheId;
+
+        let encodedTaskId = encodeURIComponent(taskId);
+        let encodedDatasetId = encodeURIComponent(datasetId);
+        this.openUrl = `edit.html?dataset=${encodedDatasetId}&task=${encodedTaskId}`;
+        this.thumbnailCacheId = `task_thumbnail_${datasetId}_${taskId}`;
+    }
+
+    customUrl(callbackUrl, actionId) {
+        let encodedActionId = encodeURIComponent(actionId);
+        let encodedTaskId = encodeURIComponent(this.taskId);
+        let encodedDatasetId = encodeURIComponent(this.datasetId);
+        var url = callbackUrl;
+        if ((url === undefined) || (url === null) || (url === '')) {
+            url = 'arc-interactive-callback.html';
+        }
+        url = url.replace(/\bTASKID\b/g, this.taskId);
+        url = url.replace(/\bDATASETID\b/g, this.datasetId);
+
+        // append ? if needed
+        if (url.indexOf('?') === -1) {
+            url += "?";
+        }
+        
+        url += `action=${encodedActionId}&dataset=${encodedDatasetId}&task=${encodedTaskId}`;
+        return url;
     }
 
     toThumbnailCanvas(theme, extraWide, scale) {
