@@ -18,19 +18,46 @@ class PageController {
         this.updateColorPreview(false);
         this.updateCallbackUrl();
 
-        document.getElementById('simple-advanced-toggle-button').addEventListener('click', function() {
+    
+        this.setupSimpleAdvancedToggle();
+    }
+
+    // Simple / Advanced mode handling
+
+    setupSimpleAdvancedToggle() {
+        let advancedModeEnabled = localStorage.getItem('settings-advanced-mode-enabled');
+        if ((advancedModeEnabled === "true") || (advancedModeEnabled === true)) {
+            this.showAdvancedSettings();
+        } else {
+            this.hideAdvancedSettings();
+        }
+
+        document.getElementById('simple-advanced-toggle-button').addEventListener('click', () => {
             var el_advanced = document.getElementById('advanced-settings');
-            var button = document.getElementById('simple-advanced-toggle-button');
-            
+            var advanceModeEnabled = false;
             if (el_advanced.classList.contains('hidden')) {
-                el_advanced.classList.remove('hidden');
-                button.textContent = "Switch to Simple Mode";
+                this.showAdvancedSettings();
+                advanceModeEnabled = true;
             } else {
-                el_advanced.classList.add('hidden');
-                button.textContent = "Switch to Advanced Mode";
+                this.hideAdvancedSettings();
+                advanceModeEnabled = false;
             }
+            localStorage.setItem('settings-advanced-mode-enabled', advanceModeEnabled);
         });
-        
+    }
+
+    hideAdvancedSettings() {
+        var el_advanced = document.getElementById('advanced-settings');
+        el_advanced.classList.add('hidden');
+        var button = document.getElementById('simple-advanced-toggle-button');
+        button.textContent = "Switch to Advanced Mode";
+    }
+
+    showAdvancedSettings() {
+        var el_advanced = document.getElementById('advanced-settings');
+        el_advanced.classList.remove('hidden');
+        var button = document.getElementById('simple-advanced-toggle-button');
+        button.textContent = "Switch to Simple Mode";
     }
 
     // Theme handling
