@@ -211,25 +211,6 @@ class PageController {
             el_gallery.appendChild(el_a);
         }
     }
-
-    flushIndexedDB() {
-        const openRequest = indexedDB.open(indexdb_database_name, 1);
-
-        openRequest.onsuccess = function() {
-            let db = openRequest.result;
-            let transaction = db.transaction('images', 'readwrite');
-            let images = transaction.objectStore('images');
-            let request = images.clear();
-
-            request.onsuccess = function() {
-                console.log("IndexedDB flushed");
-            };
-
-            request.onerror = function() {
-                console.log("Error", request.error);
-            };
-        };
-    }
 }
 
 var gPageController = null;
