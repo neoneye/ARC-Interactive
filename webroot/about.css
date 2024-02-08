@@ -1,0 +1,31 @@
+#main-outer {
+    width: 100%;
+}
+
+#main-inner {
+    width: 100%;
+    padding: 2em;
+    background-color: var(--ui-footer-background);
+}
+
+@media (min-width: 700px) { 
+    #main-inner {
+        width: 640px;
+        /* background-color: yellow; */
+
+        /* This centers #main-inner horizontally */
+        margin-left: auto;
+        margin-right: auto;
+
+        border-left: 1px solid var(--ui-separator);
+        border-right: 1px solid var(--ui-separator);
+    }
+}
+
+#main-inner a {
+    color: var(--ui-link-color);
+}
+
+h2, h3, p {
+    margin-bottom: 1em;
+}
