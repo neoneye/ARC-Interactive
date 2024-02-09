@@ -20,6 +20,17 @@ class PageController {
             // console.log("URLSearchParams does not contain 'dataset' parameter. Using 'ARC' dataset.");
         }
 
+        // Extract the "filter" from urlParams, it looks like this: 
+        // "filter=hard,-ambiguous", this gives the hard tasks, but not the ambiguous ones.
+        // "filter=-easy", this gives all tasks except the easy ones.
+        const urlParamFilter = urlParams.get('filter');
+        if (urlParamFilter) {
+            console.log("Filter:", urlParamFilter);
+            this.filter = urlParamFilter;
+        } else {
+            this.filter = null;
+        }
+
         document.title = this.datasetId + " - ARC-Interactive";
     }
 
@@ -156,7 +167,74 @@ class PageController {
         } catch (error) {
             console.error('Error loading bundle', error);
         }
-        this.showTasks(this.dataset.tasks);
+        var includedTaskIds = [];
+        var excludedTaskIds = [];
+        if (this.filter) {
+            console.log('Filter:', this.filter);
+            let parts = this.filter.split(',');
+            for (let i = 0; i < parts.length; i++) {
+                let part = parts[i];
+                var filterId = part;
+                var includeTask = true;
+                if (part.startsWith('-')) {
+                    filterId = part.substring(1);
+                    includeTask = false;
+                }
+
+                var taskIds = [];
+                if (filterId == 'entry') {
+                    taskIds = ARC_LEVELS.entry;
+                }
+                if (filterId == 'easy') {
+                    taskIds = ARC_LEVELS.easy;
+                }
+                if (filterId == 'medium') {
+                    taskIds = ARC_LEVELS.medium;
+                }
+                if (filterId == 'hard') {
+                    taskIds = ARC_LEVELS.hard;
+                }
+                if (filterId == 'tedious') {
+                    taskIds = ARC_LEVELS.tedious;
+                }
+                if (filterId == 'multiple-solutions') {
+                    taskIds = ARC_LEVELS.multipleSolutions;
+                }
+                if (filterId == 'unfixed') {
+                    taskIds = ARC_LEVELS.unfixed;
+                }
+                if (includeTask) {
+                    includedTaskIds = includedTaskIds.concat(taskIds);
+                } else {
+                    excludedTaskIds = excludedTaskIds.concat(taskIds);
+                }
+            }
+        } else {
+            console.log('No filter');
+        }
+        var filteredTasksStage1 = [];
+        if (includedTaskIds.length > 0) {
+            for(let i = 0; i < this.dataset.tasks.length; i++) {
+                let task = this.dataset.tasks[i];
+                if (includedTaskIds.includes(task.taskId)) {
+                    filteredTasksStage1.push(task);
+                }
+            }
+        } else {
+            filteredTasksStage1 = this.dataset.tasks;
+        }
+        let filteredTasksStage2 = [];
+        if (excludedTaskIds.length > 0) {
+            for(let i = 0; i < filteredTasksStage1.length; i++) {
+                let task = filteredTasksStage1[i];
+                if (!excludedTaskIds.includes(task.taskId)) {
+                    filteredTasksStage2.push(task);
+                }
+            }
+        } else {
+            filteredTasksStage2 = filteredTasksStage1;
+        }
+        this.showTasks(filteredTasksStage2);
         this.assignThumbnailUrlsBasedOnCurrentTool();
         this.hideOverlay();
 

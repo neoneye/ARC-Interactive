@@ -9,6 +9,7 @@
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <script src="pako_inflate.min.js"></script>
     <script src="common.js"></script>
+    <script src="levels.js"></script>
     <script src="index.js"></script>
     <title>Task browser - ARC-Interactive</title>
 </head>
@@ -57,18 +58,23 @@
         <div id="main-inner">
             <div id="filter-settings">
                 Filter: 
-                <a href="#" title="Easy to solve, good for beginners.">easy</a>
-                <a href="#" class="filter-plus" title="Medium difficulty level. Don't start with these.">medium</a>
-                <a href="#" class="filter-minus" title="Hard difficulty level.">hard</a>
-                <a href="#" title="Solved by Icecuber">icecuber</a>
-                <a href="#" title="Solved by Parapraxis">parapraxis</a>
-                <a href="#" title="Has one or more issues">ambiguous</a>
-                <a href="#" title="Pattern expansion">pattern-expansion</a>
-                <a href="#" title="Extract an area from input">crop</a>
-                <a href="#" title="Recoloring">recolor</a>
-                <a href="#" class="filter-minus" title="Draw lines">line</a>
-                <a href="#" title="Pattern repetition">pattern-repeat</a>
-                <a href="#" title="Direction guessing">direction-guess</a>
+                <a href="?filter=entry" title="Easy to solve, good for beginners.">entry</a>
+                <a href="?filter=easy" title="Somewhat easy to solve.">easy</a>
+                <a href="?filter=-medium" class="filter-plus" title="Medium difficulty level. Don't start with these.">medium</a>
+                <a href="?filter=hard" class="filter-minus" title="Hard difficulty level.">hard</a>
+                <a href="?filter=tedious" title="Too boring to do.">tedious</a>
+                <a href="?filter=multiple-solutions" title="Ambiguous how to solve the task.">multiple-solutions</a>
+                <a href="?filter=unfixed" title="Has one or more issues.">unfixed</a>
+                <!-- 
+                <a href="?filter=icecuber" title="Solved by Icecuber">icecuber</a>
+                <a href="?filter=parapraxis" title="Solved by Parapraxis">parapraxis</a>
+                <a href="?filter=pattern-expansion" title="Pattern expansion">pattern-expansion</a>
+                <a href="?filter=crop" title="Extract an area from input">crop</a>
+                <a href="?filter=recolor" title="Recoloring">recolor</a>
+                <a href="?filter=line" class="filter-minus" title="Draw lines">line</a>
+                <a href="?filter=pattern-repeat" title="Pattern repetition">pattern-repeat</a>
+                <a href="?filter=direction" title="Direction guessing">direction-guess</a> 
+                -->
             </div>
             <div class="container">
                 <div class="gallery" id="gallery"></div>
