@@ -3,6 +3,7 @@ class PageController {
         this.db = null;
         this.dataset = null;
         this.theme = null;
+        this.visibleTasks = [];
 
         // Create URLSearchParams object
         const urlParams = new URLSearchParams(window.location.search);
@@ -234,7 +235,8 @@ class PageController {
         } else {
             filteredTasksStage2 = filteredTasksStage1;
         }
-        this.showTasks(filteredTasksStage2);
+        this.visibleTasks = filteredTasksStage2;
+        this.showVisibleTasks();
         this.assignThumbnailUrlsBasedOnCurrentTool();
         this.hideOverlay();
 
@@ -267,7 +269,7 @@ class PageController {
             console.log('Invalid taskindex', taskindex);
             return;
         }
-        let task = this.dataset.tasks[index];
+        let task = this.visibleTasks[index];
         if (!task) {
             console.log('Invalid task at index', index, task);
             return;
@@ -288,7 +290,8 @@ class PageController {
         document.getElementById("overlay").style.display = "none";
     }
 
-    showTasks(tasks) {
+    showVisibleTasks() {
+        let tasks = this.visibleTasks;
         console.log('Show tasks:', tasks.length);
         let openInNewTab = false;
 
