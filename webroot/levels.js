@@ -338,7 +338,9 @@ const ARC_LEVELS = {
     "95990924",
     "3de23699",
     "6455b5f5",
-    "e7a25a18"
+    "e7a25a18",
+    "d5d6de2d",
+    "dc433765"
   ],
   "medium": [
     "0e206a2e",
@@ -600,7 +602,9 @@ const ARC_LEVELS = {
     "f823c43c",
     "f0df5ff0",
     "f21745ec",
-    "fb791726"
+    "fb791726",
+    "ff28f65a",
+    "e9614598"
   ],
   "hard": [
     "7837ac64",
@@ -665,7 +669,11 @@ const ARC_LEVELS = {
     "ca8de6ea",
     "d94c3b52",
     "79369cc6",
-    "94133066"
+    "94133066",
+    "12997ef3",
+    "4852f2fa",
+    "f3e62deb",
+    "bda2d7a6"
   ],
   "tedious": [
     "92e50de0",
@@ -769,28 +777,21 @@ const ARC_LEVELS = {
     "e95e3d8e"
   ],
   "multipleSolutions": [
-    "4852f2fa",
     "e21a174a",
-    "ff28f65a",
     "d4469b4b",
-    "dc433765",
     "da2b0fe3",
     "31d5ba1a",
     "dae9d2b5",
     "c074846d",
     "794b24be",
     "bbb1b8b6",
-    "12997ef3",
     "25ff71a9",
     "e345f17b",
     "d5c634a2",
-    "e9614598",
     "b1fc8b8e",
     "4c177718",
-    "f3e62deb",
     "3428a4f5",
     "239be575",
-    "bda2d7a6",
     "5d2a5c43",
     "53b68214",
     "1d398264",
@@ -799,7 +800,6 @@ const ARC_LEVELS = {
     "9b4c17c4",
     "6ea4a07e",
     "44f52bb0",
-    "d5d6de2d",
     "9110e3c5"
   ],
   "unfixed": [
