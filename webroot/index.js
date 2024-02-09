@@ -43,6 +43,7 @@ class PageController {
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         this.setupAdvancedToolPicker();
+        this.updateFilterButtons();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -347,6 +348,84 @@ class PageController {
         let attributeName = `data-tool-${toolIdentifier}`;
         links.forEach(link => {
             link.href = link.getAttribute(attributeName);
+        });
+    }
+
+    updateFilterButtons() {
+        // Determine what buttons are currently active.
+        var filterButtonsPlus = [];
+        var filterButtonsMinus = [];
+        if (this.filter) {
+            console.log('Filter:', this.filter);
+            let parts = this.filter.split(',');
+            for (let i = 0; i < parts.length; i++) {
+                let part = parts[i];
+                var filterId = part;
+                if (part.startsWith('-')) {
+                    filterId = part.substring(1);
+                    filterButtonsMinus.push(filterId);
+                } else {
+                    filterButtonsPlus.push(filterId);
+                }
+            }
+        }
+        console.log('filterButtonsPlus:', filterButtonsPlus);
+        console.log('filterButtonsMinus:', filterButtonsMinus);
+
+        // Traverse all links and update their href and class.
+        let links = document.querySelectorAll('a[data-filter]'); // Assuming all links have a `data-filter` attribute
+        links.forEach(link => {
+            let filterId = link.getAttribute('data-filter');
+
+            // Copy the arrays, but without the current button.
+            var newFilterButtonsPlus = filterButtonsPlus.filter(item => item !== filterId);
+            var newFilterButtonsMinus = filterButtonsMinus.filter(item => item !== filterId);
+
+            // Insert the current button into the opposite array. Since it's tristate.
+            // If it's normal mode, switch it to plus array.
+            // If it's a plus, insert it into the minus array.
+            // If it's a minus, switch it to normal mode.
+            if (filterId) {
+                if (filterButtonsPlus.includes(filterId)) {
+                    newFilterButtonsMinus.push(filterId);
+                } else {
+                    if (!filterButtonsMinus.includes(filterId)) {
+                        newFilterButtonsPlus.push(filterId);
+                    }
+                }
+            }
+
+            // Sort the arrays, so url generation is deterministic.
+            newFilterButtonsPlus.sort();
+            newFilterButtonsMinus.sort();
+
+            // Concatenate the filter parameters
+            var filterParameterString = '';
+            if (newFilterButtonsPlus.length > 0) {
+                filterParameterString = newFilterButtonsPlus.join(',');
+            }
+            for (let i = 0; i < newFilterButtonsMinus.length; i++) {
+                if (filterParameterString.length > 0) {
+                    filterParameterString += ',';
+                }
+                filterParameterString += '-' + newFilterButtonsMinus[i];
+            }
+
+            // Generate the href
+            var href = ".?";
+            href = href + `filter=${filterParameterString}`;
+            link.setAttribute('href', href);
+
+            // Set the class of the link, so it's highlighted depending on if it's plus/minus/neutral.
+            if (filterButtonsPlus.includes(filterId)) {
+                link.className = 'filter-plus';
+            } else {
+                if (filterButtonsMinus.includes(filterId)) {
+                    link.className = 'filter-minus';
+                } else {
+                    link.className = '';
+                }
+            }
         });
     }
 }
