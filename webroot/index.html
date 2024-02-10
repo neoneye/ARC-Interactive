@@ -9,6 +9,7 @@
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <script src="pako_inflate.min.js"></script>
     <script src="common.js"></script>
+    <script src="levels.js"></script>
     <script src="index.js"></script>
     <title>Task browser - ARC-Interactive</title>
 </head>
@@ -20,7 +21,7 @@
     <header class="titlebar-container">
         <div class="titlebar-item titlebar-item-left">
             <a id="settings-button" class="secondary-button" href="settings.html">Settings</a>
-            <a id="about-link" class="secondary-button" href="about.html">About</a>
+            <a id="about-button" class="secondary-button" href="about.html">About</a>
         </div>
         
         <div class="titlebar-item titlebar-item-center">
@@ -56,6 +57,17 @@
     <main id="main-outer">
         <div id="main-inner">
             <div class="container">
+                <div id="filter-settings" class="hidden">
+                    Filter: 
+                    <a href="#" data-filter="entry" title="Easy to solve, good for beginners.">entry</a>
+                    <a href="#" data-filter="easy" title="Somewhat easy to solve.">easy</a>
+                    <a href="#" data-filter="medium" title="Medium difficulty level. Don't start with these.">medium</a>
+                    <a href="#" data-filter="hard" title="Hard difficulty level.">hard</a>
+                    <a href="#" data-filter="tedious" title="Too boring to do.">tedious</a>
+                    <a href="#" data-filter="multiple-solutions" title="Ambiguous how to solve the task.">multiple-solutions</a>
+                    <a href="#" data-filter="unfixed" title="Has one or more issues.">unfixed</a>
+                </div>
+                <div id="filter-status">Number of tasks here</div>
                 <div class="gallery" id="gallery"></div>
             </div>
         </div>

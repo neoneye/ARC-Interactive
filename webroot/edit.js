@@ -162,18 +162,15 @@ class PageController {
         this.db = null;
         this.theme = null;
 
-        // Get the full URL
-        const url = window.location.href;
-
         // Create URLSearchParams object
-        const urlParams = new URLSearchParams(window.location.search);
+        let urlParams = new URLSearchParams(window.location.search);
 
         // Get the 'task' parameter
-        const urlParamTask = urlParams.get('task');
+        let urlParamTask = urlParams.get('task');
 
         // If 'task' parameter exists, decode it
         if (urlParamTask) {
-            const decodedTask = decodeURIComponent(urlParamTask);
+            let decodedTask = decodeURIComponent(urlParamTask);
             console.log("Task:", decodedTask);
             this.taskId = decodedTask;
 
@@ -186,11 +183,11 @@ class PageController {
         }
 
         // Get the 'dataset' parameter
-        const urlParamDataset = urlParams.get('dataset');
+        let urlParamDataset = urlParams.get('dataset');
 
         // If 'dataset' parameter exists, decode it
         if (urlParamDataset) {
-            const decodedDataset = decodeURIComponent(urlParamDataset);
+            let decodedDataset = decodeURIComponent(urlParamDataset);
             console.log("Dataset:", decodedDataset);
             this.datasetId = decodedDataset;
         } else {
@@ -198,10 +195,15 @@ class PageController {
             console.error("URLSearchParams does not contain 'dataset' parameter.");
         }
 
-        if(urlParamDataset) {
+        // Assign link to "Back button", so it preserves the URL parameters.
+        {
+            let urlParams2 = new URLSearchParams(window.location.search);
+            urlParams2.delete('task');
+
+            let url = `.?` + urlParams2.toString();
             let el = document.getElementById('link-to-tasks-page');
-            el.href = `.?dataset=${urlParamDataset}`;
-            console.log('setting back button url: el.href', el.href);
+            el.href = url;
+            console.log('setting back button url:', el.href);
         }
 
         if (enableFullscreenMode()) {

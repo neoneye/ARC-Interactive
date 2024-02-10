@@ -8,11 +8,18 @@
     <link rel="stylesheet" href="about.css">
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <title>About - ARC-Interactive</title>
+
+    <script>
+        function body_onload() {
+            // Assign link to "Back button", so it preserves the URL parameters.
+            document.getElementById('link-to-tasks-page').href = '.' + window.location.search;
+        }
+    </script>
 </head>
-<body>
+<body onload="body_onload()">
     <header class="titlebar-container">
         <div class="titlebar-item titlebar-item-left">
-            <a class="secondary-button" href=".">Tasks</a>
+            <a id="link-to-tasks-page" class="secondary-button" href=".">Tasks</a>
         </div>
         
         <div class="titlebar-item titlebar-item-center">About</div>

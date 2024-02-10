@@ -3,6 +3,13 @@ class PageController {
         this.db = null;
         this.dataset = null;
         this.theme = null;
+        this.visibleTasks = [];
+
+        // Assign urls to buttons in the navigation bar, so the URL parameters gets preserved.
+        {
+            document.getElementById('settings-button').href = 'settings.html' + window.location.search;
+            document.getElementById('about-button').href = 'about.html' + window.location.search;
+        }
 
         // Create URLSearchParams object
         const urlParams = new URLSearchParams(window.location.search);
@@ -19,8 +26,30 @@ class PageController {
             this.datasetId = 'ARC';
             // console.log("URLSearchParams does not contain 'dataset' parameter. Using 'ARC' dataset.");
         }
-
         document.title = this.datasetId + " - ARC-Interactive";
+
+        // Extract the "filter" from urlParams, it looks like this: 
+        // "filter=hard,-ambiguous", this gives the hard tasks, but not the ambiguous ones.
+        // "filter=-easy", this gives all tasks except the easy ones.
+        const urlParamFilter = urlParams.get('filter');
+        if (urlParamFilter) {
+            // console.log("Filter:", urlParamFilter);
+            this.filter = urlParamFilter;
+        } else {
+            this.filter = null;
+        }
+
+        // At the moment the "filter" is only used for the ARC dataset.
+        if (this.datasetId != 'ARC') {
+            this.filter = null;
+        }
+
+        // At the moment the "filter" is only used for the ARC dataset.
+        if (this.datasetId == 'ARC') {
+            // Show the "filter-settings" when the dataset is ARC.
+            // Otherwise hide it.
+            document.getElementById('filter-settings').classList.remove('hidden');
+        }
     }
 
     async onload() {
@@ -31,6 +60,7 @@ class PageController {
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         this.setupAdvancedToolPicker();
+        this.updateFilterButtons();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -111,7 +141,13 @@ class PageController {
         // Listen for changes to the selected option
         select.addEventListener('change', () => {
             this.scrollTopSetZero();
-            window.location.href = `index.html?dataset=${encodeURIComponent(select.value)}`;
+
+            // Preserve the url parameters, and overwrite the 'dataset' parameter.
+            let urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('dataset', select.value);
+
+            // Redirect to the 'index.html' page, with the new url parameters.
+            window.location.href = '.?' + urlParams.toString();
         });
     }
 
@@ -156,7 +192,77 @@ class PageController {
         } catch (error) {
             console.error('Error loading bundle', error);
         }
-        this.showTasks(this.dataset.tasks);
+        var includedTaskIds = [];
+        var excludedTaskIds = [];
+        if (this.filter) {
+            console.log('Filter:', this.filter);
+            let parts = this.filter.split(',');
+            for (let i = 0; i < parts.length; i++) {
+                let part = parts[i];
+                var filterId = part;
+                var includeTask = true;
+                if (part.startsWith('-')) {
+                    filterId = part.substring(1);
+                    includeTask = false;
+                }
+
+                var taskIds = [];
+                if (filterId == 'entry') {
+                    taskIds = ARC_LEVELS.entry;
+                }
+                if (filterId == 'easy') {
+                    taskIds = ARC_LEVELS.easy;
+                }
+                if (filterId == 'medium') {
+                    taskIds = ARC_LEVELS.medium;
+                }
+                if (filterId == 'hard') {
+                    taskIds = ARC_LEVELS.hard;
+                }
+                if (filterId == 'tedious') {
+                    taskIds = ARC_LEVELS.tedious;
+                }
+                if (filterId == 'multiple-solutions') {
+                    taskIds = ARC_LEVELS.multipleSolutions;
+                }
+                if (filterId == 'unfixed') {
+                    taskIds = ARC_LEVELS.unfixed;
+                }
+                if (includeTask) {
+                    includedTaskIds = includedTaskIds.concat(taskIds);
+                } else {
+                    excludedTaskIds = excludedTaskIds.concat(taskIds);
+                }
+            }
+        } else {
+            console.log('No filter');
+        }
+        var filteredTasksStage1 = [];
+        if (includedTaskIds.length > 0) {
+            for(let i = 0; i < this.dataset.tasks.length; i++) {
+                let task = this.dataset.tasks[i];
+                if (includedTaskIds.includes(task.taskId)) {
+                    filteredTasksStage1.push(task);
+                }
+            }
+        } else {
+            filteredTasksStage1 = this.dataset.tasks;
+        }
+        let filteredTasksStage2 = [];
+        if (excludedTaskIds.length > 0) {
+            for(let i = 0; i < filteredTasksStage1.length; i++) {
+                let task = filteredTasksStage1[i];
+                if (!excludedTaskIds.includes(task.taskId)) {
+                    filteredTasksStage2.push(task);
+                }
+            }
+        } else {
+            filteredTasksStage2 = filteredTasksStage1;
+        }
+        this.visibleTasks = filteredTasksStage2;
+
+        this.updateVisibleTaskCount();
+        this.showVisibleTasks();
         this.assignThumbnailUrlsBasedOnCurrentTool();
         this.hideOverlay();
 
@@ -189,7 +295,7 @@ class PageController {
             console.log('Invalid taskindex', taskindex);
             return;
         }
-        let task = this.dataset.tasks[index];
+        let task = this.visibleTasks[index];
         if (!task) {
             console.log('Invalid task at index', index, task);
             return;
@@ -210,13 +316,30 @@ class PageController {
         document.getElementById("overlay").style.display = "none";
     }
 
-    showTasks(tasks) {
+    updateVisibleTaskCount() {
+        let text = '';
+        if (this.visibleTasks.length == 0) {
+            text = 'No tasks found. Adjust filter settings to see more.';
+        } else {
+            text = `Number of tasks: ${this.visibleTasks.length}`;
+        }
+        let el = document.getElementById('filter-status');
+        el.innerText = text;
+    }
+
+    showVisibleTasks() {
+        let tasks = this.visibleTasks;
         console.log('Show tasks:', tasks.length);
         let openInNewTab = false;
 
         let customUrl = localStorage.getItem('arc-interactive-callback-url');
 
-        const el_gallery = document.getElementById('gallery');
+        var filterUrlParam = '';
+        if (this.filter && this.filter.length > 0) {
+            filterUrlParam = `&filter=${this.filter}`;
+        }
+
+        let el_gallery = document.getElementById('gallery');
 
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
@@ -240,10 +363,10 @@ class PageController {
             } else {
                 el_a.className = 'gallery_cell gallery_cell_normal';
             }
-            el_a.href = task.openUrl;
-            el_a.setAttribute("data-tool-edit", task.openUrl);
-            el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a'));
-            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b'));
+            el_a.href = task.openUrl + filterUrlParam;
+            el_a.setAttribute("data-tool-edit", task.openUrl + filterUrlParam);
+            el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a') + filterUrlParam);
+            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b') + filterUrlParam);
             if (openInNewTab) {
                 el_a.target = "_blank";
             }
@@ -266,6 +389,89 @@ class PageController {
         let attributeName = `data-tool-${toolIdentifier}`;
         links.forEach(link => {
             link.href = link.getAttribute(attributeName);
+        });
+    }
+
+    updateFilterButtons() {
+        // Determine what buttons are currently active.
+        var filterButtonsPlus = [];
+        var filterButtonsMinus = [];
+        if (this.filter) {
+            console.log('Filter:', this.filter);
+            let parts = this.filter.split(',');
+            for (let i = 0; i < parts.length; i++) {
+                let part = parts[i];
+                var filterId = part;
+                if (part.startsWith('-')) {
+                    filterId = part.substring(1);
+                    filterButtonsMinus.push(filterId);
+                } else {
+                    filterButtonsPlus.push(filterId);
+                }
+            }
+        }
+        console.log('filterButtonsPlus:', filterButtonsPlus);
+        console.log('filterButtonsMinus:', filterButtonsMinus);
+
+        // Traverse all links and update their href and class.
+        let links = document.querySelectorAll('a[data-filter]'); // Assuming all links have a `data-filter` attribute
+        links.forEach(link => {
+            let filterId = link.getAttribute('data-filter');
+
+            // Copy the arrays, but without the current button.
+            var newFilterButtonsPlus = filterButtonsPlus.filter(item => item !== filterId);
+            var newFilterButtonsMinus = filterButtonsMinus.filter(item => item !== filterId);
+
+            // Insert the current button into the opposite array. Since it's tristate.
+            // If it's normal mode, switch it to plus array.
+            // If it's a plus, insert it into the minus array.
+            // If it's a minus, switch it to normal mode.
+            if (filterId) {
+                if (filterButtonsPlus.includes(filterId)) {
+                    newFilterButtonsMinus.push(filterId);
+                } else {
+                    if (!filterButtonsMinus.includes(filterId)) {
+                        newFilterButtonsPlus.push(filterId);
+                    }
+                }
+            }
+
+            // Sort the arrays, so url generation is deterministic.
+            newFilterButtonsPlus.sort();
+            newFilterButtonsMinus.sort();
+
+            // Concatenate the filter parameters
+            var filterParameterString = '';
+            if (newFilterButtonsPlus.length > 0) {
+                filterParameterString = newFilterButtonsPlus.join(',');
+            }
+            for (let i = 0; i < newFilterButtonsMinus.length; i++) {
+                if (filterParameterString.length > 0) {
+                    filterParameterString += ',';
+                }
+                filterParameterString += '-' + newFilterButtonsMinus[i];
+            }
+
+            // Generate the href
+            let urlParams = new URLSearchParams(window.location.search);
+            if (filterParameterString.length > 0) {
+                urlParams.set('filter', filterParameterString);
+            } else {
+                urlParams.delete('filter');
+            }
+            let href = '.?' + urlParams.toString();
+            link.setAttribute('href', href);
+
+            // Set the class of the link, so it's highlighted depending on if it's plus/minus/neutral.
+            if (filterButtonsPlus.includes(filterId)) {
+                link.className = 'filter-plus';
+            } else {
+                if (filterButtonsMinus.includes(filterId)) {
+                    link.className = 'filter-minus';
+                } else {
+                    link.className = '';
+                }
+            }
         });
     }
 }

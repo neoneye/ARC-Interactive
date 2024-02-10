@@ -1,5 +1,7 @@
 class PageController {
     constructor() {
+        // Assign link to "Back button", so it preserves the URL parameters.
+        document.getElementById('link-to-tasks-page').href = '.' + window.location.search;
     }
 
     async onload() {
