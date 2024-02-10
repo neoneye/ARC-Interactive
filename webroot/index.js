@@ -213,17 +213,20 @@ class PageController {
                 if (filterId == 'easy') {
                     taskIds = ARC_LEVELS.easy;
                 }
+                if (filterId == 'intermediate') {
+                    taskIds = ARC_LEVELS.intermediate;
+                }
                 if (filterId == 'medium') {
                     taskIds = ARC_LEVELS.medium;
                 }
                 if (filterId == 'hard') {
                     taskIds = ARC_LEVELS.hard;
                 }
-                if (filterId == 'tedious') {
-                    taskIds = ARC_LEVELS.tedious;
+                if (filterId == 'very-hard') {
+                    taskIds = ARC_LEVELS.veryHard;
                 }
-                if (filterId == 'multiple-solutions') {
-                    taskIds = ARC_LEVELS.multipleSolutions;
+                if (filterId == 'expert') {
+                    taskIds = ARC_LEVELS.expert;
                 }
                 if (filterId == 'unfixed') {
                     taskIds = ARC_LEVELS.unfixed;
