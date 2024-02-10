@@ -158,30 +158,30 @@ html {
 }
 
 #settings-button,
-#about-link {
+#about-button {
   font-size: 10px;
 }
 
-#about-link {
+#about-button {
   display: none;
 }
 
 @media only screen and (min-width: 700px) {
-  #about-link {
+  #about-button {
     display: inline-block;
   }
 }
 
 @media only screen and (min-width: 850px) {
   #settings-button,
-  #about-link {
+  #about-button {
     font-size: 12px;
   }
 }
 
 @media only screen and (min-width: 1000px) {
   #settings-button,
-  #about-link {
+  #about-button {
     font-size: 15px;
   }
 }

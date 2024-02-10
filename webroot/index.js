@@ -33,6 +33,12 @@ class PageController {
         }
 
         document.title = this.datasetId + " - ARC-Interactive";
+
+        // Assign urls to buttons in the navigation bar, so the URL parameters gets preserved.
+        {
+            document.getElementById('settings-button').href = 'settings.html' + window.location.search;
+            document.getElementById('about-button').href = 'about.html' + window.location.search;
+        }
     }
 
     async onload() {
