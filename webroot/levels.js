@@ -489,7 +489,6 @@ const ARC_LEVELS = {
     "3e980e27",
     "846bdb03",
     "d07ae81c",
-    "c92b942c",
     "cdecee7f",
     "1acc24af",
     "9aec4887",
@@ -751,6 +750,7 @@ const ARC_LEVELS = {
     "e95e3d8e"
   ],
   "expert": [
+    "c92b942c",
     "b4a43f3b",
     "c64f1187",
     "256b0a75",
