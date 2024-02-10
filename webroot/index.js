@@ -26,7 +26,7 @@ class PageController {
         // "filter=-easy", this gives all tasks except the easy ones.
         const urlParamFilter = urlParams.get('filter');
         if (urlParamFilter) {
-            console.log("Filter:", urlParamFilter);
+            // console.log("Filter:", urlParamFilter);
             this.filter = urlParamFilter;
         } else {
             this.filter = null;
@@ -249,6 +249,8 @@ class PageController {
             filteredTasksStage2 = filteredTasksStage1;
         }
         this.visibleTasks = filteredTasksStage2;
+
+        this.updateVisibleTaskCount();
         this.showVisibleTasks();
         this.assignThumbnailUrlsBasedOnCurrentTool();
         this.hideOverlay();
@@ -301,6 +303,17 @@ class PageController {
 
     hideOverlay() {
         document.getElementById("overlay").style.display = "none";
+    }
+
+    updateVisibleTaskCount() {
+        let text = '';
+        if (this.visibleTasks.length == 0) {
+            text = 'No tasks found. Adjust filter settings to see more.';
+        } else {
+            text = `Number of tasks: ${this.visibleTasks.length}`;
+        }
+        let el = document.getElementById('filter-status');
+        el.innerText = text;
     }
 
     showVisibleTasks() {
