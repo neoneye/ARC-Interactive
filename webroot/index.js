@@ -5,6 +5,12 @@ class PageController {
         this.theme = null;
         this.visibleTasks = [];
 
+        // Assign urls to buttons in the navigation bar, so the URL parameters gets preserved.
+        {
+            document.getElementById('settings-button').href = 'settings.html' + window.location.search;
+            document.getElementById('about-button').href = 'about.html' + window.location.search;
+        }
+
         // Create URLSearchParams object
         const urlParams = new URLSearchParams(window.location.search);
 
@@ -20,6 +26,7 @@ class PageController {
             this.datasetId = 'ARC';
             // console.log("URLSearchParams does not contain 'dataset' parameter. Using 'ARC' dataset.");
         }
+        document.title = this.datasetId + " - ARC-Interactive";
 
         // Extract the "filter" from urlParams, it looks like this: 
         // "filter=hard,-ambiguous", this gives the hard tasks, but not the ambiguous ones.
@@ -32,12 +39,16 @@ class PageController {
             this.filter = null;
         }
 
-        document.title = this.datasetId + " - ARC-Interactive";
+        // At the moment the "filter" is only used for the ARC dataset.
+        if (this.datasetId != 'ARC') {
+            this.filter = null;
+        }
 
-        // Assign urls to buttons in the navigation bar, so the URL parameters gets preserved.
-        {
-            document.getElementById('settings-button').href = 'settings.html' + window.location.search;
-            document.getElementById('about-button').href = 'about.html' + window.location.search;
+        // At the moment the "filter" is only used for the ARC dataset.
+        if (this.datasetId == 'ARC') {
+            // Show the "filter-settings" when the dataset is ARC.
+            // Otherwise hide it.
+            document.getElementById('filter-settings').classList.remove('hidden');
         }
     }
 
