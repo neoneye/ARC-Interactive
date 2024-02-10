@@ -453,8 +453,13 @@ class PageController {
             }
 
             // Generate the href
-            var href = ".?";
-            href = href + `filter=${filterParameterString}`;
+            let urlParams = new URLSearchParams(window.location.search);
+            if (filterParameterString.length > 0) {
+                urlParams.set('filter', filterParameterString);
+            } else {
+                urlParams.delete('filter');
+            }
+            let href = '.?' + urlParams.toString();
             link.setAttribute('href', href);
 
             // Set the class of the link, so it's highlighted depending on if it's plus/minus/neutral.
