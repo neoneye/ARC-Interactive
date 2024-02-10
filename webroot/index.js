@@ -298,7 +298,12 @@ class PageController {
 
         let customUrl = localStorage.getItem('arc-interactive-callback-url');
 
-        const el_gallery = document.getElementById('gallery');
+        var filterUrlParam = '';
+        if (this.filter && this.filter.length > 0) {
+            filterUrlParam = `&filter=${this.filter}`;
+        }
+
+        let el_gallery = document.getElementById('gallery');
 
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
@@ -322,10 +327,10 @@ class PageController {
             } else {
                 el_a.className = 'gallery_cell gallery_cell_normal';
             }
-            el_a.href = task.openUrl;
-            el_a.setAttribute("data-tool-edit", task.openUrl);
-            el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a'));
-            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b'));
+            el_a.href = task.openUrl + filterUrlParam;
+            el_a.setAttribute("data-tool-edit", task.openUrl + filterUrlParam);
+            el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a') + filterUrlParam);
+            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b') + filterUrlParam);
             if (openInNewTab) {
                 el_a.target = "_blank";
             }
