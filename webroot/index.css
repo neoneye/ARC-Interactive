@@ -12,6 +12,8 @@ html {
   outline: none;
 }
 
+/* Overlay with Initializing... message */
+
 #overlay {
   position: fixed;
   top: 0;
@@ -33,17 +35,64 @@ html {
   -ms-transform: translate(-50%,-50%);
 }
 
+/* Filter section */
+
+#filter-settings a {
+  color: #2a7ae2;
+  text-decoration: none;
+}
+
+.filter-plus,
+.filter-minus {
+  border-radius: 25px;
+  border: 1px solid #383838;
+  padding-top: 0px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.filter-plus {
+  background: #BCE29E;
+}
+
+.filter-plus::before {
+  content: "+";
+}
+
+.filter-minus {
+  background: #FF8787;
+}
+
+.filter-minus::before {
+  content: "-";
+}
+
+/* Task gallery */
+
 .container {
-  width: 100%;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#filter-settings {
+  padding-top: 1em;
+}
+
+#filter-status {
+  padding-top: 1em;
+  padding-bottom: 1em;
 }
 
 .gallery {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  margin-left: auto;
-  margin-right: auto;
-  width: fit-content; /* This ensures that the grid doesn't stretch beyond its content */
   grid-gap: 0; 
 }
 
@@ -119,30 +168,30 @@ html {
 }
 
 #settings-button,
-#about-link {
+#about-button {
   font-size: 10px;
 }
 
-#about-link {
+#about-button {
   display: none;
 }
 
 @media only screen and (min-width: 700px) {
-  #about-link {
+  #about-button {
     display: inline-block;
   }
 }
 
 @media only screen and (min-width: 850px) {
   #settings-button,
-  #about-link {
+  #about-button {
     font-size: 12px;
   }
 }
 
 @media only screen and (min-width: 1000px) {
   #settings-button,
-  #about-link {
+  #about-button {
     font-size: 15px;
   }
 }
