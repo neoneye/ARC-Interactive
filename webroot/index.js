@@ -225,9 +225,6 @@ class PageController {
                 if (filterId == 'tedious') {
                     taskIds = ARC_LEVELS.tedious;
                 }
-                if (filterId == 'multiple-solutions') {
-                    taskIds = ARC_LEVELS.multipleSolutions;
-                }
                 if (filterId == 'unfixed') {
                     taskIds = ARC_LEVELS.unfixed;
                 }
