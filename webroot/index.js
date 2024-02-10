@@ -219,6 +219,9 @@ class PageController {
                 if (filterId == 'hard') {
                     taskIds = ARC_LEVELS.hard;
                 }
+                if (filterId == 'expert') {
+                    taskIds = ARC_LEVELS.expert;
+                }
                 if (filterId == 'tedious') {
                     taskIds = ARC_LEVELS.tedious;
                 }
