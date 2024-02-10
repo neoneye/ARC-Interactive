@@ -130,7 +130,13 @@ class PageController {
         // Listen for changes to the selected option
         select.addEventListener('change', () => {
             this.scrollTopSetZero();
-            window.location.href = `index.html?dataset=${encodeURIComponent(select.value)}`;
+
+            // Preserve the url parameters, and overwrite the 'dataset' parameter.
+            let urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('dataset', select.value);
+
+            // Redirect to the 'index.html' page, with the new url parameters.
+            window.location.href = '.?' + urlParams.toString();
         });
     }
 
