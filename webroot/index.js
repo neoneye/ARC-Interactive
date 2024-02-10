@@ -213,6 +213,9 @@ class PageController {
                 if (filterId == 'easy') {
                     taskIds = ARC_LEVELS.easy;
                 }
+                if (filterId == 'intermediate') {
+                    taskIds = ARC_LEVELS.intermediate;
+                }
                 if (filterId == 'medium') {
                     taskIds = ARC_LEVELS.medium;
                 }
