@@ -1,5 +1,13 @@
 class PageController {
     constructor() {
+        // Assign link to "Back button", so it preserves the URL parameters.
+        {
+            let urlParams = new URLSearchParams(window.location.search);
+            let url = `.?` + urlParams.toString();
+            let el = document.getElementById('link-to-tasks-page');
+            el.href = url;
+            console.log('setting back button url:', el.href);
+        }        
     }
 
     async onload() {
