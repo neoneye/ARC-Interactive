@@ -821,6 +821,42 @@ const ARC_TAGS = {
         "d0f5fe59",
         "d22278a0"
     ],
+    "parapraxis-correct": [
+        "00576224",
+        "0607ce86",
+        "070dd51e",
+        "09c534e7",
+        "0b17323b",
+        "0bb8deee",
+        "0c786b71",
+        "0c9aba6e",
+        "0e671a1a",
+        "103eff5b",
+        "12997ef3",
+        "137f0df0",
+        "14754a24",
+        "15663ba9",
+        "1990f7a8",
+        "19bb5feb",
+        "1a2e2828",
+        "1c0d0a4b",
+        "1d0a4b61",
+        "1d398264",
+        "1e97544e",
+        "2072aba6",
+        "22a4bbc2",
+        "2546ccf6",
+        "27f8ce4f",
+        "281123b4",
+        "292dd178",
+        "3194b014",
+        "31d5ba1a",
+        "31d5ba1a",
+        "32e9702f",
+        "332efdb3",
+        "33b52de3",
+        "3979b1a8"
+    ],
     "pattern_alignment": [
         "1caeab9d"
     ],
@@ -1188,6 +1224,8 @@ const ARC_TAGS = {
         "a1570a43",
         "a64e4611",
         "a8d7556c",
+        "ba97ae07",
+        "bb43febb",
         "b6afb2da",
         "c909285e",
         "d4f3cd78",
@@ -1227,10 +1265,6 @@ const ARC_TAGS = {
         "ce22a75a",
         "d5d6de2d",
         "d90796e8"
-    ],
-    "rettangle_guessing": [
-        "ba97ae07",
-        "bb43febb"
     ],
     "separate_image": [
         "6d0160f0"

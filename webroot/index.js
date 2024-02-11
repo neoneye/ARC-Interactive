@@ -427,6 +427,9 @@ class PageController {
             let el_tag = document.createElement('a');
             el_tag.innerText = filterId;
             el_tag.setAttribute('data-filter', filterId);
+            if (filterId == "parapraxis-correct") {
+                el_tag.title = "Solved by Parapraxis LLM, as of 2024-Feb-11";
+            }
             el.appendChild(el_tag);
             let el_space = document.createElement('span');
             el_space.innerText = ' ';
