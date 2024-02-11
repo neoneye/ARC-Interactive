@@ -59,6 +59,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
+        this.setupAdvancedFilterTag();
         this.setupAdvancedToolPicker();
         this.populateFilterListTags();
         this.updateFilterButtons();
@@ -152,6 +153,19 @@ class PageController {
         });
     }
 
+    setupAdvancedFilterTag() {
+        if (!Settings.getAdvancedModeEnabled()) {
+            // Advanced mode is not enabled, so we don't show the filter by tag.
+            return;
+        }
+
+        // Show the advanced filter by tag
+        {
+            var el = document.getElementById('advanced-filter-tag');
+            el.classList.remove('hidden');
+        }
+    }
+
     setupAdvancedToolPicker() {
         if (!Settings.getAdvancedModeEnabled()) {
             // Advanced mode is not enabled, so we don't show the tool picker.
@@ -232,8 +246,10 @@ class PageController {
                 if (filterId == 'unfixed') {
                     taskIds = ARC_LEVELS.unfixed;
                 }
-                if (ARC_TAGS[filterId]) {
-                    taskIds = ARC_TAGS[filterId];
+                if (Settings.getAdvancedModeEnabled()) {
+                    if (ARC_TAGS[filterId]) {
+                        taskIds = ARC_TAGS[filterId];
+                    }
                 }
                 if (includeTask) {
                     includedTaskIds = includedTaskIds.concat(taskIds);

@@ -238,6 +238,7 @@ html {
   }
 }
 
-#advanced-tool.hidden {
+#advanced-tool.hidden,
+#advanced-filter-tag.hidden {
   display: none !important;
 }
