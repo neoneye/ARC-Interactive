@@ -222,33 +222,12 @@ class PageController {
                 }
 
                 var taskIds = [];
-                if (filterId == 'entry') {
-                    taskIds = ARC_LEVELS.entry;
-                }
-                if (filterId == 'easy') {
-                    taskIds = ARC_LEVELS.easy;
-                }
-                if (filterId == 'intermediate') {
-                    taskIds = ARC_LEVELS.intermediate;
-                }
-                if (filterId == 'medium') {
-                    taskIds = ARC_LEVELS.medium;
-                }
-                if (filterId == 'hard') {
-                    taskIds = ARC_LEVELS.hard;
-                }
-                if (filterId == 'very-hard') {
-                    taskIds = ARC_LEVELS.veryHard;
-                }
-                if (filterId == 'expert') {
-                    taskIds = ARC_LEVELS.expert;
-                }
-                if (filterId == 'unfixed') {
-                    taskIds = ARC_LEVELS.unfixed;
+                if (META_ARC_LEVELS[filterId]) {
+                    taskIds = META_ARC_LEVELS[filterId];
                 }
                 if (Settings.getAdvancedModeEnabled()) {
-                    if (ARC_TAGS[filterId]) {
-                        taskIds = ARC_TAGS[filterId];
+                    if (META_ARC_TAGS[filterId]) {
+                        taskIds = META_ARC_TAGS[filterId];
                     }
                 }
                 if (includeTask) {
@@ -420,7 +399,7 @@ class PageController {
         while (el.firstChild) {
             el.removeChild(el.firstChild);
         }
-        let keys = Object.keys(ARC_TAGS);
+        let keys = Object.keys(META_ARC_TAGS);
         keys.sort();
         for (let i = 0; i < keys.length; i++) {
             let filterId = keys[i];

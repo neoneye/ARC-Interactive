@@ -1,6 +1,6 @@
 // Based on by ARC-Game by Alexey Borsky (volotat)
 // https://github.com/volotat/ARC-Game
-const ARC_LEVELS = {
+const META_ARC_LEVELS = {
   "entry": [
     "bb43febb",
     "6f8cd79b",
@@ -612,7 +612,7 @@ const ARC_LEVELS = {
     "caa06a1f",
     "662c240a",
   ],
-  "veryHard": [
+  "very-hard": [
     "4852f2fa",
     "025d127b",
     "12422b43",

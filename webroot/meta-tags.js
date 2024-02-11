@@ -1,6 +1,6 @@
 // Based on by Davide Bonin, 'Task Tagging' notebook
 // https://www.kaggle.com/code/davidbnn92/task-tagging/notebook
-const ARC_TAGS = {
+const META_ARC_TAGS = {
     "adapt_image_to_grid": [
         "09629e4f"
     ],
