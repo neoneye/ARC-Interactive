@@ -60,6 +60,7 @@ class PageController {
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         this.setupAdvancedToolPicker();
+        this.populateFilterListTags();
         this.updateFilterButtons();
         await this.loadTasks();
 
@@ -231,6 +232,9 @@ class PageController {
                 if (filterId == 'unfixed') {
                     taskIds = ARC_LEVELS.unfixed;
                 }
+                if (ARC_TAGS[filterId]) {
+                    taskIds = ARC_TAGS[filterId];
+                }
                 if (includeTask) {
                     includedTaskIds = includedTaskIds.concat(taskIds);
                 } else {
@@ -393,6 +397,25 @@ class PageController {
         links.forEach(link => {
             link.href = link.getAttribute(attributeName);
         });
+    }
+
+    populateFilterListTags() {
+        let el = document.getElementById('filter-list-tags');
+        while (el.firstChild) {
+            el.removeChild(el.firstChild);
+        }
+        let keys = Object.keys(ARC_TAGS);
+        keys.sort();
+        for (let i = 0; i < keys.length; i++) {
+            let filterId = keys[i];
+            let el_tag = document.createElement('a');
+            el_tag.innerText = filterId;
+            el_tag.setAttribute('data-filter', filterId);
+            el.appendChild(el_tag);
+            let el_space = document.createElement('span');
+            el_space.innerText = ' ';
+            el.appendChild(el_space);
+        }    
     }
 
     updateFilterButtons() {
