@@ -1224,6 +1224,8 @@ const ARC_TAGS = {
         "a1570a43",
         "a64e4611",
         "a8d7556c",
+        "ba97ae07",
+        "bb43febb",
         "b6afb2da",
         "c909285e",
         "d4f3cd78",
@@ -1263,10 +1265,6 @@ const ARC_TAGS = {
         "ce22a75a",
         "d5d6de2d",
         "d90796e8"
-    ],
-    "rettangle_guessing": [
-        "ba97ae07",
-        "bb43febb"
     ],
     "separate_image": [
         "6d0160f0"
