@@ -62,6 +62,7 @@ class PageController {
         this.setupAdvancedFilterTag();
         this.setupAdvancedToolPicker();
         this.populateFilterListTags();
+        this.populateFilterListCategories();
         this.updateFilterButtons();
         await this.loadTasks();
 
@@ -226,6 +227,15 @@ class PageController {
                     taskIds = META_ARC_LEVELS[filterId];
                 }
                 if (Settings.getAdvancedModeEnabled()) {
+                    // if filterId starts with 'cat50_', then it's a category filter.
+                    let categoryPrefix = 'cat50_';
+                    if (filterId.startsWith(categoryPrefix)) {
+                        let categoryFilterId = filterId.substring(categoryPrefix.length);
+                        if (META_ARC_CATEGORY_50[categoryFilterId]) {
+                            taskIds = META_ARC_CATEGORY_50[categoryFilterId];
+                        }
+                    }
+
                     if (META_ARC_TAGS[filterId]) {
                         taskIds = META_ARC_TAGS[filterId];
                     }
@@ -412,6 +422,25 @@ class PageController {
             if (filterId == "parapraxis-correct-3shots-after-voting") {
                 el_tag.title = "Solved by Parapraxis LLM, as of 2024-Feb-11";
             }
+            el.appendChild(el_tag);
+            let el_space = document.createElement('span');
+            el_space.innerText = ' ';
+            el.appendChild(el_space);
+        }    
+    }
+
+    populateFilterListCategories() {
+        let prefix = 'cat50_';
+        let el = document.getElementById('filter-list-categories');
+        while (el.firstChild) {
+            el.removeChild(el.firstChild);
+        }
+        let keys = Object.keys(META_ARC_CATEGORY_50);
+        for (let i = 0; i < keys.length; i++) {
+            let filterId = keys[i];
+            let el_tag = document.createElement('a');
+            el_tag.innerText = filterId;
+            el_tag.setAttribute('data-filter', prefix + filterId);
             el.appendChild(el_tag);
             let el_space = document.createElement('span');
             el_space.innerText = ' ';
