@@ -427,7 +427,10 @@ class PageController {
             let el_tag = document.createElement('a');
             el_tag.innerText = filterId;
             el_tag.setAttribute('data-filter', filterId);
-            if (filterId == "parapraxis-correct") {
+            if (filterId == "parapraxis-correct-1shot") {
+                el_tag.title = "Solved by Parapraxis LLM, as of 2024-Feb-11";
+            }
+            if (filterId == "parapraxis-correct-3shots-after-voting") {
                 el_tag.title = "Solved by Parapraxis LLM, as of 2024-Feb-11";
             }
             el.appendChild(el_tag);
