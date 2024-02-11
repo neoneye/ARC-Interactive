@@ -10,6 +10,7 @@
     <script src="pako_inflate.min.js"></script>
     <script src="common.js"></script>
     <script src="levels.js"></script>
+    <script src="tags.js"></script>
     <script src="index.js"></script>
     <title>Task browser - ARC-Interactive</title>
 </head>
@@ -58,7 +59,7 @@
         <div id="main-inner">
             <div class="container">
                 <div id="filter-settings" class="hidden">
-                    Filter: 
+                    Skill: 
                     <a href="#" data-filter="entry" title="Easy to solve, good for beginners.">entry</a>
                     <a href="#" data-filter="easy" title="Somewhat easy to solve.">easy</a>
                     <a href="#" data-filter="intermediate" title="A notch above easy but not quite medium.">intermediate</a>
@@ -67,6 +68,10 @@
                     <a href="#" data-filter="very-hard" title="Harder than hard.">very-hard</a>
                     <a href="#" data-filter="expert" title="The most challenging tasks.">expert</a>
                     <a href="#" data-filter="unfixed" title="Has one or more issues. Ambiguous how to solve the task.">unfixed</a>
+                    <div id="advanced-filter-tag" class="hidden">
+                        Tag:
+                        <span id="filter-list-tags"></span>
+                    </div>
                 </div>
                 <div id="filter-status">Number of tasks here</div>
                 <div class="gallery" id="gallery"></div>
