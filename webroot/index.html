@@ -9,8 +9,9 @@
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <script src="pako_inflate.min.js"></script>
     <script src="common.js"></script>
-    <script src="levels.js"></script>
-    <script src="tags.js"></script>
+    <script src="meta-category.js"></script>
+    <script src="meta-levels.js"></script>
+    <script src="meta-tags.js"></script>
     <script src="index.js"></script>
     <title>Task browser - ARC-Interactive</title>
 </head>
@@ -69,6 +70,9 @@
                     <a href="#" data-filter="expert" title="The most challenging tasks.">expert</a>
                     <a href="#" data-filter="unfixed" title="Has one or more issues. Ambiguous how to solve the task.">unfixed</a>
                     <div id="advanced-filter-tag" class="hidden">
+                        Category:
+                        <span id="filter-list-categories"></span>
+                        <br>
                         Tag:
                         <span id="filter-list-tags"></span>
                     </div>
