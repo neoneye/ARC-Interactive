@@ -64,6 +64,7 @@ class PageController {
         this.populateFilterListTags();
         this.populateFilterListCategories();
         this.updateFilterButtons();
+        this.updatePrevNextButton();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -491,32 +492,9 @@ class PageController {
                     }
                 }
             }
-
-            // Sort the arrays, so url generation is deterministic.
-            newFilterButtonsPlus.sort();
-            newFilterButtonsMinus.sort();
-
-            // Concatenate the filter parameters
-            var filterParameterString = '';
-            if (newFilterButtonsPlus.length > 0) {
-                filterParameterString = newFilterButtonsPlus.join(',');
-            }
-            for (let i = 0; i < newFilterButtonsMinus.length; i++) {
-                if (filterParameterString.length > 0) {
-                    filterParameterString += ',';
-                }
-                filterParameterString += '-' + newFilterButtonsMinus[i];
-            }
-
-            // Generate the href
-            let urlParams = new URLSearchParams(window.location.search);
-            if (filterParameterString.length > 0) {
-                urlParams.set('filter', filterParameterString);
-            } else {
-                urlParams.delete('filter');
-            }
-            let href = '.?' + urlParams.toString();
-            link.setAttribute('href', href);
+            
+            let url = this.createUrlWithFilterParameters(newFilterButtonsPlus, newFilterButtonsMinus);
+            link.href = url;
 
             // Set the class of the link, so it's highlighted depending on if it's plus/minus/neutral.
             if (filterButtonsPlus.includes(filterId)) {
@@ -529,6 +507,83 @@ class PageController {
                 }
             }
         });
+    }
+
+    updatePrevNextButton() {
+        // get all `<a>` elements with `data-filter` attribute
+        let links = document.querySelectorAll('a[data-filter]'); // Assuming all links have a `data-filter` attribute
+
+        if (links.length == 0) {
+            console.log('No links found');
+            return;
+        }
+
+        var foundIndex = 0;
+        for(var i = 0; i < links.length; i++) {
+            var link = links[i];
+            // console.log(link);
+
+            // Does this link have a class of 'filter-plus'?
+            if (!link.classList.contains('filter-plus')) {
+                continue;
+            }
+
+            console.log('filter-plus');
+
+            // If it does, then we have found the previous button.
+            foundIndex = i;
+            break;
+        }
+        if (foundIndex >= links.length) {
+            console.log('No next link found');
+            return;
+        }
+        {
+            let prevButtonIndex = (foundIndex + links.length - 1) % links.length; 
+            var el_a = links[prevButtonIndex];
+            let filterId = el_a.getAttribute('data-filter');
+            let url = this.createUrlWithFilterParameters([filterId], []);
+            document.getElementById('filter-previous-button').href = url;
+        }
+        {
+            let nextButtonIndex = (foundIndex + 1) % links.length; 
+            var el_a = links[nextButtonIndex];
+            let filterId = el_a.getAttribute('data-filter');
+            let url = this.createUrlWithFilterParameters([filterId], []);
+            document.getElementById('filter-next-button').href = url;
+        }
+    }
+
+    createUrlWithFilterParameters(filterIdArrayPlus, filterIdArrayMinus) {
+        // Copy the arrays.
+        var newFilterButtonsPlus = filterIdArrayPlus.slice();
+        var newFilterButtonsMinus = filterIdArrayMinus.slice();
+
+        // Sort the arrays, so url generation is deterministic.
+        newFilterButtonsPlus.sort();
+        newFilterButtonsMinus.sort();
+
+        // Concatenate the filter parameters
+        var filterParameterString = '';
+        if (newFilterButtonsPlus.length > 0) {
+            filterParameterString = newFilterButtonsPlus.join(',');
+        }
+        for (let i = 0; i < newFilterButtonsMinus.length; i++) {
+            if (filterParameterString.length > 0) {
+                filterParameterString += ',';
+            }
+            filterParameterString += '-' + newFilterButtonsMinus[i];
+        }
+
+        // Generate the url
+        let urlParams = new URLSearchParams(window.location.search);
+        if (filterParameterString.length > 0) {
+            urlParams.set('filter', filterParameterString);
+        } else {
+            urlParams.delete('filter');
+        }
+        let url = '.?' + urlParams.toString();
+        return url;
     }
 }
 
