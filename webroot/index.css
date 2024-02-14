@@ -149,15 +149,6 @@ html {
   grid-column: span 2; /* Span across two columns */
 }
 
-#dataset-label {
-  display: none;
-}
-@media only screen and (min-width: 800px) {
-  #dataset-label {
-    display: inline-block;
-  }
-}
-
 #tool-label {
   display: none;
 }
