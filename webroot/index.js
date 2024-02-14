@@ -61,10 +61,11 @@ class PageController {
         this.setupDatasetPicker();
         this.setupAdvancedFilterTag();
         this.setupAdvancedToolPicker();
+        this.setupAdvancedFilterPreviousNextButtons();
         this.populateFilterListTags();
         this.populateFilterListCategories();
         this.updateFilterButtons();
-        this.updatePrevNextButton();
+        this.updatePreviousNextButtons();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -165,6 +166,25 @@ class PageController {
         {
             var el = document.getElementById('advanced-filter-tag');
             el.classList.remove('hidden');
+        }
+    }
+
+    setupAdvancedFilterPreviousNextButtons() {
+        if (!Settings.getAdvancedModeEnabled()) {
+            // Advanced mode is not enabled, so we don't show the "Previous" / "Next" buttons.
+            return;
+        }
+
+        if (this.datasetId != 'ARC') {
+            // It's only the ARC dataset that have tags, so there is no point in showing the "Previous" / "Next" buttons.
+            console.log("Not ARC dataset. Doesn't make sense to show the 'Previous' / 'Next' buttons.");
+            return;
+        }
+
+        // Show the previous/next buttons
+        {
+            document.getElementById('filter-previous-button').classList.remove('hidden');
+            document.getElementById('filter-next-button').classList.remove('hidden');
         }
     }
 
@@ -509,7 +529,7 @@ class PageController {
         });
     }
 
-    updatePrevNextButton() {
+    updatePreviousNextButtons() {
         // get all `<a>` elements with `data-filter` attribute
         let links = document.querySelectorAll('a[data-filter]'); // Assuming all links have a `data-filter` attribute
 
