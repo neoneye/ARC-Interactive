@@ -73,6 +73,39 @@ class PageController {
         this.scrollPositionRestore();
         this.scrollPositionReset();
         this.scrollViewFocus();
+
+        // Listen for the keyup event
+        window.addEventListener('keyup', (event) => { this.keyUp(event); });
+    }
+
+    // Keyboard shortcuts
+    keyUp(event) {
+        // console.log(event.code);
+
+        // Get the currently focused element
+        let activeElement = document.activeElement;
+
+        // Check if the focused element is a text input or textarea
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+            // If so, don't execute the rest of the keyUp function
+            // This allows normal behavior for text input, like moving the cursor
+            // console.log('Focused element is a text input or textarea', event.code);
+            return;
+        }
+
+        if (event.code === 'KeyP') {
+            let el = document.getElementById('filter-previous-button');
+            if (!el.classList.contains('hidden')) {
+                el.click();
+            }
+        }
+
+        if (event.code === 'KeyN') {
+            let el = document.getElementById('filter-next-button');
+            if (!el.classList.contains('hidden')) {
+                el.click();
+            }
+        }
     }
 
     // The pagehide event is sent to a Window when the browser hides the current page in the process of 
