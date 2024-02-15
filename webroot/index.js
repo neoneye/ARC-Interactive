@@ -61,9 +61,11 @@ class PageController {
         this.setupDatasetPicker();
         this.setupAdvancedFilterTag();
         this.setupAdvancedToolPicker();
+        this.setupAdvancedFilterPreviousNextButtons();
         this.populateFilterListTags();
         this.populateFilterListCategories();
         this.updateFilterButtons();
+        this.updatePreviousNextButtons();
         await this.loadTasks();
 
         addEventListener("pagehide", (event) => { this.onpagehide(); });
@@ -71,6 +73,39 @@ class PageController {
         this.scrollPositionRestore();
         this.scrollPositionReset();
         this.scrollViewFocus();
+
+        // Listen for the keyup event
+        window.addEventListener('keyup', (event) => { this.keyUp(event); });
+    }
+
+    // Keyboard shortcuts
+    keyUp(event) {
+        // console.log(event.code);
+
+        // Get the currently focused element
+        let activeElement = document.activeElement;
+
+        // Check if the focused element is a text input or textarea
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+            // If so, don't execute the rest of the keyUp function
+            // This allows normal behavior for text input, like moving the cursor
+            // console.log('Focused element is a text input or textarea', event.code);
+            return;
+        }
+
+        if (event.code === 'KeyP') {
+            let el = document.getElementById('filter-previous-button');
+            if (!el.classList.contains('hidden')) {
+                el.click();
+            }
+        }
+
+        if (event.code === 'KeyN') {
+            let el = document.getElementById('filter-next-button');
+            if (!el.classList.contains('hidden')) {
+                el.click();
+            }
+        }
     }
 
     // The pagehide event is sent to a Window when the browser hides the current page in the process of 
@@ -164,6 +199,25 @@ class PageController {
         {
             var el = document.getElementById('advanced-filter-tag');
             el.classList.remove('hidden');
+        }
+    }
+
+    setupAdvancedFilterPreviousNextButtons() {
+        if (!Settings.getAdvancedModeEnabled()) {
+            // Advanced mode is not enabled, so we don't show the "Previous" / "Next" buttons.
+            return;
+        }
+
+        if (this.datasetId != 'ARC') {
+            // It's only the ARC dataset that have tags, so there is no point in showing the "Previous" / "Next" buttons.
+            console.log("Not ARC dataset. Doesn't make sense to show the 'Previous' / 'Next' buttons.");
+            return;
+        }
+
+        // Show the previous/next buttons
+        {
+            document.getElementById('filter-previous-button').classList.remove('hidden');
+            document.getElementById('filter-next-button').classList.remove('hidden');
         }
     }
 
@@ -491,32 +545,9 @@ class PageController {
                     }
                 }
             }
-
-            // Sort the arrays, so url generation is deterministic.
-            newFilterButtonsPlus.sort();
-            newFilterButtonsMinus.sort();
-
-            // Concatenate the filter parameters
-            var filterParameterString = '';
-            if (newFilterButtonsPlus.length > 0) {
-                filterParameterString = newFilterButtonsPlus.join(',');
-            }
-            for (let i = 0; i < newFilterButtonsMinus.length; i++) {
-                if (filterParameterString.length > 0) {
-                    filterParameterString += ',';
-                }
-                filterParameterString += '-' + newFilterButtonsMinus[i];
-            }
-
-            // Generate the href
-            let urlParams = new URLSearchParams(window.location.search);
-            if (filterParameterString.length > 0) {
-                urlParams.set('filter', filterParameterString);
-            } else {
-                urlParams.delete('filter');
-            }
-            let href = '.?' + urlParams.toString();
-            link.setAttribute('href', href);
+            
+            let url = this.createUrlWithFilterParameters(newFilterButtonsPlus, newFilterButtonsMinus);
+            link.href = url;
 
             // Set the class of the link, so it's highlighted depending on if it's plus/minus/neutral.
             if (filterButtonsPlus.includes(filterId)) {
@@ -529,6 +560,83 @@ class PageController {
                 }
             }
         });
+    }
+
+    updatePreviousNextButtons() {
+        // get all `<a>` elements with `data-filter` attribute
+        let links = document.querySelectorAll('a[data-filter]'); // Assuming all links have a `data-filter` attribute
+
+        if (links.length == 0) {
+            console.log('No links found');
+            return;
+        }
+
+        var foundIndex = 0;
+        for(var i = 0; i < links.length; i++) {
+            var link = links[i];
+            // console.log(link);
+
+            // Does this link have a class of 'filter-plus'?
+            if (!link.classList.contains('filter-plus')) {
+                continue;
+            }
+
+            console.log('filter-plus');
+
+            // If it does, then we have found the previous button.
+            foundIndex = i;
+            break;
+        }
+        if (foundIndex >= links.length) {
+            console.log('No next link found');
+            return;
+        }
+        {
+            let prevButtonIndex = (foundIndex + links.length - 1) % links.length; 
+            var el_a = links[prevButtonIndex];
+            let filterId = el_a.getAttribute('data-filter');
+            let url = this.createUrlWithFilterParameters([filterId], []);
+            document.getElementById('filter-previous-button').href = url;
+        }
+        {
+            let nextButtonIndex = (foundIndex + 1) % links.length; 
+            var el_a = links[nextButtonIndex];
+            let filterId = el_a.getAttribute('data-filter');
+            let url = this.createUrlWithFilterParameters([filterId], []);
+            document.getElementById('filter-next-button').href = url;
+        }
+    }
+
+    createUrlWithFilterParameters(filterIdArrayPlus, filterIdArrayMinus) {
+        // Copy the arrays.
+        var newFilterButtonsPlus = filterIdArrayPlus.slice();
+        var newFilterButtonsMinus = filterIdArrayMinus.slice();
+
+        // Sort the arrays, so url generation is deterministic.
+        newFilterButtonsPlus.sort();
+        newFilterButtonsMinus.sort();
+
+        // Concatenate the filter parameters
+        var filterParameterString = '';
+        if (newFilterButtonsPlus.length > 0) {
+            filterParameterString = newFilterButtonsPlus.join(',');
+        }
+        for (let i = 0; i < newFilterButtonsMinus.length; i++) {
+            if (filterParameterString.length > 0) {
+                filterParameterString += ',';
+            }
+            filterParameterString += '-' + newFilterButtonsMinus[i];
+        }
+
+        // Generate the url
+        let urlParams = new URLSearchParams(window.location.search);
+        if (filterParameterString.length > 0) {
+            urlParams.set('filter', filterParameterString);
+        } else {
+            urlParams.delete('filter');
+        }
+        let url = '.?' + urlParams.toString();
+        return url;
     }
 }
 
