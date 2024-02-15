@@ -229,6 +229,8 @@ html {
   }
 }
 
+#filter-previous-button.hidden,
+#filter-next-button.hidden,
 #advanced-tool.hidden,
 #advanced-filter-tag.hidden {
   display: none !important;
