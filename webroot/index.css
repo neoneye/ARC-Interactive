@@ -149,15 +149,6 @@ html {
   grid-column: span 2; /* Span across two columns */
 }
 
-#dataset-label {
-  display: none;
-}
-@media only screen and (min-width: 800px) {
-  #dataset-label {
-    display: inline-block;
-  }
-}
-
 #tool-label {
   display: none;
 }
@@ -238,7 +229,32 @@ html {
   }
 }
 
+#filter-previous-button.hidden,
+#filter-next-button.hidden,
 #advanced-tool.hidden,
 #advanced-filter-tag.hidden {
   display: none !important;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+/* Default styles for buttons, showing full titles and hiding short titles */
+.responsive-button .full-title {
+  display: inline;
+}
+
+.responsive-button .short-title {
+  display: none;
+}
+
+@media (max-width: 600px) { /* Adjust 600px based on your needs */
+  .responsive-button .full-title {
+    display: none; /* Hide full title on small screens */
+  }
+
+  .responsive-button .short-title {
+    display: inline; /* Show short title on small screens */
+  }
 }
