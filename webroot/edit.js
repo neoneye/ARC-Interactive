@@ -1775,55 +1775,56 @@ class PageController {
         console.log('Replay');
         let drawingItem = this.currentDrawingItem();
         drawingItem.caretaker.printHistory();
+        let undoList = drawingItem.caretaker.undoList;
 
+        let index = 0; // Start from the first item in the undo list
+    
         // Show the replay area
         var el_outer = document.getElementById('replay-area-outer');
         el_outer.classList.remove('hidden');
-
-        // The browser assign width/height to the <canvas> after it's hidden and shown again.
         resizeCanvas();
-
+    
         var el_canvas = document.getElementById('replay-canvas');
         var ctx = el_canvas.getContext('2d');
+    
+        // The undoList contains the history items
+        const replayStep = () => {
+            if (index >= undoList.length) {
+                console.log('Replay finished');
+                return; // Stop the replay if we've reached the end of the undo list
+            }
+            let mementoItem = undoList[index]; // Get the current item to be drawn
+            index++; // Move to the next item for the next iteration
+        
+            // Clear the canvas for the next drawing state
+            ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
 
-        // obtain size of the canvas
-        var rect = el_canvas.getBoundingClientRect();
-        var x = rect.left;
-        var y = rect.top;
-        var w = rect.width;
-        var h = rect.height;
-        console.log('x', x, 'y', y, 'w', w, 'h', h);
+            let image = mementoItem.state.image;
+            let inset = 5;
+            let width = el_canvas.width - inset * 2;
+            let height = el_canvas.height - inset * 2;    
+            let cellSize = image.cellSize(width, height);
+            let gapSize = this.isGridVisible ? 1 : 0;
+    
+            // Draw an outline around the image
+            {
+                let x = image.calcX0(0, width, cellSize) + inset - 1;
+                let y = image.calcY0(0, height, cellSize) + inset - 1;
+                let w = image.width * cellSize + 2 - gapSize;
+                let h = image.height * cellSize + 2 - gapSize;
+                ctx.fillStyle = '#555';
+                ctx.fillRect(x, y, w, h);
+            }
+            let options = {
+                gapSize: gapSize,
+            };
+            image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
 
-        let canvasWidth = w;
-        let canvasHeight = h;
-        let inset = 5;
-        let width = canvasWidth - inset * 2;
-        let height = canvasHeight - inset * 2;
-
-        // Clear the canvas to be fully transparent
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-        // let drawingItem = this.currentDrawingItem();
-        let image = drawingItem.originator.getImageRef();
-        let cellSize = image.cellSize(width, height);
-
-        let gapSize = this.isGridVisible ? 1 : 0;
-
-        // Draw an outline around the image
-        {
-            let x = image.calcX0(0, width, cellSize) + inset - 1;
-            let y = image.calcY0(0, height, cellSize) + inset - 1;
-            let w = image.width * cellSize + 2 - gapSize;
-            let h = image.height * cellSize + 2 - gapSize;
-            ctx.fillStyle = '#555';
-            ctx.fillRect(x, y, w, h);
-        }
-
-        // Draw the image
-        let options = {
-            gapSize: gapSize,
+            // Schedule the next step
+            setTimeout(replayStep, 100);
         };
-        image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
+    
+        replayStep(); // Start the replay loop
     }
 }
 
