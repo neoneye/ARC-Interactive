@@ -85,6 +85,17 @@ body {
     opacity: 0.9;
 }
 
+#replay-area-outer {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background-color: yellow;
+}
+
 #draw-area-outer {
     position: absolute;
     display: block;
@@ -288,6 +299,7 @@ body {
 }
 
 #paste-area-outer.hidden,
+#replay-area-outer.hidden,
 #task-overview.hidden,
 #draw-area-outer.hidden,
 #page-footer-draw-mode.hidden,

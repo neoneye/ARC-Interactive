@@ -13,6 +13,10 @@
     <title>ARC-Interactive - Task editor</title>
 </head>
 <body onload="body_onload()">
+    <div id="replay-area-outer" class="hidden">
+        <canvas id="replay-canvas"></canvas>
+    </div>
+
     <div id="paste-area-outer" class="hidden">
         <canvas id="paste-canvas"></canvas>
         <button id="paste-area-reject-button" class="hover-button" onclick="gPageController.pasteFromClipboardReject()" title="Abort the paste operation.">Reject</button>
@@ -104,6 +108,7 @@
         <div class="titlebar-item titlebar-item-center" id="title_task">Task name</div>
         
         <div class="titlebar-item titlebar-item-right">
+            <button class="secondary-button" onclick="gPageController.replay()" title="Animate the actions taken so far">Replay</button>
             <button class="secondary-button" onclick="gPageController.toggleOverview()" title="O = Toggle between overview and editor.">Overview</button>
         </div>
     </header>
