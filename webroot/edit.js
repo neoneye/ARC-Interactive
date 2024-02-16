@@ -1772,10 +1772,16 @@ class PageController {
     }
 
     replay() {
-        console.log('Replay');
+        console.log('Replay start');
         let drawingItem = this.currentDrawingItem();
-        drawingItem.caretaker.printHistory();
-        let undoList = drawingItem.caretaker.undoList;
+        // drawingItem.caretaker.printHistory();
+
+        // History of all actions including the current state
+        let undoListRef = drawingItem.caretaker.undoList;
+        let undoList = Array.from(undoListRef);
+        let actionName = 'replay';
+        let currentState = drawingItem.originator.saveStateToMemento(actionName);
+        undoList.push(currentState);
 
         let index = 0; // Start from the first item in the undo list
     
