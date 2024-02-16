@@ -1826,6 +1826,13 @@ class PageController {
     
         replayStep(); // Start the replay loop
     }
+
+    dismissReplayLayer() {
+        var el = document.getElementById('replay-area-outer');
+        el.classList.add('hidden');
+        resizeCanvas();
+        this.updateDrawCanvas();
+    }
 }
 
 var gPageController = null;
