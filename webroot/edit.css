@@ -19,6 +19,12 @@ body {
     }
 }
 
+/* Hide the file input visually but keep it in the document flow */
+#file-input {
+    position: absolute;
+    left: -9999px;
+}
+
 #main-inner {
     /* background-color: red; */
 }

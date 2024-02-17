@@ -13,6 +13,8 @@
     <title>ARC-Interactive - Task editor</title>
 </head>
 <body onload="body_onload()">
+    <input type="file" id="file-input" accept=".json" onchange="gPageController.changeInputFile(event)">
+
     <div id="replay-area-outer" class="hidden" onclick="gPageController.dismissReplayLayer()">
         <canvas id="replay-canvas"></canvas>
     </div>
@@ -109,6 +111,7 @@
         
         <div class="titlebar-item titlebar-item-right">
             <button class="secondary-button" onclick="gPageController.downloadReplayFile()" title="Download the replay data">Download</button>
+            <button class="secondary-button" onclick="gPageController.clickUploadReplayFile()">Upload</button>
             <button class="secondary-button" onclick="gPageController.replay()" title="Animate the actions taken so far">Replay</button>
             <button class="secondary-button" onclick="gPageController.toggleOverview()" title="O = Toggle between overview and editor.">Overview</button>
         </div>

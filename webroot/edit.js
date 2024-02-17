@@ -1864,6 +1864,30 @@ class PageController {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
+
+    clickUploadReplayFile() {
+        document.getElementById('file-input').click(); // Programmatically click the hidden file input
+    }
+
+    changeInputFile(event) {
+        var file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var contents = e.target.result;
+            var json = JSON.parse(contents); // Parse the JSON string into an object
+            console.log(json); // Log the object to the console
+        };
+        
+        reader.onerror = function(e) {
+            console.error("Error reading file", e);
+        };
+
+        reader.readAsText(file); // Read the file as text
+    }
 }
 
 var gPageController = null;
