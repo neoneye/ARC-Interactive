@@ -1839,6 +1839,31 @@ class PageController {
         resizeCanvas();
         this.updateDrawCanvas();
     }
+
+    downloadReplayFile() {
+        var jsonString = '{"name": "John", "age": 30, "city": "New York"}';
+
+        // Convert the JSON string to a Blob
+        var blob = new Blob([jsonString], { type: 'application/json' });
+
+        // Create a URL for the Blob
+        var url = URL.createObjectURL(blob);
+
+        // Create a temporary anchor element
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.json'; // The default filename for the downloaded file
+
+        // Append the anchor to the document
+        document.body.appendChild(a);
+
+        // Programmatically click the anchor to trigger the download
+        a.click();
+
+        // Clean up by removing the anchor element and revoking the Blob URL
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 }
 
 var gPageController = null;
