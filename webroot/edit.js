@@ -1841,7 +1841,25 @@ class PageController {
     }
 
     downloadReplayFile() {
-        var jsonString = '{"name": "John", "age": 30, "city": "New York"}';
+        let user = 'anonymous';
+
+        // Date/time formatting
+        // utcTimestampWithSubsecond: "1984-12-24T23:59:59.987Z"
+        let utcTimestampWithSubsecond = new Date().toISOString();
+        // utcTimestampWithoutSubsecond: "1984-12-24T23:59:59Z"
+        let utcTimestampWithoutSubsecond = utcTimestampWithSubsecond.split('.')[0] + 'Z';
+        // utcTimestampWithoutColon: "1984-12-24T23-59-59Z"
+        let utcTimestampWithoutColon = utcTimestampWithoutSubsecond.replace(/:/g, '-');
+
+        var dict = {
+            "timestamp": utcTimestampWithoutSubsecond,
+            "user": user,
+            "dataset": this.datasetId, 
+            "task": this.taskId,
+        };
+        let jsonString = JSON.stringify(dict);
+
+        let filename = `replay ${utcTimestampWithoutColon}.json`;
 
         // Convert the JSON string to a Blob
         var blob = new Blob([jsonString], { type: 'application/json' });
@@ -1852,7 +1870,7 @@ class PageController {
         // Create a temporary anchor element
         var a = document.createElement('a');
         a.href = url;
-        a.download = 'data.json'; // The default filename for the downloaded file
+        a.download = filename; // The default filename for the downloaded file
 
         // Append the anchor to the document
         document.body.appendChild(a);
