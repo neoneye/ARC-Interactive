@@ -300,40 +300,16 @@ class PageController {
         this.history.log('loaded task');
         this.addEventListeners();
         this.hideEditorShowOverview();
-        await this.loadHistory();
+        // await this.replayExampleHistoryFile();
     }
 
-    async loadHistory() {
+    async replayExampleHistoryFile() {
         const response = await fetch('history1.json');
         // console.log('response:', response);
         const arrayBuffer = await response.arrayBuffer();
         let uint8Array = new Uint8Array(arrayBuffer);
-        let json = new TextDecoder().decode(uint8Array);
-        // console.log('json:', json);
-        let obj = JSON.parse(json);
-        // console.log('obj:', obj);
-        let history_items = obj.history;
-        let history_items2 = []; 
-        for (let i = 0; i < history_items.length; i++) {
-            let item = history_items[i];
-            console.log('item:', item);
-
-            var arc_image = null;
-            if (item.dict && item.dict.image) {
-                arc_image = new ARCImage(item.dict.image);
-            }
-            if (!arc_image) {
-                arc_image = ARCImage.color(5, 5, 0);
-            }
-            let history_item2 = {
-                image: arc_image,
-            };
-            history_items2.push(history_item2);
-        }
-        const callback = () => {
-            this.replay2(history_items2);
-        };
-        setTimeout(callback, 100);
+        let jsonString = new TextDecoder().decode(uint8Array);
+        this.replayHistoryFile(jsonString);
     }
 
     addEventListeners() {
@@ -2089,17 +2065,44 @@ class PageController {
         }
 
         var reader = new FileReader();
-        reader.onload = function(e) {
-            var contents = e.target.result;
-            var json = JSON.parse(contents); // Parse the JSON string into an object
-            console.log(json); // Log the object to the console
+        reader.onload = (e) => {
+            var jsonString = e.target.result;
+            this.replayHistoryFile(jsonString);
         };
         
-        reader.onerror = function(e) {
+        reader.onerror = (e) => {
             console.error("Error reading file", e);
         };
 
         reader.readAsText(file); // Read the file as text
+    }
+
+    replayHistoryFile(jsonString) {
+        // console.log('json:', jsonString);
+        let obj = JSON.parse(jsonString);
+        // console.log('obj:', obj);
+        let history_items = obj.history;
+        let history_items2 = []; 
+        for (let i = 0; i < history_items.length; i++) {
+            let item = history_items[i];
+            console.log('item:', item);
+
+            var arc_image = null;
+            if (item.dict && item.dict.image) {
+                arc_image = new ARCImage(item.dict.image);
+            }
+            if (!arc_image) {
+                arc_image = ARCImage.color(5, 5, 0);
+            }
+            let history_item2 = {
+                image: arc_image,
+            };
+            history_items2.push(history_item2);
+        }
+        const callback = () => {
+            this.replay2(history_items2);
+        };
+        setTimeout(callback, 100);
     }
 }
 
