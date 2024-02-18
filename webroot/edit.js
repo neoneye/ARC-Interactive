@@ -739,11 +739,35 @@ class PageController {
         image.floodFill(x, y, color);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after floodFill.');
+
+            let message = `flood fill x: ${x} y: ${y} color: ${color}, no change to image`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'flood fill',
+                what: what,
+                modified: 'none',
+                x: x,
+                y: y,
+                color: color,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'flood fill');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
+
+        let message = `flood fill x: ${x} y: ${y} color: ${color}, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'flood fill',
+            what: what,
+            modified: 'image',
+            x: x,
+            y: y,
+            color: color,
+            image: image.pixels,
+        });
     }
 
     pickColor(colorValue) {
@@ -806,11 +830,39 @@ class PageController {
         }
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after filling the selection.');
+
+            let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, no change to image`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'fill selection',
+                what: what,
+                modified: 'none',
+                minX: minX,
+                minY: minY,
+                maxX: maxX,
+                maxY: maxY,
+                color: color,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'fill selection');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
+
+        let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'fill selection',
+            what: what,
+            modified: 'image',
+            minX: minX,
+            minY: minY,
+            maxX: maxX,
+            maxY: maxY,
+            color: color,
+            image: image.pixels,
+        });
     }
 
     async loadTask() {
@@ -1331,6 +1383,28 @@ class PageController {
 
         let isCorrect = json0 == json1;
 
+        if (isCorrect) {
+            let message = `submit, correct`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'submit',
+                what: what,
+                modified: 'none',
+                correct: true,
+                image: image.pixels,
+            });
+        } else {
+            let message = `submit, incorrect`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'submit',
+                what: what,
+                modified: 'none',
+                correct: false,
+                image: image.pixels,
+            });
+        }
+
         var el = null;
         if (isCorrect) {
             el = document.getElementById('submit-status-correct');
@@ -1412,6 +1486,19 @@ class PageController {
         let image = emptyImage.overlay(originalImage, 0, 0);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after resize.');
+
+            let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, no change to image`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'resize',
+                what: what,
+                modified: 'none',
+                width: size.width,
+                height: size.height,
+                color: this.currentColor,
+                image: image.pixels,
+            });
+
             this.hideToolPanel();
             return;
         }
@@ -1421,6 +1508,18 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'resize',
+            what: what,
+            modified: 'image',
+            width: size.width,
+            height: size.height,
+            color: this.currentColor,
+            image: image.pixels,
+        });
     }
 
     startOverWithInputImage() {
@@ -1447,6 +1546,15 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `start over, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'start over',
+            what: what,
+            modified: 'image',
+            image: inputImage.pixels,
+        });
     }
 
     cropSelectedRectangle() {
@@ -1471,6 +1579,20 @@ class PageController {
         let image = originalImage.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after crop.');
+
+            let message = `crop minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, no change to image`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'crop',
+                what: what,
+                modified: 'none',
+                minX: minX,
+                minY: minY,
+                maxX: maxX,
+                maxY: maxY,
+                image: image.pixels,
+            });
+
             this.hideToolPanel();
             return;
         }
@@ -1479,6 +1601,19 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `crop minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'crop',
+            what: what,
+            modified: 'image',
+            minX: minX,
+            minY: minY,
+            maxX: maxX,
+            maxY: maxY,
+            image: image.pixels,
+        });
     }
 
     copyToClipboard() {
@@ -1488,6 +1623,18 @@ class PageController {
         this.clipboard = cropImage;
         this.hideToolPanel();
         console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
+
+        let message = `copy minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, modified clipboard`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'copy',
+            what: what,
+            modified: 'clipboard',
+            minX: minX,
+            minY: minY,
+            maxX: maxX,
+            maxY: maxY,
+        });
     }
 
     pasteFromClipboard() {
@@ -1578,6 +1725,17 @@ class PageController {
 
         this.updateDrawCanvas();
         this.hidePasteArea();
+
+        let message = `paste accept minX: ${minX} minY: ${minY}, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'paste accept',
+            what: what,
+            modified: 'image',
+            minX: minX,
+            minY: minY,
+            image: image2.pixels,
+        });
     }
 
     pasteFromClipboardReject() {
@@ -1585,6 +1743,14 @@ class PageController {
         this.isPasteMode = false;
         this.updateDrawCanvas();
         this.hidePasteArea();
+
+        let message = `paste reject, no change to image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'paste reject',
+            what: what,
+            modified: 'none'
+        });
     }
 
     // Get either the selected rectangle or the rectangle for the entire image
