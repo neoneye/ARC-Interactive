@@ -178,11 +178,14 @@ class HistoryContainer {
         this.items = [];
     }
 
-    log(message) {
+    log(message, dict = null) {
         let count = this.items.length;
         let item = HistoryItem.create();
         item.id = count;
         item.message = message;
+        if (dict) {
+            item.dict = dict;
+        }
         this.items.push(item);
     }
 
@@ -689,11 +692,34 @@ class PageController {
         }
         if (image.isEqualTo(originalImage)) {
             // console.log('The image is the same after setPixel.');
+            let message = `set pixel x: ${x} y: ${y} color: ${color}, no change to image`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'set pixel',
+                what: what,
+                modified: 'none',
+                x: x,
+                y: y,
+                color: color,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'set pixel');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
+
+        let message = `set pixel x: ${x} y: ${y} color: ${color}, modified image`;
+        let what = `test ${this.currentTest} output`;
+        this.history.log(message, {
+            action: 'set pixel',
+            what: what,
+            modified: 'image',
+            x: x,
+            y: y,
+            color: color,
+            image: image.pixels,
+        });
     }
 
     floodFill(x, y, color) {
@@ -720,11 +746,33 @@ class PageController {
         var selectedColor = document.getElementById('palette-item' + colorValue);
         selectedColor.classList.add('palette_item_selected');
 
+        let isSameColor = this.currentColor === colorValue;
         this.currentColor = colorValue;
 
         if (this.isCurrentToolSelect()) {
             this.fillSelectedRectangle();
+            return;
         }        
+
+        if (isSameColor) {
+            let message = `pick color ${colorValue}, no change to current color`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'pick color',
+                what: what,
+                modified: 'none',
+                color: colorValue,
+            });
+        } else {
+            let message = `pick color ${colorValue}, modified current color`;
+            let what = `test ${this.currentTest} output`;
+            this.history.log(message, {
+                action: 'pick color',
+                what: what,
+                modified: 'color',
+                color: colorValue,
+            });
+        }
     }
 
     fillSelectedRectangle() {
