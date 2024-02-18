@@ -157,8 +157,50 @@ class DrawingItem {
     }
 }
 
+class HistoryItem {
+    constructor(id, date) {
+        // The `id` is a non-negative integer that gets incremented for each new history item.
+        this.id = id;
+
+        // The `date` is a Date object that represents the time when the history item was created.
+        this.date = date;
+    }
+
+    static create() {
+        let id = 0;
+        let instance = new HistoryItem(id, new Date());
+        return instance;
+    }
+}
+
+class HistoryContainer {
+    constructor() {
+        this.items = [];
+    }
+
+    log(message) {
+        let count = this.items.length;
+        let item = HistoryItem.create();
+        item.id = count;
+        item.message = message;
+        this.items.push(item);
+    }
+
+    print() {
+        console.log('History:');
+        this.items.forEach((item, index) => {
+            console.log(`${index + 1}: ${item}`);
+        });
+    }
+
+    toJSON() {
+        return this.items;
+    }
+}
+
 class PageController {
     constructor() {
+        this.history = new HistoryContainer();
         this.db = null;
         this.theme = null;
 
@@ -252,6 +294,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         await this.loadTask();
+        this.history.log('loaded task');
         this.addEventListeners();
         this.hideEditorShowOverview();
     }
@@ -1851,15 +1894,23 @@ class PageController {
         // utcTimestampWithoutColon: "1984-12-24T23-59-59Z"
         let utcTimestampWithoutColon = utcTimestampWithoutSubsecond.replace(/:/g, '-');
 
+        let historyJSON = this.history.toJSON();
+
+        let summary = {
+            "history count": this.history.items.length,
+        };
+
         var dict = {
             "timestamp": utcTimestampWithoutSubsecond,
             "user": user,
             "dataset": this.datasetId, 
             "task": this.taskId,
+            "summary": summary,
+            "history": historyJSON
         };
         let jsonString = JSON.stringify(dict);
 
-        let filename = `replay ${utcTimestampWithoutColon}.json`;
+        let filename = `ARC-Interactive history ${utcTimestampWithoutColon}.json`;
 
         // Convert the JSON string to a Blob
         var blob = new Blob([jsonString], { type: 'application/json' });
