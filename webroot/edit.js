@@ -300,6 +300,40 @@ class PageController {
         this.history.log('loaded task');
         this.addEventListeners();
         this.hideEditorShowOverview();
+        await this.loadHistory();
+    }
+
+    async loadHistory() {
+        const response = await fetch('history1.json');
+        // console.log('response:', response);
+        const arrayBuffer = await response.arrayBuffer();
+        let uint8Array = new Uint8Array(arrayBuffer);
+        let json = new TextDecoder().decode(uint8Array);
+        // console.log('json:', json);
+        let obj = JSON.parse(json);
+        // console.log('obj:', obj);
+        let history_items = obj.history;
+        let history_items2 = []; 
+        for (let i = 0; i < history_items.length; i++) {
+            let item = history_items[i];
+            console.log('item:', item);
+
+            var arc_image = null;
+            if (item.dict && item.dict.image) {
+                arc_image = new ARCImage(item.dict.image);
+            }
+            if (!arc_image) {
+                arc_image = ARCImage.color(5, 5, 0);
+            }
+            let history_item2 = {
+                image: arc_image,
+            };
+            history_items2.push(history_item2);
+        }
+        const callback = () => {
+            this.replay2(history_items2);
+        };
+        setTimeout(callback, 100);
     }
 
     addEventListeners() {
@@ -1897,6 +1931,68 @@ class PageController {
             ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
 
             let image = mementoItem.state.image;
+            let inset = 5;
+            let width = el_canvas.width - inset * 2;
+            let height = el_canvas.height - inset * 2;    
+            let cellSize = image.cellSize(width, height);
+            let gapSize = this.isGridVisible ? 1 : 0;
+    
+            // Draw an outline around the image
+            {
+                let x = image.calcX0(0, width, cellSize) + inset - 1;
+                let y = image.calcY0(0, height, cellSize) + inset - 1;
+                let w = image.width * cellSize + 2 - gapSize;
+                let h = image.height * cellSize + 2 - gapSize;
+                ctx.fillStyle = '#555';
+                ctx.fillRect(x, y, w, h);
+            }
+            let options = {
+                gapSize: gapSize,
+            };
+            image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
+
+            // Schedule the next step
+            setTimeout(replayStep, 100);
+        };
+    
+        replayStep(); // Start the replay loop
+    }
+
+    replay2(history_items) {
+        console.log('Replay start');
+        // let drawingItem = this.currentDrawingItem();
+        // drawingItem.caretaker.printHistory();
+
+        // History of all actions including the current state
+        // let undoListRef = drawingItem.caretaker.undoList;
+        // let undoList = Array.from(undoListRef);
+        // let actionName = 'replay';
+        // let currentState = drawingItem.originator.saveStateToMemento(actionName);
+        // undoList.push(currentState);
+
+        let index = 0; // Start from the first item in the undo list
+    
+        // Show the replay area
+        var el_outer = document.getElementById('replay-area-outer');
+        el_outer.classList.remove('hidden');
+        resizeCanvas();
+    
+        var el_canvas = document.getElementById('replay-canvas');
+        var ctx = el_canvas.getContext('2d');
+    
+        // The undoList contains the history items
+        const replayStep = () => {
+            if (index >= history_items.length) {
+                console.log('Replay finished');
+                return; // Stop the replay if we've reached the end of the undo list
+            }
+            let item = history_items[index]; // Get the current item to be drawn
+            index++; // Move to the next item for the next iteration
+        
+            // Clear the canvas for the next drawing state
+            ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
+
+            let image = item.image;
             let inset = 5;
             let width = el_canvas.width - inset * 2;
             let height = el_canvas.height - inset * 2;    
