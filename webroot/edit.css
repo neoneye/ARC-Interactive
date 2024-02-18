@@ -102,6 +102,22 @@ body {
     background-color: var(--ui-background);
 }
 
+#replay-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Ensure it appears above the canvas */
+    z-index: 201; /* Higher than the canvas, but does not need to exceed the parent's context unless there are other elements with higher z-index values */
+    
+    /* Optional for better visibility */
+    color: #fff; /* Adjust based on your design */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for contrast */
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center; /* Center the text within the div */
+}
+
 #draw-area-outer {
     position: absolute;
     display: block;

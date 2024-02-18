@@ -2121,6 +2121,8 @@ class PageController {
     
         var el_canvas = document.getElementById('replay-canvas');
         var ctx = el_canvas.getContext('2d');
+
+        var el_message = document.getElementById('replay-message');
     
         // The undoList contains the history items
         const replayStep = () => {
@@ -2130,7 +2132,10 @@ class PageController {
             }
             let item = history_items[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
-        
+
+            let message = item.message;
+            el_message.textContent = `Step ${index} of ${history_items.length}` + message;
+
             // Clear the canvas for the next drawing state
             ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
 
@@ -2260,7 +2265,11 @@ class PageController {
             if (!arc_image) {
                 arc_image = ARCImage.color(5, 5, 0);
             }
+
+            var message = item.message;
+
             let history_item2 = {
+                message: message,
                 image: arc_image,
             };
             history_items2.push(history_item2);
