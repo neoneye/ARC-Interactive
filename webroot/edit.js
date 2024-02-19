@@ -1823,6 +1823,7 @@ class PageController {
     flipX() {
         let rectangle = this.getToolRectangle();
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
@@ -1830,18 +1831,43 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after flip x.');
             this.hideToolPanel();
+
+            let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'flip x',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'flip x for selection or entire image');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'flip x',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Reverse the y-axis of the selected rectangle or the entire image
     flipY() {
         let rectangle = this.getToolRectangle();
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
@@ -1849,12 +1875,36 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after flip y.');
             this.hideToolPanel();
+
+            let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'flip y',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'flip y for selection or entire image');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'flip y',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Rotate clockwise
