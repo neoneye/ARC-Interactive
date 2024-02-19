@@ -822,17 +822,17 @@ class PageController {
         if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
+        let color = this.currentColor;
         var image = originalImage.clone();
         for (let y = minY; y <= maxY; y++) {
             for (let x = minX; x <= maxX; x++) {
-                image.pixels[y][x] = this.currentColor;
+                image.pixels[y][x] = color;
             }
         }
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after filling the selection.');
 
             let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, no change to image`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'fill selection',
                 what: what,
