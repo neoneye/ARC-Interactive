@@ -155,6 +155,15 @@ class DrawingItem {
             y1: image.height - 1,
         };
     }
+
+    // When serializing the history to json, this function is called 
+    // to get a string that describes what image is being manipulated.
+    // Currently the user can only edit the `output` image of the `test` pairs.
+    // In the future the user may be able to edit both input images, output images.
+    // In the future the user may be able to edit both train pairs and test pairs.
+    getHistoryImageHandle() {
+        return `test ${this.id} output`;
+    }
 }
 
 class HistoryItem {
@@ -692,6 +701,7 @@ class PageController {
 
     setPixel(x, y, color) {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         try {
@@ -703,10 +713,9 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             // console.log('The image is the same after setPixel.');
             let message = `set pixel x: ${x} y: ${y} color: ${color}, no change to image`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'set pixel',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 x: x,
                 y: y,
@@ -720,10 +729,9 @@ class PageController {
         this.updateDrawCanvas();
 
         let message = `set pixel x: ${x} y: ${y} color: ${color}, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'set pixel',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             x: x,
             y: y,
@@ -734,6 +742,7 @@ class PageController {
 
     floodFill(x, y, color) {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         image.floodFill(x, y, color);
@@ -741,10 +750,9 @@ class PageController {
             console.log('The image is the same after floodFill.');
 
             let message = `flood fill x: ${x} y: ${y} color: ${color}, no change to image`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'flood fill',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 x: x,
                 y: y,
@@ -758,10 +766,9 @@ class PageController {
         this.updateDrawCanvas();
 
         let message = `flood fill x: ${x} y: ${y} color: ${color}, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'flood fill',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             x: x,
             y: y,
@@ -771,6 +778,9 @@ class PageController {
     }
 
     pickColor(colorValue) {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+
         var paletteItems = document.querySelectorAll('#palette > div');
         paletteItems.forEach((item) => {
             item.classList.remove('palette_item_selected');
@@ -790,19 +800,17 @@ class PageController {
 
         if (isSameColor) {
             let message = `pick color ${colorValue}, no change to current color`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'pick color',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 color: colorValue,
             });
         } else {
             let message = `pick color ${colorValue}, modified current color`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'pick color',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'color',
                 color: colorValue,
             });
@@ -811,6 +819,7 @@ class PageController {
 
     fillSelectedRectangle() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
         if (minX > maxX || minY > maxY) {
@@ -835,7 +844,7 @@ class PageController {
             let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, no change to image`;
             this.history.log(message, {
                 action: 'fill selection',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 minX: minX,
                 minY: minY,
@@ -851,10 +860,9 @@ class PageController {
         this.updateDrawCanvas();
 
         let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'fill selection',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             minX: minX,
             minY: minY,
@@ -1374,7 +1382,9 @@ class PageController {
 
     submitDrawing() {
         console.log('Submit');
-        let image = this.currentDrawingItem().originator.getImageRef();
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let image = drawingItem.originator.getImageRef();
         let json0 = JSON.stringify(image.pixels);
 
         let testIndex = this.currentTest % this.numberOfTests;
@@ -1385,20 +1395,18 @@ class PageController {
 
         if (isCorrect) {
             let message = `submit, correct`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'submit',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 correct: true,
                 image: image.pixels,
             });
         } else {
             let message = `submit, incorrect`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'submit',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 correct: false,
                 image: image.pixels,
@@ -1481,6 +1489,7 @@ class PageController {
 
         // Resize the image, preserve the content.
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         let image = emptyImage.overlay(originalImage, 0, 0);
@@ -1488,10 +1497,9 @@ class PageController {
             console.log('The image is the same after resize.');
 
             let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, no change to image`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'resize',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 width: size.width,
                 height: size.height,
@@ -1510,10 +1518,9 @@ class PageController {
         this.hideToolPanel();
 
         let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'resize',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             width: size.width,
             height: size.height,
@@ -1524,6 +1531,7 @@ class PageController {
 
     startOverWithInputImage() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let inputImage = this.inputImageFromCurrentTest();
         if (originalImage.isEqualTo(inputImage)) {
@@ -1548,10 +1556,9 @@ class PageController {
         this.hideToolPanel();
 
         let message = `start over, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'start over',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             image: inputImage.pixels,
         });
@@ -1563,6 +1570,7 @@ class PageController {
             return;
         }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
 
         let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
@@ -1581,10 +1589,9 @@ class PageController {
             console.log('The image is the same after crop.');
 
             let message = `crop minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, no change to image`;
-            let what = `test ${this.currentTest} output`;
             this.history.log(message, {
                 action: 'crop',
-                what: what,
+                imageHandle: historyImageHandle,
                 modified: 'none',
                 minX: minX,
                 minY: minY,
@@ -1603,10 +1610,9 @@ class PageController {
         this.hideToolPanel();
 
         let message = `crop minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'crop',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             minX: minX,
             minY: minY,
@@ -1618,17 +1624,18 @@ class PageController {
 
     copyToClipboard() {
         let rectangle = this.getToolRectangle();
-        let originalImage = this.currentDrawingItem().originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.clipboard = cropImage;
         this.hideToolPanel();
         console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
 
-        let what = `test ${this.currentTest} output`;
         let message = `copy x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified clipboard`;
         this.history.log(message, {
             action: 'copy',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'clipboard',
             x: rectangle.x,
             y: rectangle.y,
@@ -1692,6 +1699,7 @@ class PageController {
         let height = canvasHeight - inset * 2;
 
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let image = drawingItem.originator.getImageClone();
 
         let cellSize = image.cellSize(width, height);
@@ -1727,10 +1735,9 @@ class PageController {
         this.hidePasteArea();
 
         let message = `paste accept minX: ${minX} minY: ${minY}, modified image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'paste accept',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'image',
             minX: minX,
             minY: minY,
@@ -1744,11 +1751,13 @@ class PageController {
         this.updateDrawCanvas();
         this.hidePasteArea();
 
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+
         let message = `paste reject, no change to image`;
-        let what = `test ${this.currentTest} output`;
         this.history.log(message, {
             action: 'paste reject',
-            what: what,
+            imageHandle: historyImageHandle,
             modified: 'none'
         });
     }
