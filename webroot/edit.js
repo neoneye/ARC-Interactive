@@ -178,13 +178,13 @@ class HistoryContainer {
         this.items = [];
     }
 
-    log(message, dict = null) {
+    log(message, context = null) {
         let count = this.items.length;
         let item = HistoryItem.create();
         item.id = count;
         item.message = message;
-        if (dict) {
-            item.dict = dict;
+        if (context) {
+            item.context = context;
         }
         this.items.push(item);
     }
@@ -2259,8 +2259,8 @@ class PageController {
             console.log('item:', item);
 
             var arc_image = null;
-            if (item.dict && item.dict.image) {
-                arc_image = new ARCImage(item.dict.image);
+            if (item.context && item.context.image) {
+                arc_image = new ARCImage(item.context.image);
             }
             if (!arc_image) {
                 arc_image = ARCImage.color(5, 5, 0);
