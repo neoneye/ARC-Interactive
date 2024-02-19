@@ -1624,16 +1624,16 @@ class PageController {
         this.hideToolPanel();
         console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
 
-        let message = `copy minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, modified clipboard`;
         let what = `test ${this.currentTest} output`;
+        let message = `copy x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified clipboard`;
         this.history.log(message, {
             action: 'copy',
             what: what,
             modified: 'clipboard',
-            minX: minX,
-            minY: minY,
-            maxX: maxX,
-            maxY: maxY,
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
         });
     }
 
