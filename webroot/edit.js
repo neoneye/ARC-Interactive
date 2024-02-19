@@ -1707,22 +1707,24 @@ class PageController {
         let pasteCenterX = this.pasteCenterX;
         let pasteCenterY = this.pasteCenterY;
         let clipboardImage = this.clipboard;
-        let halfWidth = Math.floor(clipboardImage.width * cellSize / 2);
-        let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
+        let pasteWidth = clipboardImage.width;
+        let pasteHeight = clipboardImage.height;
+        let halfWidth = Math.floor(pasteWidth * cellSize / 2);
+        let halfHeight = Math.floor(pasteHeight * cellSize / 2);
 
         let x0 = image.calcX0(0, width, cellSize) + inset;
         let y0 = image.calcY0(0, height, cellSize) + inset;
 
-        var minX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
-        var minY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
+        let pasteMinX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
+        let pasteMinY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
 
-        let image2 = image.overlay(clipboardImage, minX, minY);
+        let image2 = image.overlay(clipboardImage, pasteMinX, pasteMinY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(minX, image2.width - 1));
-        let clampedY0 = Math.max(0, Math.min(minY, image2.height - 1));
-        let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, image2.width - 1));
-        let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, image2.height - 1));
+        let clampedX0 = Math.max(0, Math.min(pasteMinX, image2.width - 1));
+        let clampedY0 = Math.max(0, Math.min(pasteMinY, image2.height - 1));
+        let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image2.width - 1));
+        let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image2.height - 1));
         drawingItem.selectRectangle.x0 = clampedX0;
         drawingItem.selectRectangle.y0 = clampedY0;
         drawingItem.selectRectangle.x1 = clampedX1;
@@ -1734,13 +1736,15 @@ class PageController {
         this.updateDrawCanvas();
         this.hidePasteArea();
 
-        let message = `paste accept minX: ${minX} minY: ${minY}, modified image`;
+        let message = `paste accept pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}, modified image and selection`;
         this.history.log(message, {
             action: 'paste accept',
             imageHandle: historyImageHandle,
-            modified: 'image',
-            minX: minX,
-            minY: minY,
+            modified: 'image,selection',
+            pasteX: pasteMinX,
+            pasteY: pasteMinY,
+            pasteWidth: pasteWidth,
+            pasteHeight: pasteHeight,
             image: image2.pixels,
         });
     }
