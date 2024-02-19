@@ -1661,11 +1661,22 @@ class PageController {
         console.log(`Paste from clipboard. width: ${image.width}, height: ${image.height}`);
         this.pasteCenterX = this.drawCanvas.width / 2;
         this.pasteCenterY = this.drawCanvas.height / 2;
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         this.hideToolPanel();
         this.isPasteMode = true;
         this.showPasteArea();
         resizeCanvas();
         this.updateDrawCanvas();
+
+        let message = `paste begin width: ${image.width} height: ${image.height}, no change to image`;
+        this.history.log(message, {
+            action: 'paste begin',
+            imageHandle: historyImageHandle,
+            modified: 'none',
+            width: image.width,
+            height: image.height,
+        });
     }
 
     showPasteArea() {
