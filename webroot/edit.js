@@ -1725,6 +1725,8 @@ class PageController {
         let clampedY0 = Math.max(0, Math.min(pasteMinY, image2.height - 1));
         let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image2.width - 1));
         let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image2.height - 1));
+        let selectionWidth = clampedX1 - clampedX0 + 1;
+        let selectionHeight = clampedY1 - clampedY0 + 1;
         drawingItem.selectRectangle.x0 = clampedX0;
         drawingItem.selectRectangle.y0 = clampedY0;
         drawingItem.selectRectangle.x1 = clampedX1;
@@ -1745,6 +1747,10 @@ class PageController {
             pasteY: pasteMinY,
             pasteWidth: pasteWidth,
             pasteHeight: pasteHeight,
+            selectionX: clampedX0,
+            selectionY: clampedY0,
+            selectionWidth: selectionWidth,
+            selectionHeight: selectionHeight,
             image: image2.pixels,
         });
     }
