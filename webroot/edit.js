@@ -277,8 +277,8 @@ class PageController {
         this.clipboard = null;
         this.isPasteMode = false;
         this.isPasting = false;
-        this.pasteX = 0;
-        this.pasteY = 0;
+        this.pasteCenterX = 0;
+        this.pasteCenterY = 0;
 
         this.enablePlotDraw = false;
 
@@ -540,9 +540,9 @@ class PageController {
         this.isPasting = true;
         let position = this.getPosition(event);
 
-        this.pasteX = position.x;
-        this.pasteY = position.y;
-        // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+        this.pasteCenterX = position.x;
+        this.pasteCenterY = position.y;
+        // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
         this.updateDrawCanvas();
     }
 
@@ -558,9 +558,9 @@ class PageController {
         event.preventDefault();
         let position = this.getPosition(event);
 
-        this.pasteX = position.x;
-        this.pasteY = position.y;
-        // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+        this.pasteCenterX = position.x;
+        this.pasteCenterY = position.y;
+        // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
         this.updateDrawCanvas();
     }
 
@@ -585,9 +585,9 @@ class PageController {
         }
 
         if(this.isPasteMode) {
-            this.pasteX = position.x;
-            this.pasteY = position.y;
-            // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+            this.pasteCenterX = position.x;
+            this.pasteCenterY = position.y;
+            // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
             this.updateDrawCanvas();
             return;
         }
@@ -649,9 +649,9 @@ class PageController {
         }
 
         if(this.isPasteMode) {
-            this.pasteX = position.x;
-            this.pasteY = position.y;
-            // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+            this.pasteCenterX = position.x;
+            this.pasteCenterY = position.y;
+            // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
             this.updateDrawCanvas();
             return;
         }
@@ -1232,13 +1232,13 @@ class PageController {
                 const ctx2 = this.pasteCanvas.getContext('2d');
                 ctx2.clearRect(0, 0, this.pasteCanvas.width, this.pasteCanvas.height);
 
-                let pasteX = this.pasteX;
-                let pasteY = this.pasteY;
+                let pasteCenterX = this.pasteCenterX;
+                let pasteCenterY = this.pasteCenterY;
                 let clipboardImage = this.clipboard;
                 let halfWidth = Math.floor(clipboardImage.width * cellSize / 2);
                 let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
-                let minXRaw = pasteX - halfWidth;
-                let minYRaw = pasteY - halfHeight;
+                let minXRaw = pasteCenterX - halfWidth;
+                let minYRaw = pasteCenterY - halfHeight;
                 let position2 = this.translateCoordinatesToSecondCanvas(this.pasteCanvas, this.drawCanvas, minXRaw, minYRaw);
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
@@ -1249,8 +1249,8 @@ class PageController {
                 let x0 = image.calcX0(0, width, cellSize) + inset;
                 let y0 = image.calcY0(0, height, cellSize) + inset;
 
-                var minX = Math.floor((pasteX - halfWidth - x0) / cellSize + 0.5);
-                var minY = Math.floor((pasteY - halfHeight - y0) / cellSize + 0.5);
+                var minX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
+                var minY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
                 var maxX = minX + clipboardImage.width - 1;
                 var maxY = minY + clipboardImage.height - 1;
 
@@ -1651,8 +1651,8 @@ class PageController {
         }
         let image = this.clipboard;
         console.log(`Paste from clipboard. width: ${image.width}, height: ${image.height}`);
-        this.pasteX = this.drawCanvas.width / 2;
-        this.pasteY = this.drawCanvas.height / 2;
+        this.pasteCenterX = this.drawCanvas.width / 2;
+        this.pasteCenterY = this.drawCanvas.height / 2;
         this.hideToolPanel();
         this.isPasteMode = true;
         this.showPasteArea();
@@ -1704,8 +1704,8 @@ class PageController {
 
         let cellSize = image.cellSize(width, height);
 
-        let pasteX = this.pasteX;
-        let pasteY = this.pasteY;
+        let pasteCenterX = this.pasteCenterX;
+        let pasteCenterY = this.pasteCenterY;
         let clipboardImage = this.clipboard;
         let halfWidth = Math.floor(clipboardImage.width * cellSize / 2);
         let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
@@ -1713,8 +1713,8 @@ class PageController {
         let x0 = image.calcX0(0, width, cellSize) + inset;
         let y0 = image.calcY0(0, height, cellSize) + inset;
 
-        var minX = Math.floor((pasteX - halfWidth - x0) / cellSize + 0.5);
-        var minY = Math.floor((pasteY - halfHeight - y0) / cellSize + 0.5);
+        var minX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
+        var minY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
 
         let image2 = image.overlay(clipboardImage, minX, minY);
         this.isPasteMode = false;
