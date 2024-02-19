@@ -1584,19 +1584,23 @@ class PageController {
         if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
-        let image = originalImage.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        let cropX = minX;
+        let cropY = minY;
+        let cropWidth = maxX - minX + 1;
+        let cropHeight = maxY - minY + 1;
+        let image = originalImage.crop(cropX, cropY, cropWidth, cropHeight);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after crop.');
 
-            let message = `crop minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, no change to image`;
+            let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, no change to image`;
             this.history.log(message, {
                 action: 'crop',
                 imageHandle: historyImageHandle,
                 modified: 'none',
-                minX: minX,
-                minY: minY,
-                maxX: maxX,
-                maxY: maxY,
+                x: cropX,
+                y: cropY,
+                width: cropWidth,
+                height: cropHeight,
                 image: image.pixels,
             });
 
@@ -1609,15 +1613,15 @@ class PageController {
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        let message = `crop minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY}, modified image`;
+        let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, modified image`;
         this.history.log(message, {
             action: 'crop',
             imageHandle: historyImageHandle,
             modified: 'image',
-            minX: minX,
-            minY: minY,
-            maxX: maxX,
-            maxY: maxY,
+            x: cropX,
+            y: cropY,
+            width: cropWidth,
+            height: cropHeight,
             image: image.pixels,
         });
     }
