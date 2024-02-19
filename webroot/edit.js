@@ -831,6 +831,10 @@ class PageController {
         if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
+        let selectionX = minX;
+        let selectionY = minY;
+        let selectionWidth = maxX - minX + 1;
+        let selectionHeight = maxY - minY + 1;
         let color = this.currentColor;
         var image = originalImage.clone();
         for (let y = minY; y <= maxY; y++) {
@@ -841,15 +845,15 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after filling the selection.');
 
-            let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, no change to image`;
+            let message = `fill selection x: ${selectionX} y: ${selectionY} width: ${selectionWidth} height: ${selectionHeight} color: ${color}, no change to image`;
             this.history.log(message, {
                 action: 'fill selection',
                 imageHandle: historyImageHandle,
                 modified: 'none',
-                minX: minX,
-                minY: minY,
-                maxX: maxX,
-                maxY: maxY,
+                x: selectionX,
+                y: selectionY,
+                width: selectionWidth,
+                height: selectionHeight,
                 color: color,
                 image: image.pixels,
             });
@@ -859,15 +863,15 @@ class PageController {
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
 
-        let message = `fill selection minX: ${minX} minY: ${minY} maxX: ${maxX} maxY: ${maxY} color: ${color}, modified image`;
+        let message = `fill selection x: ${selectionX} y: ${selectionY} width: ${selectionWidth} height: ${selectionHeight} color: ${color}, modified image`;
         this.history.log(message, {
             action: 'fill selection',
             imageHandle: historyImageHandle,
             modified: 'image',
-            minX: minX,
-            minY: minY,
-            maxX: maxX,
-            maxY: maxY,
+            x: selectionX,
+            y: selectionY,
+            width: selectionWidth,
+            height: selectionHeight,
             color: color,
             image: image.pixels,
         });
