@@ -1917,34 +1917,78 @@ class PageController {
     }
 
     rotateCW_selection() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageClone();
+
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
+            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: originalImage.pixels,
+            });
             return;
         }
-        let drawingItem = this.currentDrawingItem();
-        let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise selection');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'rotate selection clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     rotateCW_entireImage() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCW();
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate image clockwise, no change to image`;
+            this.history.log(message, {
+                action: 'rotate image clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise entire image');
@@ -1952,6 +1996,14 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate image clockwise, modified image`;
+        this.history.log(message, {
+            action: 'rotate image clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     // Rotate counter clockwise
@@ -1964,34 +2016,78 @@ class PageController {
     }
 
     rotateCCW_selection() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageClone();
+
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
+            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection counter-clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: originalImage.pixels,
+            });
             return;
         }
-        let drawingItem = this.currentDrawingItem();
-        let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection counter-clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise selection');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'rotate selection counter-clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     rotateCCW_entireImage() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCCW();
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate image counter-clockwise, no change to image`;
+            this.history.log(message, {
+                action: 'rotate image counter-clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise entire image');
@@ -1999,6 +2095,14 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate image counter-clockwise, modified image`;
+        this.history.log(message, {
+            action: 'rotate image counter-clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     // Move left with wrap around
