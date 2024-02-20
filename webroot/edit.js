@@ -120,15 +120,14 @@ class Caretaker {
     }
 
     redo(originator) {
-        if (this.redoList.length > 0) {
-            const memento = this.redoList.pop();
-            const actionName = memento.getActionName();
-            this.undoList.push(originator.saveStateToMemento(`Redo ${actionName}`)); // save current state before redoing
-            originator.getStateFromMemento(memento);
-            console.log(`Redid action: ${actionName}`);
-        } else {
-            console.log('No actions to redo.');
+        if (!this.canRedo()) {
+            throw new Error("No actions to redo. redoList is empty");
         }
+        let memento = this.redoList.pop();
+        let actionName = memento.getActionName();
+        this.undoList.push(originator.saveStateToMemento(`Redo ${actionName}`)); // save current state before redoing
+        originator.getStateFromMemento(memento);
+        return actionName;
     }
 }
 
@@ -515,9 +514,27 @@ class PageController {
     redoAction() {
         console.log('Redo action');
         let drawingItem = this.currentDrawingItem();
-        drawingItem.caretaker.redo(drawingItem.originator);
+
+        if (!drawingItem.caretaker.canRedo()) {
+            console.log('No actions to redo.');
+            return;
+        }
+
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let actionName = drawingItem.caretaker.redo(drawingItem.originator);
+        let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        console.log(`Redid action: ${actionName}`);
+        let message = `redo, modified image`;
+        this.history.log(message, {
+            action: 'redo',
+            actionName: actionName,
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     getPosition(event) {
