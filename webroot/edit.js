@@ -468,9 +468,10 @@ class PageController {
             if (event.code === 'ArrowRight') {
                 this.moveRight();
             }
-            if (event.code === 'KeyQ') {
-                this.replay();
-            }
+            // Experiments with replaying the recorded history
+            // if (event.code === 'KeyQ') {
+            //     this.replay();
+            // }
         }
     }
 
