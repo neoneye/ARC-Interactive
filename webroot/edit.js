@@ -469,9 +469,9 @@ class PageController {
                 this.moveRight();
             }
             // Experiments with replaying the recorded history
-            // if (event.code === 'KeyQ') {
-            //     this.replay();
-            // }
+            if (event.code === 'KeyQ') {
+                this.replay();
+            }
         }
     }
 
