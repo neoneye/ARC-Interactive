@@ -19,6 +19,12 @@ body {
     }
 }
 
+/* Hide the file input visually but keep it in the document flow */
+#file-input {
+    position: absolute;
+    left: -9999px;
+}
+
 #main-inner {
     /* background-color: red; */
 }
@@ -83,6 +89,33 @@ body {
 #paste-canvas {
     background-color: rgba(149, 149, 149, 0.734);
     opacity: 0.9;
+}
+
+#replay-area-outer {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background-color: var(--ui-background);
+}
+
+#replay-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Ensure it appears above the canvas */
+    z-index: 201; /* Higher than the canvas, but does not need to exceed the parent's context unless there are other elements with higher z-index values */
+    
+    /* Optional for better visibility */
+    color: #fff; /* Adjust based on your design */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for contrast */
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center; /* Center the text within the div */
 }
 
 #draw-area-outer {
@@ -288,6 +321,7 @@ body {
 }
 
 #paste-area-outer.hidden,
+#replay-area-outer.hidden,
 #task-overview.hidden,
 #draw-area-outer.hidden,
 #page-footer-draw-mode.hidden,

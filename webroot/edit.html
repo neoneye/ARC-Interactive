@@ -13,6 +13,13 @@
     <title>ARC-Interactive - Task editor</title>
 </head>
 <body onload="body_onload()">
+    <input type="file" id="file-input" accept=".json" onchange="gPageController.changeInputFile(event)">
+
+    <div id="replay-area-outer" class="hidden" onclick="gPageController.dismissReplayLayer()">
+        <canvas id="replay-canvas"></canvas>
+        <div id="replay-message">Message</div>
+    </div>
+
     <div id="paste-area-outer" class="hidden">
         <canvas id="paste-canvas"></canvas>
         <button id="paste-area-reject-button" class="hover-button" onclick="gPageController.pasteFromClipboardReject()" title="Abort the paste operation.">Reject</button>
@@ -104,6 +111,9 @@
         <div class="titlebar-item titlebar-item-center" id="title_task">Task name</div>
         
         <div class="titlebar-item titlebar-item-right">
+            <button class="secondary-button hidden" onclick="gPageController.downloadReplayFile()" title="Download the replay data">Download</button>
+            <button class="secondary-button hidden" onclick="gPageController.clickUploadReplayFile()">Upload</button>
+            <button class="secondary-button hidden" onclick="gPageController.replay()" title="Animate the actions taken so far">Replay</button>
             <button class="secondary-button" onclick="gPageController.toggleOverview()" title="O = Toggle between overview and editor.">Overview</button>
         </div>
     </header>
