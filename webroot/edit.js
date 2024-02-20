@@ -100,16 +100,23 @@ class Caretaker {
         });
     }
 
+    canUndo() {
+        return this.undoList.length > 0;
+    }
+
+    canRedo() {
+        return this.redoList.length > 0;
+    }
+
     undo(originator) {
-        if (this.undoList.length > 0) {
-            const memento = this.undoList.pop();
-            const actionName = memento.getActionName();
-            this.redoList.push(originator.saveStateToMemento(`Undo ${actionName}`)); // save current state before undoing
-            originator.getStateFromMemento(memento);
-            console.log(`Undid action: ${actionName}`);
-        } else {
-            console.log('No actions to undo.');
+        if (!this.canUndo()) {
+            throw new Error("No actions to undo. undoList is empty");
         }
+        let memento = this.undoList.pop();
+        let actionName = memento.getActionName();
+        this.redoList.push(originator.saveStateToMemento(`Undo ${actionName}`)); // save current state before undoing
+        originator.getStateFromMemento(memento);
+        return actionName;
     }
 
     redo(originator) {
@@ -482,9 +489,27 @@ class PageController {
     undoAction() {
         console.log('Undo action');
         let drawingItem = this.currentDrawingItem();
-        drawingItem.caretaker.undo(drawingItem.originator);
+
+        if (!drawingItem.caretaker.canUndo()) {
+            console.log('No actions to undo.');
+            return;
+        }
+
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let actionName = drawingItem.caretaker.undo(drawingItem.originator);
+        let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        console.log(`Undid action: ${actionName}`);
+        let message = `undo, modified image`;
+        this.history.log(message, {
+            action: 'undo',
+            actionName: actionName,
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     redoAction() {
