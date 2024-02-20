@@ -281,7 +281,7 @@ class PageController {
         this.isDrawing = false;
         this.currentColor = 0;
         this.currentTest = 0;
-        this.currentTool = 'paint';
+        this.currentTool = 'draw';
         this.numberOfTests = 1;
         this.drawingItems = [];
         this.inset = 2;
@@ -305,10 +305,10 @@ class PageController {
         this.overviewRevealSolutions = false;
 
         {
-            // Select the radio button with the id 'tool_paint'
+            // Select the radio button with the id 'tool_draw'
             // Sometimes the browser remembers the last selected radio button, across sessions.
-            // This code makes sure that the 'tool_paint' radio button is always selected on launch.
-            document.getElementById('tool_paint').checked = true;
+            // This code makes sure that the 'tool_draw' radio button is always selected on launch.
+            document.getElementById('tool_draw').checked = true;
         }
     }
 
@@ -449,8 +449,8 @@ class PageController {
             if (event.code === 'KeyV') {
                 this.pasteFromClipboard();
             }
-            if (event.code === 'KeyP') {
-                this.keyboardShortcutPickTool('tool_paint');
+            if (event.code === 'KeyD') {
+                this.keyboardShortcutPickTool('tool_draw');
             }
             if (event.code === 'KeyS') {
                 this.keyboardShortcutPickTool('tool_select');
@@ -685,7 +685,7 @@ class PageController {
         if (celly < 0 || celly >= originalImage.height) {
             return;
         }
-        if(this.currentTool == 'paint') {
+        if(this.currentTool == 'draw') {
             this.setPixel(cellx, celly, this.currentColor);
         }
         if(this.currentTool == 'fill') {
@@ -746,7 +746,7 @@ class PageController {
         if (celly < 0 || celly >= originalImage.height) {
             return;
         }
-        if(this.currentTool == 'paint') {
+        if(this.currentTool == 'draw') {
             this.setPixel(cellx, celly, this.currentColor);
         }
     }
