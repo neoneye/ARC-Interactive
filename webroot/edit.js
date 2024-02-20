@@ -1422,6 +1422,10 @@ class PageController {
 
     static getItemIsGridVisible() {
         let rawValue = localStorage.getItem(PageController.gridKey());
+        if (rawValue === null) {
+            // For new users, show the grid by default
+            return true;
+        }
         return rawValue == 'true';
     }
 
