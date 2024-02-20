@@ -584,7 +584,19 @@ class ARCImage {
         // Get the source color and start the flood fill
         let sourceColor = this.pixels[y][x];
         floodFillHelper(x, y, sourceColor, targetColor);
-    }    
+    }
+    
+    // Move the content to the left inside the rectangle, wrap around when reaching the left edge.
+    moveLeft(x, y, width, height) {
+        var image3 = this.clone();
+        if (width >= 2) {
+            let image0 = this.crop(x, y, 1, height);
+            let image1 = this.crop(x + 1, y, width - 1, height);
+            let image2 = this.overlay(image1, x, y);
+            image3 = image2.overlay(image0, x + width - 1, y);
+        }
+        return image3;
+    }
 }
 
 class ARCPair {

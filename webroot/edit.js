@@ -2107,26 +2107,43 @@ class PageController {
 
     // Move left with wrap around
     moveLeft() {
-        let rectangle = this.getToolRectangle();
-        if (rectangle.width < 2) {
-            console.log('Move is only available when the width is 2 or greater.');
-            return;
-        }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
-        let image0 = originalImage.crop(rectangle.x, rectangle.y, 1, rectangle.height);
-        let image1 = originalImage.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
-        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
-        let image3 = image2.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
-        if (image3.isEqualTo(originalImage)) {
+        let rectangle = this.getToolRectangle();
+        let image = originalImage.moveLeft(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
             this.hideToolPanel();
+            let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'move left',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'move left');
-        drawingItem.originator.setImage(image3);
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'move left',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Move right with wrap around
