@@ -669,13 +669,7 @@ class PageController {
         // console.log('cellx', cellx, 'celly', celly);
 
         if(this.currentTool == 'select') {
-            let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
-            let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
-            drawingItem.selectRectangle.x0 = clampedCellX;
-            drawingItem.selectRectangle.y0 = clampedCellY;
-            drawingItem.selectRectangle.x1 = clampedCellX;
-            drawingItem.selectRectangle.y1 = clampedCellY;
-            this.updateDrawCanvas();
+            this.createSelectionBegin(cellx, celly);
             return;
         }
 
@@ -758,6 +752,28 @@ class PageController {
         // let cellSize = 100;
         // ctx.fillStyle = 'white';
         // ctx.fillRect(0, 0, cellSize, cellSize);
+    }
+
+    createSelectionBegin(unclampedX, unclampedY) {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageRef();
+        let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
+        let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
+        drawingItem.selectRectangle.x0 = x;
+        drawingItem.selectRectangle.y0 = y;
+        drawingItem.selectRectangle.x1 = x;
+        drawingItem.selectRectangle.y1 = y;
+        this.updateDrawCanvas();
+
+        let message = `create selection begin x: ${x} y: ${y}, modified selection`;
+        this.history.log(message, {
+            action: 'create selection begin',
+            imageHandle: historyImageHandle,
+            modified: 'selection',
+            x: x,
+            y: y,
+        });
     }
 
     setPixel(x, y, color) {
