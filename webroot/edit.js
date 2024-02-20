@@ -173,30 +173,35 @@ class DrawingItem {
 }
 
 class HistoryItem {
-    constructor(id, date) {
+    constructor(id, wait) {
         // The `id` is a non-negative integer that gets incremented for each new history item.
         this.id = id;
 
-        // The `date` is a Date object that represents the time when the history item was created.
-        this.date = date;
-    }
-
-    static create() {
-        let id = 0;
-        let instance = new HistoryItem(id, new Date());
-        return instance;
+        // The `wait` is the number of milliseconds since previous history item. It's a non-negative integer.
+        this.wait = wait;
     }
 }
 
 class HistoryContainer {
     constructor() {
         this.items = [];
+        this.lastEventTime = null; // Tracks the time of the last event.
     }
 
     log(message, context = null) {
-        let count = this.items.length;
-        let item = HistoryItem.create();
-        item.id = count;
+        const now = new Date();
+        let msSinceLastEvent = 0;
+
+        // Calculate the time difference if there is a last event time recorded
+        if (this.lastEventTime !== null) {
+            msSinceLastEvent = now.getTime() - this.lastEventTime.getTime();
+        }
+
+        // Update the last event time to now
+        this.lastEventTime = now;
+
+        // Create a new HistoryItem with the ID as the current length of items and the calculated msSinceLastEvent
+        let item = new HistoryItem(this.items.length, msSinceLastEvent);
         item.message = message;
         if (context) {
             item.context = context;
