@@ -491,6 +491,17 @@ class PageController {
         } else {
             el1.classList.add('hidden');
         }
+
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+
+        let message = `change tool to ${toolId}`;
+        this.history.log(message, {
+            action: 'pick tool',
+            toolId: toolId,
+            modified: 'none',
+            imageHandle: historyImageHandle,
+        });
     }
 
     undoAction() {
