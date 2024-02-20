@@ -293,6 +293,8 @@ class PageController {
 
         this.enablePlotDraw = false;
 
+        this.statsRevealCount = 0;
+
         let maxPixelSize = 100;
         this.maxPixelSize = maxPixelSize;
         this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
@@ -1041,16 +1043,28 @@ class PageController {
         return cellSize;
     }
 
-    // The user is pressing down the button that reveals the solutions.
+    // The user is pressing down the button that reveals the solutions. By default the solutions are hidden.
     overviewRevealSolutionsYes() {
         this.overviewRevealSolutions = true;
         this.updateOverview();
+
+        this.statsRevealCount++;
+
+        let message = 'reveal begin';
+        this.history.log(message, {
+            modified: 'none',
+        });
     }
 
-    // The user is releasing the button that reveals the solutions.
+    // The user is releasing the button that reveals the solutions. So the solutions are hidden again.
     overviewRevealSolutionsNo() {
         this.overviewRevealSolutions = false;
         this.updateOverview();
+
+        let message = 'reveal end';
+        this.history.log(message, {
+            modified: 'none',
+        });
     }
 
     // Rebuild the overview table, so it shows what the user has drawn so far.
@@ -2501,6 +2515,7 @@ class PageController {
 
         let summary = {
             "history count": this.history.items.length,
+            "reveal count": this.statsRevealCount,
         };
 
         var dict = {
