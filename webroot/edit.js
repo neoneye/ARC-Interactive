@@ -100,28 +100,34 @@ class Caretaker {
         });
     }
 
+    canUndo() {
+        return this.undoList.length > 0;
+    }
+
+    canRedo() {
+        return this.redoList.length > 0;
+    }
+
     undo(originator) {
-        if (this.undoList.length > 0) {
-            const memento = this.undoList.pop();
-            const actionName = memento.getActionName();
-            this.redoList.push(originator.saveStateToMemento(`Undo ${actionName}`)); // save current state before undoing
-            originator.getStateFromMemento(memento);
-            console.log(`Undid action: ${actionName}`);
-        } else {
-            console.log('No actions to undo.');
+        if (!this.canUndo()) {
+            throw new Error("No actions to undo. undoList is empty");
         }
+        let memento = this.undoList.pop();
+        let actionName = memento.getActionName();
+        this.redoList.push(originator.saveStateToMemento(actionName)); // save current state before undoing
+        originator.getStateFromMemento(memento);
+        return actionName;
     }
 
     redo(originator) {
-        if (this.redoList.length > 0) {
-            const memento = this.redoList.pop();
-            const actionName = memento.getActionName();
-            this.undoList.push(originator.saveStateToMemento(`Redo ${actionName}`)); // save current state before redoing
-            originator.getStateFromMemento(memento);
-            console.log(`Redid action: ${actionName}`);
-        } else {
-            console.log('No actions to redo.');
+        if (!this.canRedo()) {
+            throw new Error("No actions to redo. redoList is empty");
         }
+        let memento = this.redoList.pop();
+        let actionName = memento.getActionName();
+        this.undoList.push(originator.saveStateToMemento(actionName)); // save current state before redoing
+        originator.getStateFromMemento(memento);
+        return actionName;
     }
 }
 
@@ -155,10 +161,69 @@ class DrawingItem {
             y1: image.height - 1,
         };
     }
+
+    // When serializing the history to json, this function is called 
+    // to get a string that describes what image is being manipulated.
+    // Currently the user can only edit the `output` image of the `test` pairs.
+    // In the future the user may be able to edit both input images, output images.
+    // In the future the user may be able to edit both train pairs and test pairs.
+    getHistoryImageHandle() {
+        return `test ${this.id} output`;
+    }
+}
+
+class HistoryItem {
+    constructor(id, wait) {
+        // The `id` is a non-negative integer that gets incremented for each new history item.
+        this.id = id;
+
+        // The `wait` is the number of milliseconds since previous history item. It's a non-negative integer.
+        this.wait = wait;
+    }
+}
+
+class HistoryContainer {
+    constructor() {
+        this.items = [];
+        this.lastEventTime = null; // Tracks the time of the last event.
+    }
+
+    log(message, context = null) {
+        const now = new Date();
+        let msSinceLastEvent = 0;
+
+        // Calculate the time difference if there is a last event time recorded
+        if (this.lastEventTime !== null) {
+            msSinceLastEvent = now.getTime() - this.lastEventTime.getTime();
+        }
+
+        // Update the last event time to now
+        this.lastEventTime = now;
+
+        // Create a new HistoryItem with the ID as the current length of items and the calculated msSinceLastEvent
+        let item = new HistoryItem(this.items.length, msSinceLastEvent);
+        item.message = message;
+        if (context) {
+            item.context = context;
+        }
+        this.items.push(item);
+    }
+
+    print() {
+        console.log('History:');
+        this.items.forEach((item, index) => {
+            console.log(`${index + 1}: ${item}`);
+        });
+    }
+
+    toJSON() {
+        return this.items;
+    }
 }
 
 class PageController {
     constructor() {
+        this.history = new HistoryContainer();
         this.db = null;
         this.theme = null;
 
@@ -223,8 +288,8 @@ class PageController {
         this.clipboard = null;
         this.isPasteMode = false;
         this.isPasting = false;
-        this.pasteX = 0;
-        this.pasteY = 0;
+        this.pasteCenterX = 0;
+        this.pasteCenterY = 0;
 
         this.enablePlotDraw = false;
 
@@ -252,8 +317,19 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         await this.loadTask();
+        this.history.log('loaded task');
         this.addEventListeners();
         this.hideEditorShowOverview();
+        // await this.replayExampleHistoryFile();
+    }
+
+    async replayExampleHistoryFile() {
+        const response = await fetch('history1.json');
+        // console.log('response:', response);
+        const arrayBuffer = await response.arrayBuffer();
+        let uint8Array = new Uint8Array(arrayBuffer);
+        let jsonString = new TextDecoder().decode(uint8Array);
+        this.replayHistoryFile(jsonString);
     }
 
     addEventListeners() {
@@ -262,22 +338,22 @@ class PageController {
         window.addEventListener('orientationchange', () => { this.resizeOrChangeOrientation(); });
 
         // Interaction with the draw canvas
-        this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
-        this.drawCanvas.addEventListener('touchmove', (event) => { this.moveDraw(event); }, false);
-        this.drawCanvas.addEventListener('touchend', (event) => { this.stopDraw(event); }, false);
-        this.drawCanvas.addEventListener('mousedown', (event) => { this.startDraw(event); }, false);
-        this.drawCanvas.addEventListener('mousemove', (event) => { this.moveDraw(event); }, false);
-        this.drawCanvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
-        this.drawCanvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
+        this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); });
+        this.drawCanvas.addEventListener('touchmove', (event) => { this.moveDraw(event); });
+        this.drawCanvas.addEventListener('touchend', (event) => { this.stopDraw(event); });
+        this.drawCanvas.addEventListener('mousedown', (event) => { this.startDraw(event); });
+        this.drawCanvas.addEventListener('mousemove', (event) => { this.moveDraw(event); });
+        this.drawCanvas.addEventListener('mouseup', (event) => { this.stopDraw(event); });
+        this.drawCanvas.addEventListener('mouseout', (event) => { this.stopDraw(event); });
 
         // Interaction with the paste canvas
-        this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
-        this.pasteCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); }, false);
-        this.pasteCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); }, false);
-        this.pasteCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); }, false);
-        this.pasteCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); }, false);
-        this.pasteCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); }, false);
-        this.pasteCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); }, false);
+        this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); });
+        this.pasteCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); });
+        this.pasteCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); });
+        this.pasteCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); });
+        this.pasteCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); });
+        this.pasteCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); });
+        this.pasteCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); });
 
         // Listen for the keyup event
         window.addEventListener('keyup', (event) => { this.keyUp(event); });
@@ -392,6 +468,10 @@ class PageController {
             if (event.code === 'ArrowRight') {
                 this.moveRight();
             }
+            // Experiments with replaying the recorded history
+            // if (event.code === 'KeyQ') {
+            //     this.replay();
+            // }
         }
     }
 
@@ -412,19 +492,55 @@ class PageController {
     }
 
     undoAction() {
-        console.log('Undo action');
+        // console.log('Undo action');
         let drawingItem = this.currentDrawingItem();
-        drawingItem.caretaker.undo(drawingItem.originator);
+
+        if (!drawingItem.caretaker.canUndo()) {
+            console.log('No actions to undo.');
+            return;
+        }
+
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let actionName = drawingItem.caretaker.undo(drawingItem.originator);
+        let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        console.log(`Undid action: ${actionName}`);
+        let message = `undo, modified image`;
+        this.history.log(message, {
+            action: 'undo',
+            actionName: actionName,
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     redoAction() {
-        console.log('Redo action');
+        // console.log('Redo action');
         let drawingItem = this.currentDrawingItem();
-        drawingItem.caretaker.redo(drawingItem.originator);
+
+        if (!drawingItem.caretaker.canRedo()) {
+            console.log('No actions to redo.');
+            return;
+        }
+
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let actionName = drawingItem.caretaker.redo(drawingItem.originator);
+        let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        console.log(`Redid action: ${actionName}`);
+        let message = `redo, modified image`;
+        this.history.log(message, {
+            action: 'redo',
+            actionName: actionName,
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     getPosition(event) {
@@ -472,9 +588,9 @@ class PageController {
         this.isPasting = true;
         let position = this.getPosition(event);
 
-        this.pasteX = position.x;
-        this.pasteY = position.y;
-        // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+        this.pasteCenterX = position.x;
+        this.pasteCenterY = position.y;
+        // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
         this.updateDrawCanvas();
     }
 
@@ -490,9 +606,9 @@ class PageController {
         event.preventDefault();
         let position = this.getPosition(event);
 
-        this.pasteX = position.x;
-        this.pasteY = position.y;
-        // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+        this.pasteCenterX = position.x;
+        this.pasteCenterY = position.y;
+        // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
         this.updateDrawCanvas();
     }
 
@@ -517,9 +633,9 @@ class PageController {
         }
 
         if(this.isPasteMode) {
-            this.pasteX = position.x;
-            this.pasteY = position.y;
-            // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+            this.pasteCenterX = position.x;
+            this.pasteCenterY = position.y;
+            // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
             this.updateDrawCanvas();
             return;
         }
@@ -581,9 +697,9 @@ class PageController {
         }
 
         if(this.isPasteMode) {
-            this.pasteX = position.x;
-            this.pasteY = position.y;
-            // console.log('Paste mode. x:', this.pasteX, 'y:', this.pasteY);
+            this.pasteCenterX = position.x;
+            this.pasteCenterY = position.y;
+            // console.log('Paste mode. x:', this.pasteCenterX, 'y:', this.pasteCenterY);
             this.updateDrawCanvas();
             return;
         }
@@ -633,6 +749,7 @@ class PageController {
 
     setPixel(x, y, color) {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         try {
@@ -643,28 +760,75 @@ class PageController {
         }
         if (image.isEqualTo(originalImage)) {
             // console.log('The image is the same after setPixel.');
+            let message = `set pixel x: ${x} y: ${y} color: ${color}, no change to image`;
+            this.history.log(message, {
+                action: 'set pixel',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: x,
+                y: y,
+                color: color,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'set pixel');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
+
+        let message = `set pixel x: ${x} y: ${y} color: ${color}, modified image`;
+        this.history.log(message, {
+            action: 'set pixel',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: x,
+            y: y,
+            color: color,
+            image: image.pixels,
+        });
     }
 
     floodFill(x, y, color) {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         image.floodFill(x, y, color);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after floodFill.');
+
+            let message = `flood fill x: ${x} y: ${y} color: ${color}, no change to image`;
+            this.history.log(message, {
+                action: 'flood fill',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: x,
+                y: y,
+                color: color,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'flood fill');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
+
+        let message = `flood fill x: ${x} y: ${y} color: ${color}, modified image`;
+        this.history.log(message, {
+            action: 'flood fill',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: x,
+            y: y,
+            color: color,
+            image: image.pixels,
+        });
     }
 
     pickColor(colorValue) {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+
         var paletteItems = document.querySelectorAll('#palette > div');
         paletteItems.forEach((item) => {
             item.classList.remove('palette_item_selected');
@@ -674,15 +838,36 @@ class PageController {
         var selectedColor = document.getElementById('palette-item' + colorValue);
         selectedColor.classList.add('palette_item_selected');
 
+        let isSameColor = this.currentColor === colorValue;
         this.currentColor = colorValue;
 
         if (this.isCurrentToolSelect()) {
             this.fillSelectedRectangle();
+            return;
         }        
+
+        if (isSameColor) {
+            let message = `pick color ${colorValue}, no change to current color`;
+            this.history.log(message, {
+                action: 'pick color',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                color: colorValue,
+            });
+        } else {
+            let message = `pick color ${colorValue}, modified current color`;
+            this.history.log(message, {
+                action: 'pick color',
+                imageHandle: historyImageHandle,
+                modified: 'color',
+                color: colorValue,
+            });
+        }
     }
 
     fillSelectedRectangle() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
         if (minX > maxX || minY > maxY) {
@@ -694,19 +879,50 @@ class PageController {
         if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
+        let selectionX = minX;
+        let selectionY = minY;
+        let selectionWidth = maxX - minX + 1;
+        let selectionHeight = maxY - minY + 1;
+        let color = this.currentColor;
         var image = originalImage.clone();
         for (let y = minY; y <= maxY; y++) {
             for (let x = minX; x <= maxX; x++) {
-                image.pixels[y][x] = this.currentColor;
+                image.pixels[y][x] = color;
             }
         }
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after filling the selection.');
+
+            let message = `fill selection x: ${selectionX} y: ${selectionY} width: ${selectionWidth} height: ${selectionHeight} color: ${color}, no change to image`;
+            this.history.log(message, {
+                action: 'fill selection',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: selectionX,
+                y: selectionY,
+                width: selectionWidth,
+                height: selectionHeight,
+                color: color,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'fill selection');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
+
+        let message = `fill selection x: ${selectionX} y: ${selectionY} width: ${selectionWidth} height: ${selectionHeight} color: ${color}, modified image`;
+        this.history.log(message, {
+            action: 'fill selection',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: selectionX,
+            y: selectionY,
+            width: selectionWidth,
+            height: selectionHeight,
+            color: color,
+            image: image.pixels,
+        });
     }
 
     async loadTask() {
@@ -1068,13 +1284,13 @@ class PageController {
                 const ctx2 = this.pasteCanvas.getContext('2d');
                 ctx2.clearRect(0, 0, this.pasteCanvas.width, this.pasteCanvas.height);
 
-                let pasteX = this.pasteX;
-                let pasteY = this.pasteY;
+                let pasteCenterX = this.pasteCenterX;
+                let pasteCenterY = this.pasteCenterY;
                 let clipboardImage = this.clipboard;
                 let halfWidth = Math.floor(clipboardImage.width * cellSize / 2);
                 let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
-                let minXRaw = pasteX - halfWidth;
-                let minYRaw = pasteY - halfHeight;
+                let minXRaw = pasteCenterX - halfWidth;
+                let minYRaw = pasteCenterY - halfHeight;
                 let position2 = this.translateCoordinatesToSecondCanvas(this.pasteCanvas, this.drawCanvas, minXRaw, minYRaw);
                 let drawX = Math.floor(position2.x);
                 let drawY = Math.floor(position2.y);
@@ -1085,8 +1301,8 @@ class PageController {
                 let x0 = image.calcX0(0, width, cellSize) + inset;
                 let y0 = image.calcY0(0, height, cellSize) + inset;
 
-                var minX = Math.floor((pasteX - halfWidth - x0) / cellSize + 0.5);
-                var minY = Math.floor((pasteY - halfHeight - y0) / cellSize + 0.5);
+                var minX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
+                var minY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
                 var maxX = minX + clipboardImage.width - 1;
                 var maxY = minY + clipboardImage.height - 1;
 
@@ -1218,7 +1434,9 @@ class PageController {
 
     submitDrawing() {
         console.log('Submit');
-        let image = this.currentDrawingItem().originator.getImageRef();
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let image = drawingItem.originator.getImageRef();
         let json0 = JSON.stringify(image.pixels);
 
         let testIndex = this.currentTest % this.numberOfTests;
@@ -1226,6 +1444,26 @@ class PageController {
         let json1 = JSON.stringify(expectedImage.pixels);
 
         let isCorrect = json0 == json1;
+
+        if (isCorrect) {
+            let message = `submit, correct`;
+            this.history.log(message, {
+                action: 'submit',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                correct: true,
+                image: image.pixels,
+            });
+        } else {
+            let message = `submit, incorrect`;
+            this.history.log(message, {
+                action: 'submit',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                correct: false,
+                image: image.pixels,
+            });
+        }
 
         var el = null;
         if (isCorrect) {
@@ -1303,11 +1541,24 @@ class PageController {
 
         // Resize the image, preserve the content.
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         let image = emptyImage.overlay(originalImage, 0, 0);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after resize.');
+
+            let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, no change to image`;
+            this.history.log(message, {
+                action: 'resize',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                width: size.width,
+                height: size.height,
+                color: this.currentColor,
+                image: image.pixels,
+            });
+
             this.hideToolPanel();
             return;
         }
@@ -1317,10 +1568,22 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, modified image`;
+        this.history.log(message, {
+            action: 'resize',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            width: size.width,
+            height: size.height,
+            color: this.currentColor,
+            image: image.pixels,
+        });
     }
 
     startOverWithInputImage() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let inputImage = this.inputImageFromCurrentTest();
         if (originalImage.isEqualTo(inputImage)) {
@@ -1343,6 +1606,14 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `start over, modified image`;
+        this.history.log(message, {
+            action: 'start over',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: inputImage.pixels,
+        });
     }
 
     cropSelectedRectangle() {
@@ -1351,6 +1622,7 @@ class PageController {
             return;
         }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
 
         let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
@@ -1364,9 +1636,26 @@ class PageController {
         if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
-        let image = originalImage.crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        let cropX = minX;
+        let cropY = minY;
+        let cropWidth = maxX - minX + 1;
+        let cropHeight = maxY - minY + 1;
+        let image = originalImage.crop(cropX, cropY, cropWidth, cropHeight);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after crop.');
+
+            let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, no change to image`;
+            this.history.log(message, {
+                action: 'crop',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: cropX,
+                y: cropY,
+                width: cropWidth,
+                height: cropHeight,
+                image: image.pixels,
+            });
+
             this.hideToolPanel();
             return;
         }
@@ -1375,15 +1664,40 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, modified image`;
+        this.history.log(message, {
+            action: 'crop',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: cropX,
+            y: cropY,
+            width: cropWidth,
+            height: cropHeight,
+            image: image.pixels,
+        });
     }
 
     copyToClipboard() {
         let rectangle = this.getToolRectangle();
-        let originalImage = this.currentDrawingItem().originator.getImageClone();
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.clipboard = cropImage;
         this.hideToolPanel();
         console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
+
+        let message = `copy x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified clipboard`;
+        this.history.log(message, {
+            action: 'copy',
+            imageHandle: historyImageHandle,
+            modified: 'clipboard',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+        });
     }
 
     pasteFromClipboard() {
@@ -1393,13 +1707,24 @@ class PageController {
         }
         let image = this.clipboard;
         console.log(`Paste from clipboard. width: ${image.width}, height: ${image.height}`);
-        this.pasteX = this.drawCanvas.width / 2;
-        this.pasteY = this.drawCanvas.height / 2;
+        this.pasteCenterX = this.drawCanvas.width / 2;
+        this.pasteCenterY = this.drawCanvas.height / 2;
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         this.hideToolPanel();
         this.isPasteMode = true;
         this.showPasteArea();
         resizeCanvas();
         this.updateDrawCanvas();
+
+        let message = `paste begin width: ${image.width} height: ${image.height}, no change to image`;
+        this.history.log(message, {
+            action: 'paste begin',
+            imageHandle: historyImageHandle,
+            modified: 'none',
+            width: image.width,
+            height: image.height,
+        });
     }
 
     showPasteArea() {
@@ -1441,29 +1766,34 @@ class PageController {
         let height = canvasHeight - inset * 2;
 
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let image = drawingItem.originator.getImageClone();
 
         let cellSize = image.cellSize(width, height);
 
-        let pasteX = this.pasteX;
-        let pasteY = this.pasteY;
+        let pasteCenterX = this.pasteCenterX;
+        let pasteCenterY = this.pasteCenterY;
         let clipboardImage = this.clipboard;
-        let halfWidth = Math.floor(clipboardImage.width * cellSize / 2);
-        let halfHeight = Math.floor(clipboardImage.height * cellSize / 2);
+        let pasteWidth = clipboardImage.width;
+        let pasteHeight = clipboardImage.height;
+        let halfWidth = Math.floor(pasteWidth * cellSize / 2);
+        let halfHeight = Math.floor(pasteHeight * cellSize / 2);
 
         let x0 = image.calcX0(0, width, cellSize) + inset;
         let y0 = image.calcY0(0, height, cellSize) + inset;
 
-        var minX = Math.floor((pasteX - halfWidth - x0) / cellSize + 0.5);
-        var minY = Math.floor((pasteY - halfHeight - y0) / cellSize + 0.5);
+        let pasteMinX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
+        let pasteMinY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
 
-        let image2 = image.overlay(clipboardImage, minX, minY);
+        let image2 = image.overlay(clipboardImage, pasteMinX, pasteMinY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(minX, image2.width - 1));
-        let clampedY0 = Math.max(0, Math.min(minY, image2.height - 1));
-        let clampedX1 = Math.max(0, Math.min(minX + clipboardImage.width - 1, image2.width - 1));
-        let clampedY1 = Math.max(0, Math.min(minY + clipboardImage.height - 1, image2.height - 1));
+        let clampedX0 = Math.max(0, Math.min(pasteMinX, image2.width - 1));
+        let clampedY0 = Math.max(0, Math.min(pasteMinY, image2.height - 1));
+        let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image2.width - 1));
+        let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image2.height - 1));
+        let selectionWidth = clampedX1 - clampedX0 + 1;
+        let selectionHeight = clampedY1 - clampedY0 + 1;
         drawingItem.selectRectangle.x0 = clampedX0;
         drawingItem.selectRectangle.y0 = clampedY0;
         drawingItem.selectRectangle.x1 = clampedX1;
@@ -1474,6 +1804,22 @@ class PageController {
 
         this.updateDrawCanvas();
         this.hidePasteArea();
+
+        let message = `paste accept pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}, modified image and selection`;
+        this.history.log(message, {
+            action: 'paste accept',
+            imageHandle: historyImageHandle,
+            modified: 'image,selection',
+            pasteX: pasteMinX,
+            pasteY: pasteMinY,
+            pasteWidth: pasteWidth,
+            pasteHeight: pasteHeight,
+            selectionX: clampedX0,
+            selectionY: clampedY0,
+            selectionWidth: selectionWidth,
+            selectionHeight: selectionHeight,
+            image: image2.pixels,
+        });
     }
 
     pasteFromClipboardReject() {
@@ -1481,6 +1827,16 @@ class PageController {
         this.isPasteMode = false;
         this.updateDrawCanvas();
         this.hidePasteArea();
+
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+
+        let message = `paste reject, no change to image`;
+        this.history.log(message, {
+            action: 'paste reject',
+            imageHandle: historyImageHandle,
+            modified: 'none'
+        });
     }
 
     // Get either the selected rectangle or the rectangle for the entire image
@@ -1515,6 +1871,7 @@ class PageController {
     flipX() {
         let rectangle = this.getToolRectangle();
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
@@ -1522,18 +1879,43 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after flip x.');
             this.hideToolPanel();
+
+            let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'flip x',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'flip x for selection or entire image');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'flip x',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Reverse the y-axis of the selected rectangle or the entire image
     flipY() {
         let rectangle = this.getToolRectangle();
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
@@ -1541,12 +1923,36 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after flip y.');
             this.hideToolPanel();
+
+            let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'flip y',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'flip y for selection or entire image');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'flip y',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Rotate clockwise
@@ -1559,34 +1965,78 @@ class PageController {
     }
 
     rotateCW_selection() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageClone();
+
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
+            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: originalImage.pixels,
+            });
             return;
         }
-        let drawingItem = this.currentDrawingItem();
-        let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise selection');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'rotate selection clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     rotateCW_entireImage() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCW();
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate image clockwise, no change to image`;
+            this.history.log(message, {
+                action: 'rotate image clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise entire image');
@@ -1594,6 +2044,14 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate image clockwise, modified image`;
+        this.history.log(message, {
+            action: 'rotate image clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     // Rotate counter clockwise
@@ -1606,34 +2064,78 @@ class PageController {
     }
 
     rotateCCW_selection() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageClone();
+
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
+            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection counter-clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: originalImage.pixels,
+            });
             return;
         }
-        let drawingItem = this.currentDrawingItem();
-        let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'rotate selection counter-clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise selection');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'rotate selection counter-clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     rotateCCW_entireImage() {
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCCW();
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
+            let message = `rotate image counter-clockwise, no change to image`;
+            this.history.log(message, {
+                action: 'rotate image counter-clockwise',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise entire image');
@@ -1641,102 +2143,178 @@ class PageController {
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `rotate image counter-clockwise, modified image`;
+        this.history.log(message, {
+            action: 'rotate image counter-clockwise',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            image: image.pixels,
+        });
     }
 
     // Move left with wrap around
     moveLeft() {
-        let rectangle = this.getToolRectangle();
-        if (rectangle.width < 2) {
-            console.log('Move is only available when the width is 2 or greater.');
-            return;
-        }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
-        let image0 = originalImage.crop(rectangle.x, rectangle.y, 1, rectangle.height);
-        let image1 = originalImage.crop(rectangle.x + 1, rectangle.y, rectangle.width - 1, rectangle.height);
-        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
-        let image3 = image2.overlay(image0, rectangle.x + rectangle.width - 1, rectangle.y);
-        if (image3.isEqualTo(originalImage)) {
+        let rectangle = this.getToolRectangle();
+        let image = originalImage.moveLeft(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
             this.hideToolPanel();
+            let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'move left',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'move left');
-        drawingItem.originator.setImage(image3);
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'move left',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Move right with wrap around
     moveRight() {
-        let rectangle = this.getToolRectangle();
-        if (rectangle.width < 2) {
-            console.log('Move is only available when the width is 2 or greater.');
-            return;
-        }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
-        let image0 = originalImage.crop(rectangle.x + rectangle.width - 1, rectangle.y, 1, rectangle.height);
-        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width - 1, rectangle.height);
-        let image2 = originalImage.overlay(image1, rectangle.x + 1, rectangle.y);
-        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
-        if (image3.isEqualTo(originalImage)) {
+        let rectangle = this.getToolRectangle();
+        let image = originalImage.moveRight(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
             this.hideToolPanel();
+            let message = `move right x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'move right',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'move right');
-        drawingItem.originator.setImage(image3);
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `move right x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'move right',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Move up with wrap around
     moveUp() {
-        let rectangle = this.getToolRectangle();
-        if (rectangle.height < 2) {
-            console.log('Move is only available when the height is 2 or greater.');
-            return;
-        }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
-        let image0 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, 1);
-        let image1 = originalImage.crop(rectangle.x, rectangle.y + 1, rectangle.width, rectangle.height - 1);
-        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y);
-        let image3 = image2.overlay(image0, rectangle.x, rectangle.y + rectangle.height - 1);
-        if (image3.isEqualTo(originalImage)) {
+        let rectangle = this.getToolRectangle();
+        let image = originalImage.moveUp(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
             this.hideToolPanel();
+            let message = `move up x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'move up',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'move up');
-        drawingItem.originator.setImage(image3);
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `move up x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'move up',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     // Move down with wrap around
     moveDown() {
-        let rectangle = this.getToolRectangle();
-        if (rectangle.height < 2) {
-            console.log('Move is only available when the height is 2 or greater.');
-            return;
-        }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
-        let image0 = originalImage.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
-        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
-        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y + 1);
-        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
-        if (image3.isEqualTo(originalImage)) {
+        let rectangle = this.getToolRectangle();
+        let image = originalImage.moveDown(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
             this.hideToolPanel();
+            let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'move down',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'move down');
-        drawingItem.originator.setImage(image3);
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'move down',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     showToolPanel() {
@@ -1766,7 +2344,249 @@ class PageController {
             // Click outside, dismiss the panel
             this.hideToolPanel();
         }
-    }    
+    }
+
+    replay() {
+        console.log('Replay start');
+        let drawingItem = this.currentDrawingItem();
+        // drawingItem.caretaker.printHistory();
+
+        // History of all actions including the current state
+        let undoListRef = drawingItem.caretaker.undoList;
+        let undoList = Array.from(undoListRef);
+        let actionName = 'replay';
+        let currentState = drawingItem.originator.saveStateToMemento(actionName);
+        undoList.push(currentState);
+
+        let index = 0; // Start from the first item in the undo list
+    
+        // Show the replay area
+        var el_outer = document.getElementById('replay-area-outer');
+        el_outer.classList.remove('hidden');
+        resizeCanvas();
+    
+        var el_canvas = document.getElementById('replay-canvas');
+        var ctx = el_canvas.getContext('2d');
+    
+        // The undoList contains the history items
+        const replayStep = () => {
+            if (index >= undoList.length) {
+                console.log('Replay finished');
+                return; // Stop the replay if we've reached the end of the undo list
+            }
+            let mementoItem = undoList[index]; // Get the current item to be drawn
+            index++; // Move to the next item for the next iteration
+        
+            // Clear the canvas for the next drawing state
+            ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
+
+            let image = mementoItem.state.image;
+            let inset = 5;
+            let width = el_canvas.width - inset * 2;
+            let height = el_canvas.height - inset * 2;    
+            let cellSize = image.cellSize(width, height);
+            let gapSize = this.isGridVisible ? 1 : 0;
+    
+            // Draw an outline around the image
+            {
+                let x = image.calcX0(0, width, cellSize) + inset - 1;
+                let y = image.calcY0(0, height, cellSize) + inset - 1;
+                let w = image.width * cellSize + 2 - gapSize;
+                let h = image.height * cellSize + 2 - gapSize;
+                ctx.fillStyle = '#555';
+                ctx.fillRect(x, y, w, h);
+            }
+            let options = {
+                gapSize: gapSize,
+            };
+            image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
+
+            // Schedule the next step
+            setTimeout(replayStep, 100);
+        };
+    
+        replayStep(); // Start the replay loop
+    }
+
+    replay2(history_items) {
+        console.log('Replay start');
+        // let drawingItem = this.currentDrawingItem();
+        // drawingItem.caretaker.printHistory();
+
+        // History of all actions including the current state
+        // let undoListRef = drawingItem.caretaker.undoList;
+        // let undoList = Array.from(undoListRef);
+        // let actionName = 'replay';
+        // let currentState = drawingItem.originator.saveStateToMemento(actionName);
+        // undoList.push(currentState);
+
+        let index = 0; // Start from the first item in the undo list
+    
+        // Show the replay area
+        var el_outer = document.getElementById('replay-area-outer');
+        el_outer.classList.remove('hidden');
+        resizeCanvas();
+    
+        var el_canvas = document.getElementById('replay-canvas');
+        var ctx = el_canvas.getContext('2d');
+
+        var el_message = document.getElementById('replay-message');
+    
+        // The undoList contains the history items
+        const replayStep = () => {
+            if (index >= history_items.length) {
+                console.log('Replay finished');
+                return; // Stop the replay if we've reached the end of the undo list
+            }
+            let item = history_items[index]; // Get the current item to be drawn
+            index++; // Move to the next item for the next iteration
+
+            let message = item.message;
+            el_message.textContent = `Step ${index} of ${history_items.length}` + message;
+
+            // Clear the canvas for the next drawing state
+            ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
+
+            let image = item.image;
+            let inset = 5;
+            let width = el_canvas.width - inset * 2;
+            let height = el_canvas.height - inset * 2;    
+            let cellSize = image.cellSize(width, height);
+            let gapSize = this.isGridVisible ? 1 : 0;
+    
+            // Draw an outline around the image
+            {
+                let x = image.calcX0(0, width, cellSize) + inset - 1;
+                let y = image.calcY0(0, height, cellSize) + inset - 1;
+                let w = image.width * cellSize + 2 - gapSize;
+                let h = image.height * cellSize + 2 - gapSize;
+                ctx.fillStyle = '#555';
+                ctx.fillRect(x, y, w, h);
+            }
+            let options = {
+                gapSize: gapSize,
+            };
+            image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
+
+            // Schedule the next step
+            setTimeout(replayStep, 100);
+        };
+    
+        replayStep(); // Start the replay loop
+    }
+
+    dismissReplayLayer() {
+        var el = document.getElementById('replay-area-outer');
+        el.classList.add('hidden');
+        resizeCanvas();
+        this.updateDrawCanvas();
+    }
+
+    downloadReplayFile() {
+        let user = 'anonymous';
+
+        // Date/time formatting
+        // utcTimestampWithSubsecond: "1984-12-24T23:59:59.987Z"
+        let utcTimestampWithSubsecond = new Date().toISOString();
+        // utcTimestampWithoutSubsecond: "1984-12-24T23:59:59Z"
+        let utcTimestampWithoutSubsecond = utcTimestampWithSubsecond.split('.')[0] + 'Z';
+        // utcTimestampWithoutColon: "1984-12-24T23-59-59Z"
+        let utcTimestampWithoutColon = utcTimestampWithoutSubsecond.replace(/:/g, '-');
+
+        let historyJSON = this.history.toJSON();
+
+        let summary = {
+            "history count": this.history.items.length,
+        };
+
+        var dict = {
+            "timestamp": utcTimestampWithoutSubsecond,
+            "user": user,
+            "dataset": this.datasetId, 
+            "task": this.taskId,
+            "summary": summary,
+            "history": historyJSON
+        };
+        let jsonString = JSON.stringify(dict);
+
+        let filename = `ARC-Interactive history ${utcTimestampWithoutColon}.json`;
+
+        // Convert the JSON string to a Blob
+        var blob = new Blob([jsonString], { type: 'application/json' });
+
+        // Create a URL for the Blob
+        var url = URL.createObjectURL(blob);
+
+        // Create a temporary anchor element
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename; // The default filename for the downloaded file
+
+        // Append the anchor to the document
+        document.body.appendChild(a);
+
+        // Programmatically click the anchor to trigger the download
+        a.click();
+
+        // Clean up by removing the anchor element and revoking the Blob URL
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    clickUploadReplayFile() {
+        document.getElementById('file-input').click(); // Programmatically click the hidden file input
+    }
+
+    changeInputFile(event) {
+        var file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = (e) => {
+            var jsonString = e.target.result;
+            this.replayHistoryFile(jsonString);
+        };
+        
+        reader.onerror = (e) => {
+            console.error("Error reading file", e);
+        };
+
+        reader.readAsText(file); // Read the file as text
+    }
+
+    replayHistoryFile(jsonString) {
+        // console.log('json:', jsonString);
+        let obj = JSON.parse(jsonString);
+        // console.log('obj:', obj);
+        let history_items = obj.history;
+        let history_items2 = []; 
+        for (let i = 0; i < history_items.length; i++) {
+            let item = history_items[i];
+            console.log('item:', item);
+
+            var arc_image = null;
+            if (item.context && item.context.image) {
+                arc_image = new ARCImage(item.context.image);
+            }
+            if (!arc_image) {
+                arc_image = ARCImage.color(5, 5, 0);
+            }
+
+            var message = item.message;
+
+            let history_item2 = {
+                message: message,
+                image: arc_image,
+            };
+            history_items2.push(history_item2);
+        }
+        const callback = () => {
+            this.replay2(history_items2);
+        };
+        setTimeout(callback, 100);
+    }
 }
 
 var gPageController = null;
@@ -1790,6 +2610,12 @@ function resizeCanvas() {
     {
         let canvas = document.getElementById('paste-canvas');
         let parentDiv = document.getElementById('paste-area-outer');
+        canvas.width = parentDiv.clientWidth;
+        canvas.height = parentDiv.clientHeight;
+    }
+    {
+        let canvas = document.getElementById('replay-canvas');
+        let parentDiv = document.getElementById('replay-area-outer');
         canvas.width = parentDiv.clientWidth;
         canvas.height = parentDiv.clientHeight;
     }
