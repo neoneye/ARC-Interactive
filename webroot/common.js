@@ -621,6 +621,18 @@ class ARCImage {
         }
         return image3;
     }
+    
+    // Move the content to the down inside the rectangle, wrap around when reaching the bottom edge.
+    moveDown(x, y, width, height) {
+        var image3 = this.clone();
+        if (height >= 2) {
+            let image0 = this.crop(x, y + height - 1, width, 1);
+            let image1 = this.crop(x, y, width, height - 1);
+            let image2 = this.overlay(image1, x, y + 1);
+            image3 = image2.overlay(image0, x, y);
+        }
+        return image3;
+    }
 }
 
 class ARCPair {

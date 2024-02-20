@@ -2230,26 +2230,43 @@ class PageController {
 
     // Move down with wrap around
     moveDown() {
-        let rectangle = this.getToolRectangle();
-        if (rectangle.height < 2) {
-            console.log('Move is only available when the height is 2 or greater.');
-            return;
-        }
         let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
-        let image0 = originalImage.crop(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width, 1);
-        let image1 = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height - 1);
-        let image2 = originalImage.overlay(image1, rectangle.x, rectangle.y + 1);
-        let image3 = image2.overlay(image0, rectangle.x, rectangle.y);
-        if (image3.isEqualTo(originalImage)) {
+        let rectangle = this.getToolRectangle();
+        let image = originalImage.moveDown(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after the move.');
             this.hideToolPanel();
+            let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
+            this.history.log(message, {
+                action: 'move down',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+                x: rectangle.x,
+                y: rectangle.y,
+                width: rectangle.width,
+                height: rectangle.height,
+                image: image.pixels,
+            });
             return;
         }
         drawingItem.caretaker.saveState(drawingItem.originator, 'move down');
-        drawingItem.originator.setImage(image3);
+        drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
         this.hideToolPanel();
+
+        let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        this.history.log(message, {
+            action: 'move down',
+            imageHandle: historyImageHandle,
+            modified: 'image',
+            x: rectangle.x,
+            y: rectangle.y,
+            width: rectangle.width,
+            height: rectangle.height,
+            image: image.pixels,
+        });
     }
 
     showToolPanel() {
