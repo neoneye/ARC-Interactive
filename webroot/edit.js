@@ -114,7 +114,7 @@ class Caretaker {
         }
         let memento = this.undoList.pop();
         let actionName = memento.getActionName();
-        this.redoList.push(originator.saveStateToMemento(`Undo ${actionName}`)); // save current state before undoing
+        this.redoList.push(originator.saveStateToMemento(actionName)); // save current state before undoing
         originator.getStateFromMemento(memento);
         return actionName;
     }
@@ -125,7 +125,7 @@ class Caretaker {
         }
         let memento = this.redoList.pop();
         let actionName = memento.getActionName();
-        this.undoList.push(originator.saveStateToMemento(`Redo ${actionName}`)); // save current state before redoing
+        this.undoList.push(originator.saveStateToMemento(actionName)); // save current state before redoing
         originator.getStateFromMemento(memento);
         return actionName;
     }
