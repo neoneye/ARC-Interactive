@@ -338,22 +338,22 @@ class PageController {
         window.addEventListener('orientationchange', () => { this.resizeOrChangeOrientation(); });
 
         // Interaction with the draw canvas
-        this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); }, false);
-        this.drawCanvas.addEventListener('touchmove', (event) => { this.moveDraw(event); }, false);
-        this.drawCanvas.addEventListener('touchend', (event) => { this.stopDraw(event); }, false);
-        this.drawCanvas.addEventListener('mousedown', (event) => { this.startDraw(event); }, false);
-        this.drawCanvas.addEventListener('mousemove', (event) => { this.moveDraw(event); }, false);
-        this.drawCanvas.addEventListener('mouseup', (event) => { this.stopDraw(event); }, false);
-        this.drawCanvas.addEventListener('mouseout', (event) => { this.stopDraw(event); }, false);
+        this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); });
+        this.drawCanvas.addEventListener('touchmove', (event) => { this.moveDraw(event); });
+        this.drawCanvas.addEventListener('touchend', (event) => { this.stopDraw(event); });
+        this.drawCanvas.addEventListener('mousedown', (event) => { this.startDraw(event); });
+        this.drawCanvas.addEventListener('mousemove', (event) => { this.moveDraw(event); });
+        this.drawCanvas.addEventListener('mouseup', (event) => { this.stopDraw(event); });
+        this.drawCanvas.addEventListener('mouseout', (event) => { this.stopDraw(event); });
 
         // Interaction with the paste canvas
-        this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); }, false);
-        this.pasteCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); }, false);
-        this.pasteCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); }, false);
-        this.pasteCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); }, false);
-        this.pasteCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); }, false);
-        this.pasteCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); }, false);
-        this.pasteCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); }, false);
+        this.pasteCanvas.addEventListener('touchstart', (event) => { this.startPaste(event); });
+        this.pasteCanvas.addEventListener('touchmove', (event) => { this.movePaste(event); });
+        this.pasteCanvas.addEventListener('touchend', (event) => { this.stopPaste(event); });
+        this.pasteCanvas.addEventListener('mousedown', (event) => { this.startPaste(event); });
+        this.pasteCanvas.addEventListener('mousemove', (event) => { this.movePaste(event); });
+        this.pasteCanvas.addEventListener('mouseup', (event) => { this.stopPaste(event); });
+        this.pasteCanvas.addEventListener('mouseout', (event) => { this.stopPaste(event); });
 
         // Listen for the keyup event
         window.addEventListener('keyup', (event) => { this.keyUp(event); });
