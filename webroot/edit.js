@@ -486,7 +486,7 @@ class PageController {
     }
 
     undoAction() {
-        console.log('Undo action');
+        // console.log('Undo action');
         let drawingItem = this.currentDrawingItem();
 
         if (!drawingItem.caretaker.canUndo()) {
@@ -512,7 +512,7 @@ class PageController {
     }
 
     redoAction() {
-        console.log('Redo action');
+        // console.log('Redo action');
         let drawingItem = this.currentDrawingItem();
 
         if (!drawingItem.caretaker.canRedo()) {
