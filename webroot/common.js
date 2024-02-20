@@ -597,6 +597,18 @@ class ARCImage {
         }
         return image3;
     }
+    
+    // Move the content to the right inside the rectangle, wrap around when reaching the right edge.
+    moveRight(x, y, width, height) {
+        var image3 = this.clone();
+        if (width >= 2) {
+            let image0 = this.crop(x + width - 1, y, 1, height);
+            let image1 = this.crop(x, y, width - 1, height);
+            let image2 = this.overlay(image1, x + 1, y);
+            image3 = image2.overlay(image0, x, y);
+        }
+        return image3;
+    }
 }
 
 class ARCPair {
