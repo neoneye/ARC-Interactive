@@ -186,6 +186,7 @@ class HistoryContainer {
     constructor() {
         this.items = [];
         this.lastEventTime = null; // Tracks the time of the last event.
+        this.startTime = new Date(); // Tracks the time when the history was created.
     }
 
     log(message, context = null) {
@@ -2612,7 +2613,7 @@ class PageController {
 
         // Date/time formatting
         // utcTimestampWithSubsecond: "1984-12-24T23:59:59.987Z"
-        let utcTimestampWithSubsecond = new Date().toISOString();
+        let utcTimestampWithSubsecond = this.history.startTime.toISOString();
         // utcTimestampWithoutSubsecond: "1984-12-24T23:59:59Z"
         let utcTimestampWithoutSubsecond = utcTimestampWithSubsecond.split('.')[0] + 'Z';
         // utcTimestampWithoutColon: "1984-12-24T23-59-59Z"
@@ -2626,7 +2627,7 @@ class PageController {
         };
 
         var dict = {
-            "timestamp": utcTimestampWithoutSubsecond,
+            "startTime": utcTimestampWithoutSubsecond,
             "user": user,
             "dataset": this.datasetId, 
             "task": this.taskId,
