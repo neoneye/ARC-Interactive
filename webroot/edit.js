@@ -222,7 +222,7 @@ class HistoryContainer {
     }
 }
 
-class DrawInteractionStats {
+class DrawInteractionState {
     constructor(key) {
         this.key = key;
         this.registerCount = 0;
@@ -236,7 +236,7 @@ class DrawInteractionStats {
 class PageController {
     constructor() {
         this.history = new HistoryContainer();
-        this.drawInteractionStats = null;
+        this.drawInteractionState = null;
         this.db = null;
         this.theme = null;
 
@@ -703,7 +703,7 @@ class PageController {
             return;
         }
         if(this.currentTool == 'draw') {
-            this.setPixel(cellx, celly, this.currentColor);
+            this.drawPixel(cellx, celly, this.currentColor);
         }
         if(this.currentTool == 'fill') {
             this.floodFill(cellx, celly, this.currentColor);
@@ -760,7 +760,7 @@ class PageController {
             return;
         }
         if(this.currentTool == 'draw') {
-            this.setPixel(cellx, celly, this.currentColor);
+            this.drawPixel(cellx, celly, this.currentColor);
         }
     }
 
@@ -769,7 +769,7 @@ class PageController {
         this.isDrawing = false;
 
         if(this.currentTool == 'draw') {
-            this.finishCurrentDrawInteractionStats();
+            this.finishDrawInteractionState();
         }
     }
 
@@ -833,35 +833,35 @@ class PageController {
         });
     }
 
-    finishCurrentDrawInteractionStats() {
-        if (!this.drawInteractionStats) {
+    finishDrawInteractionState() {
+        if (!this.drawInteractionState) {
             return;
         }
-        // console.log(`key ${this.drawInteractionStats.key} registerCount: ${this.drawInteractionStats.registerCount}`);
-        this.drawInteractionStats = null;
+        // console.log(`key ${this.drawInteractionState.key} registerCount: ${this.drawInteractionState.registerCount}`);
+        this.drawInteractionState = null;
     }
 
-    prepareDrawInteractionStats(x, y, color) {
+    prepareDrawInteractionState(x, y, color) {
         let key = `x${x}y${y}c${color}`;
-        if (!this.drawInteractionStats) {
-            this.drawInteractionStats = new DrawInteractionStats(key);
+        if (!this.drawInteractionState) {
+            this.drawInteractionState = new DrawInteractionState(key);
             return;
         }
-        if(this.drawInteractionStats.key != key) {
-            this.finishCurrentDrawInteractionStats();
-            this.drawInteractionStats = new DrawInteractionStats(key);
+        if(this.drawInteractionState.key != key) {
+            this.finishDrawInteractionState();
+            this.drawInteractionState = new DrawInteractionState(key);
             return;
         }
     }
 
-    setPixel(x, y, color) {
-        this.prepareDrawInteractionStats(x, y, color);
-        this.drawInteractionStats.register();
-        if (this.drawInteractionStats.registerCount > 1) {
+    drawPixel(x, y, color) {
+        this.prepareDrawInteractionState(x, y, color);
+        this.drawInteractionState.register();
+        if (this.drawInteractionState.registerCount > 1) {
             // The gesture recognizer fires many times per second. 60 times per second I guess.
             // When interacting with a single pixel, it may fire several times.
             // This code prevents flooding the history with duplicate entries.
-            // console.log('setPixel is called more than once for the same pixel');
+            // console.log('drawPixel is called more than once for the same pixel');
             return;
         }
 
@@ -877,9 +877,9 @@ class PageController {
         }
         if (image.isEqualTo(originalImage)) {
             // console.log('The image is the same after setPixel.');
-            let message = `set pixel x: ${x} y: ${y} color: ${color}, no change to image`;
+            let message = `draw x: ${x} y: ${y} color: ${color}, no change to image`;
             this.history.log(message, {
-                action: 'set pixel',
+                action: 'draw',
                 imageHandle: historyImageHandle,
                 modified: 'none',
                 x: x,
@@ -893,9 +893,9 @@ class PageController {
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
 
-        let message = `set pixel x: ${x} y: ${y} color: ${color}, modified image`;
+        let message = `draw x: ${x} y: ${y} color: ${color}, modified image`;
         this.history.log(message, {
-            action: 'set pixel',
+            action: 'draw',
             imageHandle: historyImageHandle,
             modified: 'image',
             x: x,
