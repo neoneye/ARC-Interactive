@@ -307,6 +307,7 @@ class PageController {
         this.enablePlotDraw = false;
 
         this.statsRevealCount = 0;
+        this.statsStartOverCount = 0;
 
         let maxPixelSize = 100;
         this.maxPixelSize = maxPixelSize;
@@ -1766,6 +1767,8 @@ class PageController {
         this.updateDrawCanvas();
         this.hideToolPanel();
 
+        this.statsStartOverCount++;
+
         let message = `start over, modified image`;
         this.history.log(message, {
             action: 'start over',
@@ -2676,6 +2679,7 @@ class PageController {
         let summary = {
             "history count": this.history.items.length,
             "reveal count": this.statsRevealCount,
+            "start over count": this.statsStartOverCount,
         };
 
         var dict = {
