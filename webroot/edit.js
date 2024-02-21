@@ -2406,16 +2406,35 @@ class PageController {
         });
     }
 
+    isToolPanelHidden() {
+        let el = document.getElementById("tool-panel");
+        return el.classList.contains('hidden');
+    }
+
     showToolPanel() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageRef();
+
         {
-            let originalImage = this.currentDrawingItem().originator.getImageRef();
             var el = document.getElementById('canvas-size-input');
             el.value = `${originalImage.width}x${originalImage.height}`;
+        }
+        if (!this.isToolPanelHidden()) {
+            // Already visible. No need to show it again.
+            return;
         }
         {
             var el = document.getElementById('tool-panel');
             el.classList.remove('hidden');
         }
+
+        let message = 'show tool panel';
+        this.history.log(message, {
+            action: 'show tool panel',
+            imageHandle: historyImageHandle,
+            modified: 'none',
+        });
     }
 
     hideToolPanel() {
