@@ -76,13 +76,11 @@
                     </button>
                 </div>
 
-                <!-- <hr> -->
-
                 <div id="tool-radio-buttons">
                     <ul class="segmented-control">
                         <li class="segmented-control__item">
-                            <input class="segmented-control__input" type="radio" name="tool_switching" id="tool_paint" value="paint" checked>
-                            <label class="segmented-control__label" for="tool_paint" title="P = Paint tool">Paint</label>
+                            <input class="segmented-control__input" type="radio" name="tool_switching" id="tool_draw" value="draw" checked>
+                            <label class="segmented-control__label" for="tool_draw" title="D = Draw tool">Draw</label>
                         </li>
                         <li class="segmented-control__item">
                             <input class="segmented-control__input" type="radio" name="tool_switching" id="tool_select" value="select">
@@ -139,7 +137,7 @@
     <div id="page-footer-draw-mode" class="page-footer user-select-none hidden">
         <div class="page-footer-left">
             <!-- Left -->
-            <button id="tool-button" class="secondary-button" onclick="gPageController.showToolPanel()">Tool: paint</button>
+            <button id="tool-button" class="secondary-button" onclick="gPageController.showToolPanel()">Tool: draw</button>
             <button id="undo-button-footer" class="secondary-button hidden" onclick="gPageController.undoAction()" title="CTRL Z = Undo">Undo</button>
             <button id="redo-button-footer" class="secondary-button hidden" onclick="gPageController.redoAction()" title="CTRL SHIFT Z = Redo">Redo</button>
         </div>
