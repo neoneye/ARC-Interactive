@@ -889,7 +889,7 @@ class PageController {
             });
             return;
         }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'set pixel');
+        drawingItem.caretaker.saveState(drawingItem.originator, 'draw');
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
 
