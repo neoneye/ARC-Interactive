@@ -494,14 +494,24 @@ class PageController {
 
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
 
         let message = `change tool to ${toolId}`;
-        this.history.log(message, {
+        var context = {
             action: 'pick tool',
             toolId: toolId,
             modified: 'none',
             imageHandle: historyImageHandle,
-        });
+        };
+        if (toolId === 'select') {
+            let selectionWidth = maxX - minX + 1;
+            let selectionHeight = maxY - minY + 1;
+            context.selectionX = minX;
+            context.selectionY = minY;
+            context.selectionWidth = selectionWidth;
+            context.selectionHeight = selectionHeight;
+        }
+        this.history.log(message, context);
     }
 
     undoAction() {
