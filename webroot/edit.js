@@ -483,6 +483,12 @@ class PageController {
             if (event.code === 'ArrowRight') {
                 this.moveRight();
             }
+            if (event.code === 'KeyX') {
+                this.flipX();
+            }
+            if (event.code === 'KeyY') {
+                this.flipY();
+            }
             if (event.code === 'KeyT') {
                 this.showToolPanel();
             }
