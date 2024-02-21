@@ -321,7 +321,7 @@ class PageController {
         await this.loadTask();
         this.history.log('loaded task');
         this.addEventListeners();
-        this.hideEditorShowOverview();
+        this.hideEditorShowOverview({ shouldHistoryLog: false });
         // await this.replayExampleHistoryFile();
     }
 
@@ -1469,7 +1469,10 @@ class PageController {
         this.updateDrawCanvas();
     }
 
-    hideEditorShowOverview() {
+    hideEditorShowOverview(options = {}) {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+
         let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("page-footer-overview-mode");
         let el2 = document.getElementById("draw-area-outer");
@@ -1480,6 +1483,20 @@ class PageController {
         el3.classList.add('hidden');
 
         this.updateOverview();
+
+        var shouldHistoryLog = true;
+        if (options.hasOwnProperty('shouldHistoryLog')) {
+            shouldHistoryLog = options.shouldHistoryLog;
+        }
+
+        if (shouldHistoryLog) {
+            let message = 'hide editor show overview';
+            this.history.log(message, {
+                action: 'hide editor show overview',
+                imageHandle: historyImageHandle,
+                modified: 'none',
+            });
+        }
     }
 
     toggleFullscreen() {
