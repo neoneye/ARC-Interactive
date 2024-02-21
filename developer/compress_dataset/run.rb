@@ -16,7 +16,13 @@ filenames.each_with_index do |filename, index|
 
   # Read and parse the JSON file
   file_content = File.read(filename)
-  json_content = JSON.parse(file_content)
+  json_content = nil
+  begin
+      json_content = JSON.parse(file_content)
+  rescue => error
+      puts "Problem parsing json file at path: #{filename}\nerror: #{error.message}"
+      exit -1
+  end
 
   # Add the id to the JSON content
   json_content["id"] = id
