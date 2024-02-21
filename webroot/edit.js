@@ -726,11 +726,7 @@ class PageController {
         let celly = Math.floor((position.y-y0)/cellSize);
         // console.log('cellx', cellx, 'celly', celly);
         if(this.currentTool == 'select') {
-            let clampedCellX = Math.max(0, Math.min(cellx, originalImage.width - 1));
-            let clampedCellY = Math.max(0, Math.min(celly, originalImage.height - 1));
-            drawingItem.selectRectangle.x1 = clampedCellX;
-            drawingItem.selectRectangle.y1 = clampedCellY;
-            this.updateDrawCanvas();
+            this.createSelectionUpdate(cellx, celly);
             return;
         }
 
@@ -773,6 +769,44 @@ class PageController {
             modified: 'selection',
             x: x,
             y: y,
+            selectionX: x,
+            selectionY: y,
+            selectionWidth: 1,
+            selectionHeight: 1,
+        });
+    }
+
+    createSelectionUpdate(unclampedX, unclampedY) {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let originalImage = drawingItem.originator.getImageRef();
+
+        let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
+        let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
+        let isSame = drawingItem.selectRectangle.x1 === x && drawingItem.selectRectangle.y1 === y;
+        if (isSame) {
+            // console.log('The selection is the same after createSelectionUpdate.');
+            return;
+        }
+        drawingItem.selectRectangle.x1 = x;
+        drawingItem.selectRectangle.y1 = y;
+        this.updateDrawCanvas();
+
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
+        let selectionWidth = maxX - minX + 1;
+        let selectionHeight = maxY - minY + 1;
+
+        let message = `create selection update x: ${x} y: ${y}, modified selection`;
+        this.history.log(message, {
+            action: 'create selection update',
+            imageHandle: historyImageHandle,
+            modified: 'selection',
+            x: x,
+            y: y,
+            selectionX: minX,
+            selectionY: minY,
+            selectionWidth: selectionWidth,
+            selectionHeight: selectionHeight,
         });
     }
 
