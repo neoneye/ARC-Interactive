@@ -222,9 +222,21 @@ class HistoryContainer {
     }
 }
 
+class DrawInteractionStats {
+    constructor(key) {
+        this.key = key;
+        this.registerCount = 0;
+    }
+
+    register() {
+        this.registerCount++;
+    }
+}
+
 class PageController {
     constructor() {
         this.history = new HistoryContainer();
+        this.drawInteractionStats = null;
         this.db = null;
         this.theme = null;
 
@@ -755,10 +767,10 @@ class PageController {
     stopDraw(event) {
         event.preventDefault();
         this.isDrawing = false;
-        // var ctx = this.drawCanvas.getContext('2d');
-        // let cellSize = 100;
-        // ctx.fillStyle = 'white';
-        // ctx.fillRect(0, 0, cellSize, cellSize);
+
+        if(this.currentTool == 'draw') {
+            this.finishCurrentDrawInteractionStats();
+        }
     }
 
     createSelectionBegin(unclampedX, unclampedY) {
@@ -821,7 +833,38 @@ class PageController {
         });
     }
 
+    finishCurrentDrawInteractionStats() {
+        if (!this.drawInteractionStats) {
+            return;
+        }
+        // console.log(`key ${this.drawInteractionStats.key} registerCount: ${this.drawInteractionStats.registerCount}`);
+        this.drawInteractionStats = null;
+    }
+
+    prepareDrawInteractionStats(x, y, color) {
+        let key = `x${x}y${y}c${color}`;
+        if (!this.drawInteractionStats) {
+            this.drawInteractionStats = new DrawInteractionStats(key);
+            return;
+        }
+        if(this.drawInteractionStats.key != key) {
+            this.finishCurrentDrawInteractionStats();
+            this.drawInteractionStats = new DrawInteractionStats(key);
+            return;
+        }
+    }
+
     setPixel(x, y, color) {
+        this.prepareDrawInteractionStats(x, y, color);
+        this.drawInteractionStats.register();
+        if (this.drawInteractionStats.registerCount > 1) {
+            // The gesture recognizer fires many times per second. 60 times per second I guess.
+            // When interacting with a single pixel, it may fire several times.
+            // This code prevents flooding the history with duplicate entries.
+            // console.log('setPixel is called more than once for the same pixel');
+            return;
+        }
+
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
