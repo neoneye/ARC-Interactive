@@ -504,12 +504,12 @@ class PageController {
             imageHandle: historyImageHandle,
         };
         if (toolId === 'select') {
-            let selectionWidth = maxX - minX + 1;
-            let selectionHeight = maxY - minY + 1;
-            context.selectionX = minX;
-            context.selectionY = minY;
-            context.selectionWidth = selectionWidth;
-            context.selectionHeight = selectionHeight;
+            let selectWidth = maxX - minX + 1;
+            let selectHeight = maxY - minY + 1;
+            context.selectX = minX;
+            context.selectY = minY;
+            context.selectWidth = selectWidth;
+            context.selectHeight = selectHeight;
         }
         this.history.log(message, context);
     }
@@ -779,10 +779,10 @@ class PageController {
             modified: 'selection',
             x: x,
             y: y,
-            selectionX: x,
-            selectionY: y,
-            selectionWidth: 1,
-            selectionHeight: 1,
+            selectX: x,
+            selectY: y,
+            selectWidth: 1,
+            selectHeight: 1,
         });
     }
 
@@ -803,8 +803,8 @@ class PageController {
         this.updateDrawCanvas();
 
         let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
-        let selectionWidth = maxX - minX + 1;
-        let selectionHeight = maxY - minY + 1;
+        let selectWidth = maxX - minX + 1;
+        let selectHeight = maxY - minY + 1;
 
         let message = `create selection update x: ${x} y: ${y}, modified selection`;
         this.history.log(message, {
@@ -813,10 +813,10 @@ class PageController {
             modified: 'selection',
             x: x,
             y: y,
-            selectionX: minX,
-            selectionY: minY,
-            selectionWidth: selectionWidth,
-            selectionHeight: selectionHeight,
+            selectX: minX,
+            selectY: minY,
+            selectWidth: selectWidth,
+            selectHeight: selectHeight,
         });
     }
 
@@ -952,10 +952,10 @@ class PageController {
         if (minY < 0 || maxY >= originalImage.height) {
             return;
         }
-        let selectionX = minX;
-        let selectionY = minY;
-        let selectionWidth = maxX - minX + 1;
-        let selectionHeight = maxY - minY + 1;
+        let selectX = minX;
+        let selectY = minY;
+        let selectWidth = maxX - minX + 1;
+        let selectHeight = maxY - minY + 1;
         let color = this.currentColor;
         var image = originalImage.clone();
         for (let y = minY; y <= maxY; y++) {
@@ -966,15 +966,15 @@ class PageController {
         if (image.isEqualTo(originalImage)) {
             console.log('The image is the same after filling the selection.');
 
-            let message = `fill selection x: ${selectionX} y: ${selectionY} width: ${selectionWidth} height: ${selectionHeight} color: ${color}, no change to image`;
+            let message = `fill selection x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}, no change to image`;
             this.history.log(message, {
                 action: 'fill selection',
                 imageHandle: historyImageHandle,
                 modified: 'none',
-                x: selectionX,
-                y: selectionY,
-                width: selectionWidth,
-                height: selectionHeight,
+                x: selectX,
+                y: selectY,
+                width: selectWidth,
+                height: selectHeight,
                 color: color,
                 image: image.pixels,
             });
@@ -984,15 +984,15 @@ class PageController {
         drawingItem.originator.setImage(image);
         this.updateDrawCanvas();
 
-        let message = `fill selection x: ${selectionX} y: ${selectionY} width: ${selectionWidth} height: ${selectionHeight} color: ${color}, modified image`;
+        let message = `fill selection x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}, modified image`;
         this.history.log(message, {
             action: 'fill selection',
             imageHandle: historyImageHandle,
             modified: 'image',
-            x: selectionX,
-            y: selectionY,
-            width: selectionWidth,
-            height: selectionHeight,
+            x: selectX,
+            y: selectY,
+            width: selectWidth,
+            height: selectHeight,
             color: color,
             image: image.pixels,
         });
@@ -1881,8 +1881,8 @@ class PageController {
         let clampedY0 = Math.max(0, Math.min(pasteMinY, image2.height - 1));
         let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image2.width - 1));
         let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image2.height - 1));
-        let selectionWidth = clampedX1 - clampedX0 + 1;
-        let selectionHeight = clampedY1 - clampedY0 + 1;
+        let selectWidth = clampedX1 - clampedX0 + 1;
+        let selectHeight = clampedY1 - clampedY0 + 1;
         drawingItem.selectRectangle.x0 = clampedX0;
         drawingItem.selectRectangle.y0 = clampedY0;
         drawingItem.selectRectangle.x1 = clampedX1;
@@ -1903,10 +1903,10 @@ class PageController {
             pasteY: pasteMinY,
             pasteWidth: pasteWidth,
             pasteHeight: pasteHeight,
-            selectionX: clampedX0,
-            selectionY: clampedY0,
-            selectionWidth: selectionWidth,
-            selectionHeight: selectionHeight,
+            selectX: clampedX0,
+            selectY: clampedY0,
+            selectWidth: selectWidth,
+            selectHeight: selectHeight,
             image: image2.pixels,
         });
     }
