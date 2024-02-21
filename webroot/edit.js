@@ -483,6 +483,9 @@ class PageController {
             if (event.code === 'ArrowRight') {
                 this.moveRight();
             }
+            if (event.code === 'KeyT') {
+                this.showToolPanel();
+            }
             // Experiments with replaying the recorded history
             if (event.code === 'KeyQ') {
                 this.replay();
