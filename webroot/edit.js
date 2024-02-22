@@ -2115,39 +2115,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
         let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after flip y.');
-            this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'flip y',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'flip y for selection or entire image');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `flip y, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'flip y',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after flip y.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Rotate clockwise
