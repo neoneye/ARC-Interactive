@@ -2610,17 +2610,8 @@ class PageController {
         replayStep(); // Start the replay loop
     }
 
-    replay2(history_items) {
+    replayHistoryItems(history_items) {
         console.log('Replay start');
-        // let drawingItem = this.currentDrawingItem();
-        // drawingItem.caretaker.printHistory();
-
-        // History of all actions including the current state
-        // let undoListRef = drawingItem.caretaker.undoList;
-        // let undoList = Array.from(undoListRef);
-        // let actionName = 'replay';
-        // let currentState = drawingItem.originator.saveStateToMemento(actionName);
-        // undoList.push(currentState);
 
         let index = 0; // Start from the first item in the undo list
     
@@ -2787,7 +2778,7 @@ class PageController {
             history_items2.push(history_item2);
         }
         const callback = () => {
-            this.replay2(history_items2);
+            this.replayHistoryItems(history_items2);
         };
         setTimeout(callback, 100);
     }
