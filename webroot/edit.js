@@ -2582,8 +2582,8 @@ class PageController {
         var el_canvas = document.getElementById('replay-canvas');
         var ctx = el_canvas.getContext('2d');
     
-        var el_message = document.getElementById('replay-message');
-        el_message.classList.add('hidden');
+        var el_message_step = document.getElementById('replay-message-step');
+        var el_message_text = document.getElementById('replay-message-text');
 
         // The undoList contains the history items
         const replayStep = () => {
@@ -2598,6 +2598,9 @@ class PageController {
             let mementoItem = undoList[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
         
+            el_message_step.textContent = `${index} of ${undoList.length}`;
+            el_message_text.textContent = mementoItem.getMessage();
+
             // Clear the canvas for the next drawing state
             ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
 
@@ -2641,9 +2644,6 @@ class PageController {
     
         var el_canvas = document.getElementById('replay-canvas');
         var ctx = el_canvas.getContext('2d');
-
-        var el_message = document.getElementById('replay-message');
-        el_message.classList.remove('hidden');
 
         var el_message_step = document.getElementById('replay-message-step');
         var el_message_text = document.getElementById('replay-message-text');
