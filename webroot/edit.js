@@ -2640,6 +2640,7 @@ class PageController {
         };
 
         var dict = {
+            "fileType": "ARC-Interactive, history file, version 0.1.0",
             "startTime": utcTimestampWithoutSubsecond,
             "user": user,
             "dataset": this.datasetId, 
