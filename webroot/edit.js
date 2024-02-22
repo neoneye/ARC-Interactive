@@ -318,7 +318,7 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
-        let experimentalReplayEnabled = false;
+        let experimentalReplayEnabled = true;
         this.isUploadDownloadHistoryButtonsVisible = experimentalReplayEnabled && Settings.getAdvancedModeEnabled();
         this.isReplayUndoListButtonVisible = experimentalReplayEnabled && Settings.getAdvancedModeEnabled();
 
