@@ -844,8 +844,8 @@ class PageController {
 
         let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
         let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
-        let isSame = drawingItem.selectRectangle.x1 === x && drawingItem.selectRectangle.y1 === y;
-        if (isSame) {
+        let sameSelection = drawingItem.selectRectangle.x1 === x && drawingItem.selectRectangle.y1 === y;
+        if (sameSelection) {
             // console.log('The selection is the same after createSelectionUpdate.');
             return;
         }
@@ -857,11 +857,11 @@ class PageController {
         let selectWidth = maxX - minX + 1;
         let selectHeight = maxY - minY + 1;
 
-        let message = `create selection update x: ${x} y: ${y}, modified selection`;
+        let message = `create selection update, x: ${x} y: ${y}`;
         this.history.log(message, {
             action: 'create selection update',
             imageHandle: historyImageHandle,
-            modified: 'selection',
+            sameSelection: sameSelection,
             x: x,
             y: y,
             selectX: minX,
