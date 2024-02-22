@@ -1683,6 +1683,16 @@ class PageController {
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.updateOverview();
         this.updateDrawCanvas();
+
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let message = `activate test ${value1}`;
+        this.history.log(message, {
+            action: 'activate test',
+            valueOld: value0,
+            valueNew: value1,
+            imageHandle: historyImageHandle,
+        });
     }
 
     getWidthHeightFromTextfield() {
