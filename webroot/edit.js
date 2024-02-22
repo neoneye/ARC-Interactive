@@ -27,17 +27,17 @@ function enableFullscreenMode() {
 }
 
 class Memento {
-    constructor(state, actionName) {
+    constructor(state, message) {
         this.state = state;
-        this.actionName = actionName;
+        this.message = message;
     }
 
     getState() {
         return this.state;
     }
 
-    getActionName() {
-        return this.actionName;
+    getMessage() {
+        return this.message;
     }
 }
 
@@ -65,11 +65,11 @@ class Originator {
         return this.state.image;
     }
 
-    saveStateToMemento(actionName) {
+    saveStateToMemento(message) {
         let savedState = {
             image: this.state.image.clone(),
         };
-        return new Memento(savedState, actionName);
+        return new Memento(savedState, message);
     }
 
     getStateFromMemento(memento) {
@@ -83,9 +83,9 @@ class Caretaker {
         this.redoList = [];
     }
 
-    saveState(originator, actionName) {
+    saveState(originator, message) {
         this.redoList = []; // Clear the redoList because new action invalidates the redo history
-        this.undoList.push(originator.saveStateToMemento(actionName));
+        this.undoList.push(originator.saveStateToMemento(message));
     }
 
     clearHistory() {
@@ -96,7 +96,7 @@ class Caretaker {
     printHistory() {
         console.log("Action History:");
         this.undoList.forEach((memento, index) => {
-            console.log(`${index + 1}: ${memento.getActionName()}`);
+            console.log(`${index + 1}: ${memento.getMessage()}`);
         });
     }
 
@@ -113,10 +113,10 @@ class Caretaker {
             throw new Error("No actions to undo. undoList is empty");
         }
         let memento = this.undoList.pop();
-        let actionName = memento.getActionName();
-        this.redoList.push(originator.saveStateToMemento(actionName)); // save current state before undoing
+        let message = memento.getMessage();
+        this.redoList.push(originator.saveStateToMemento(message)); // save current state before undoing
         originator.getStateFromMemento(memento);
-        return actionName;
+        return message;
     }
 
     redo(originator) {
@@ -124,10 +124,10 @@ class Caretaker {
             throw new Error("No actions to redo. redoList is empty");
         }
         let memento = this.redoList.pop();
-        let actionName = memento.getActionName();
-        this.undoList.push(originator.saveStateToMemento(actionName)); // save current state before redoing
+        let message = memento.getMessage();
+        this.undoList.push(originator.saveStateToMemento(message)); // save current state before redoing
         originator.getStateFromMemento(memento);
-        return actionName;
+        return message;
     }
 }
 
@@ -569,18 +569,18 @@ class PageController {
         }
 
         let historyImageHandle = drawingItem.getHistoryImageHandle();
-        let actionName = drawingItem.caretaker.undo(drawingItem.originator);
+        let undoMessage = drawingItem.caretaker.undo(drawingItem.originator);
         let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        console.log(`Undid action: ${actionName}`);
-        let message = `undo, modified image`;
+        console.log(`Undid action: ${undoMessage}`);
+        let message = `undo action: ${undoMessage}`;
         this.history.log(message, {
             action: 'undo',
-            actionName: actionName,
+            undoMessage: undoMessage,
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: false,
             image: image.pixels,
         });
     }
@@ -595,18 +595,18 @@ class PageController {
         }
 
         let historyImageHandle = drawingItem.getHistoryImageHandle();
-        let actionName = drawingItem.caretaker.redo(drawingItem.originator);
+        let redoMessage = drawingItem.caretaker.redo(drawingItem.originator);
         let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        console.log(`Redid action: ${actionName}`);
-        let message = `redo, modified image`;
+        console.log(`Redid action: ${redoMessage}`);
+        let message = `redo action: ${redoMessage}`;
         this.history.log(message, {
             action: 'redo',
-            actionName: actionName,
+            redoMessage: redoMessage,
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: false,
             image: image.pixels,
         });
     }
