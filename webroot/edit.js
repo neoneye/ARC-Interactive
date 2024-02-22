@@ -1728,40 +1728,30 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         let image = emptyImage.overlay(originalImage, 0, 0);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after resize.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, no change to image`;
-            this.history.log(message, {
-                action: 'resize',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                width: size.width,
-                height: size.height,
-                color: this.currentColor,
-                image: image.pixels,
-            });
-
-            this.hideToolPanel();
-            return;
-        }
-
-        drawingItem.caretaker.saveState(drawingItem.originator, 'resize image');
-        drawingItem.originator.setImage(image);
-        drawingItem.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, modified image`;
+        let message = `resize, width: ${size.width} height: ${size.height} color: ${this.currentColor}`;
         this.history.log(message, {
             action: 'resize',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             width: size.width,
             height: size.height,
             color: this.currentColor,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after resize.');
+            this.hideToolPanel();
+            return;
+        }
+
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     startOverWithInputImage() {
