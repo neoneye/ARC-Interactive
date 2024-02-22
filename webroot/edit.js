@@ -1829,20 +1829,30 @@ class PageController {
         let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        this.clipboard = cropImage;
-        this.hideToolPanel();
-        console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
+        var sameClipboard = false;
+        if (this.clipboard) {
+            sameClipboard = cropImage.isEqualTo(this.clipboard);
+        }
 
-        let message = `copy x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified clipboard`;
+        let message = `copy, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'copy',
             imageHandle: historyImageHandle,
-            modified: 'clipboard',
+            sameClipboard: sameClipboard,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
         });
+
+        if (sameClipboard) {
+            console.log('Copied to clipboard. The clipboard already contains the same image.');
+            this.hideToolPanel();
+            return;
+        }
+        this.clipboard = cropImage;
+        this.hideToolPanel();
+        console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
     }
 
     pasteFromClipboard() {
