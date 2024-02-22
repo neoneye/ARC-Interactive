@@ -109,8 +109,6 @@
         <div class="titlebar-item titlebar-item-center" id="title_task">Task name</div>
         
         <div class="titlebar-item titlebar-item-right">
-            <button id="download-history-button" class="secondary-button hidden" onclick="gPageController.downloadHistoryFile()" title="Download history file">Download</button>
-            <button id="upload-history-button" class="secondary-button hidden" onclick="gPageController.clickUploadHistoryFile()" title="Upload a history file and see it replayed">Upload</button>
             <button id="replay-undolist-button" class="secondary-button hidden" onclick="gPageController.replayUndoList()" title="Animate the actions taken so far">Replay</button>
             <button class="secondary-button" onclick="gPageController.toggleOverview()" title="O = Toggle between overview and editor.">Overview</button>
         </div>
@@ -169,6 +167,8 @@
         </div>
         <div class="page-footer-center">
             <!-- Center -->
+            <button id="download-history-button" class="secondary-button hidden" onclick="gPageController.downloadHistoryFile()" title="Download history file">Download</button>
+            <button id="upload-history-button" class="secondary-button hidden" onclick="gPageController.clickUploadHistoryFile()" title="Upload a history file and see it replayed">Upload</button>
         </div>
         <div class="page-footer-right">
             <!-- Right -->
