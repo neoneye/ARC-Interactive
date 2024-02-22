@@ -2242,11 +2242,11 @@ class PageController {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
-            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection`;
             this.history.log(message, {
                 action: 'rotate selection counter-clockwise',
                 imageHandle: historyImageHandle,
-                modified: 'none',
+                sameImage: true,
                 x: rectangle.x,
                 y: rectangle.y,
                 width: rectangle.width,
@@ -2258,38 +2258,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after rotate.');
-            this.hideToolPanel();
-            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'rotate selection counter-clockwise',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise selection');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `rotate selection counter-clockwise, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'rotate selection counter-clockwise',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     rotateCCW_entireImage() {
