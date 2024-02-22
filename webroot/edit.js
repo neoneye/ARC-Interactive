@@ -810,17 +810,24 @@ class PageController {
         let originalImage = drawingItem.originator.getImageRef();
         let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
         let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
+        
+        let sameX0 = drawingItem.selectRectangle.x0 == x;
+        let sameY0 = drawingItem.selectRectangle.y0 == y;
+        let sameX1 = drawingItem.selectRectangle.x1 == x;
+        let sameY1 = drawingItem.selectRectangle.y1 == y;
+        let sameSelection = sameX0 && sameY0 && sameX1 && sameY1;
+
         drawingItem.selectRectangle.x0 = x;
         drawingItem.selectRectangle.y0 = y;
         drawingItem.selectRectangle.x1 = x;
         drawingItem.selectRectangle.y1 = y;
         this.updateDrawCanvas();
 
-        let message = `create selection begin x: ${x} y: ${y}, modified selection`;
+        let message = `create selection begin, x: ${x} y: ${y}`;
         this.history.log(message, {
             action: 'create selection begin',
             imageHandle: historyImageHandle,
-            modified: 'selection',
+            sameSelection: sameSelection,
             x: x,
             y: y,
             selectX: x,
