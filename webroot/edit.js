@@ -978,23 +978,13 @@ class PageController {
             return;
         }        
 
-        if (isSameColor) {
-            let message = `pick color ${colorValue}, no change to current color`;
-            this.history.log(message, {
-                action: 'pick color',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                color: colorValue,
-            });
-        } else {
-            let message = `pick color ${colorValue}, modified current color`;
-            this.history.log(message, {
-                action: 'pick color',
-                imageHandle: historyImageHandle,
-                modified: 'color',
-                color: colorValue,
-            });
-        }
+        let message = `pick color ${colorValue}`;
+        this.history.log(message, {
+            action: 'pick color',
+            sameColor: isSameColor,
+            imageHandle: historyImageHandle,
+            color: colorValue,
+        });
     }
 
     fillSelectedRectangle() {
