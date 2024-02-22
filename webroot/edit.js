@@ -545,7 +545,6 @@ class PageController {
         var context = {
             action: 'pick tool',
             toolId: toolId,
-            modified: 'none',
             imageHandle: historyImageHandle,
         };
         if (toolId === 'select') {
@@ -1160,9 +1159,7 @@ class PageController {
         this.statsRevealCount++;
 
         let message = 'reveal begin';
-        this.history.log(message, {
-            modified: 'none',
-        });
+        this.history.log(message);
     }
 
     // The user is releasing the button that reveals the solutions. So the solutions are hidden again.
@@ -1171,9 +1168,7 @@ class PageController {
         this.updateOverview();
 
         let message = 'reveal end';
-        this.history.log(message, {
-            modified: 'none',
-        });
+        this.history.log(message);
     }
 
     // Rebuild the overview table, so it shows what the user has drawn so far.
@@ -1543,7 +1538,6 @@ class PageController {
             this.history.log(message, {
                 action: 'hide editor show overview',
                 imageHandle: historyImageHandle,
-                modified: 'none',
             });
         }
     }
@@ -1605,7 +1599,6 @@ class PageController {
             this.history.log(message, {
                 action: 'submit',
                 imageHandle: historyImageHandle,
-                modified: 'none',
                 correct: true,
                 image: image.pixels,
             });
@@ -1614,7 +1607,6 @@ class PageController {
             this.history.log(message, {
                 action: 'submit',
                 imageHandle: historyImageHandle,
-                modified: 'none',
                 correct: false,
                 image: image.pixels,
             });
@@ -1867,7 +1859,6 @@ class PageController {
         this.history.log(message, {
             action: 'paste begin',
             imageHandle: historyImageHandle,
-            modified: 'none',
             width: image.width,
             height: image.height,
         });
@@ -1980,8 +1971,7 @@ class PageController {
         let message = `paste reject, no change to image`;
         this.history.log(message, {
             action: 'paste reject',
-            imageHandle: historyImageHandle,
-            modified: 'none'
+            imageHandle: historyImageHandle
         });
     }
 
@@ -2405,8 +2395,7 @@ class PageController {
         let message = 'show tool panel';
         this.history.log(message, {
             action: 'show tool panel',
-            imageHandle: historyImageHandle,
-            modified: 'none',
+            imageHandle: historyImageHandle
         });
     }
 
