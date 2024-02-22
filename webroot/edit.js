@@ -1862,7 +1862,7 @@ class PageController {
         resizeCanvas();
         this.updateDrawCanvas();
 
-        let message = `paste begin width: ${image.width} height: ${image.height}, no change to image`;
+        let message = `paste begin width: ${image.width} height: ${image.height}`;
         this.history.log(message, {
             action: 'paste begin',
             imageHandle: historyImageHandle,
@@ -1975,7 +1975,7 @@ class PageController {
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
 
-        let message = `paste reject, no change to image`;
+        let message = `paste reject`;
         this.history.log(message, {
             action: 'paste reject',
             imageHandle: historyImageHandle
