@@ -310,6 +310,7 @@ class PageController {
         this.enablePlotDraw = false;
 
         this.statsRevealCount = 0;
+        this.statsShowOverviewCount = 0;
 
         let maxPixelSize = 100;
         this.maxPixelSize = maxPixelSize;
@@ -1537,6 +1538,9 @@ class PageController {
 
         this.updateOverview();
 
+        this.statsShowOverviewCount++;
+        // console.log('statsShowOverviewCount:', this.statsShowOverviewCount);
+
         var shouldHistoryLog = true;
         if (options.hasOwnProperty('shouldHistoryLog')) {
             shouldHistoryLog = options.shouldHistoryLog;
@@ -1617,6 +1621,7 @@ class PageController {
             submitCorrectCount: drawingItem.submitCorrectCount,
             submitIncorrectCount: drawingItem.submitIncorrectCount,
             startOverCount: drawingItem.startOverCount,
+            showOverviewCount: this.statsShowOverviewCount,
             image: image.pixels,
         });
 
@@ -2637,6 +2642,7 @@ class PageController {
             "start over count": sumStartOverCount,
             "test solved count": testSolvedCount,
             "test unsolved count": testUnsolvedCount,
+            "show overview count": this.statsShowOverviewCount,
         };
 
         var dict = {
