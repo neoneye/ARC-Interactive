@@ -1763,11 +1763,11 @@ class PageController {
 
         this.statsStartOverCount++;
 
-        let message = `start over, modified image`;
+        let message = 'start over';
         this.history.log(message, {
             action: 'start over',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: false,
             image: inputImage.pixels,
         });
     }
