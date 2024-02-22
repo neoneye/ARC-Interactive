@@ -943,35 +943,26 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         image.floodFill(x, y, color);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after floodFill.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `flood fill x: ${x} y: ${y} color: ${color}, no change to image`;
-            this.history.log(message, {
-                action: 'flood fill',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: x,
-                y: y,
-                color: color,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'flood fill');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-
-        let message = `flood fill x: ${x} y: ${y} color: ${color}, modified image`;
+        let message = `flood fill, x: ${x} y: ${y} color: ${color}`;
         this.history.log(message, {
             action: 'flood fill',
+            sameImage: sameImage,
             imageHandle: historyImageHandle,
-            modified: 'image',
             x: x,
             y: y,
             color: color,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after floodFill.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     pickColor(colorValue) {
