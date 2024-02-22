@@ -1921,9 +1921,9 @@ class PageController {
 
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
-        let image = drawingItem.originator.getImageClone();
+        let originalImage = drawingItem.originator.getImageClone();
 
-        let cellSize = image.cellSize(width, height);
+        let cellSize = originalImage.cellSize(width, height);
 
         let pasteCenterX = this.pasteCenterX;
         let pasteCenterY = this.pasteCenterY;
@@ -1933,19 +1933,19 @@ class PageController {
         let halfWidth = Math.floor(pasteWidth * cellSize / 2);
         let halfHeight = Math.floor(pasteHeight * cellSize / 2);
 
-        let x0 = image.calcX0(0, width, cellSize) + inset;
-        let y0 = image.calcY0(0, height, cellSize) + inset;
+        let x0 = originalImage.calcX0(0, width, cellSize) + inset;
+        let y0 = originalImage.calcY0(0, height, cellSize) + inset;
 
         let pasteMinX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
         let pasteMinY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
 
-        let image2 = image.overlay(clipboardImage, pasteMinX, pasteMinY);
+        let image = originalImage.overlay(clipboardImage, pasteMinX, pasteMinY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(pasteMinX, image2.width - 1));
-        let clampedY0 = Math.max(0, Math.min(pasteMinY, image2.height - 1));
-        let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image2.width - 1));
-        let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image2.height - 1));
+        let clampedX0 = Math.max(0, Math.min(pasteMinX, image.width - 1));
+        let clampedY0 = Math.max(0, Math.min(pasteMinY, image.height - 1));
+        let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image.width - 1));
+        let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image.height - 1));
         let selectWidth = clampedX1 - clampedX0 + 1;
         let selectHeight = clampedY1 - clampedY0 + 1;
         drawingItem.selectRectangle.x0 = clampedX0;
@@ -1954,12 +1954,12 @@ class PageController {
         drawingItem.selectRectangle.y1 = clampedY1;
 
         drawingItem.caretaker.saveState(drawingItem.originator, 'paste');
-        drawingItem.originator.setImage(image2);
+        drawingItem.originator.setImage(image);
 
         this.updateDrawCanvas();
         this.hidePasteArea();
 
-        let message = `paste accept pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}, modified image and selection`;
+        let message = `paste accept, pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}, modified image and selection`;
         this.history.log(message, {
             action: 'paste accept',
             imageHandle: historyImageHandle,
@@ -1972,7 +1972,7 @@ class PageController {
             selectY: clampedY0,
             selectWidth: selectWidth,
             selectHeight: selectHeight,
-            image: image2.pixels,
+            image: image.pixels,
         });
     }
 
