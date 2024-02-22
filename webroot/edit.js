@@ -1872,7 +1872,7 @@ class PageController {
         resizeCanvas();
         this.updateDrawCanvas();
 
-        let message = `paste begin width: ${image.width} height: ${image.height}`;
+        let message = `paste begin, width: ${image.width} height: ${image.height}`;
         this.history.log(message, {
             action: 'paste begin',
             imageHandle: historyImageHandle,
@@ -1942,38 +1942,55 @@ class PageController {
         let image = originalImage.overlay(clipboardImage, pasteMinX, pasteMinY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(pasteMinX, image.width - 1));
-        let clampedY0 = Math.max(0, Math.min(pasteMinY, image.height - 1));
-        let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image.width - 1));
-        let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image.height - 1));
-        let selectWidth = clampedX1 - clampedX0 + 1;
-        let selectHeight = clampedY1 - clampedY0 + 1;
-        drawingItem.selectRectangle.x0 = clampedX0;
-        drawingItem.selectRectangle.y0 = clampedY0;
-        drawingItem.selectRectangle.x1 = clampedX1;
-        drawingItem.selectRectangle.y1 = clampedY1;
+        let selectX0 = Math.max(0, Math.min(pasteMinX, image.width - 1));
+        let selectY0 = Math.max(0, Math.min(pasteMinY, image.height - 1));
+        let selectX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image.width - 1));
+        let selectY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image.height - 1));
+        let selectWidth = selectX1 - selectX0 + 1;
+        let selectHeight = selectY1 - selectY0 + 1;
 
-        drawingItem.caretaker.saveState(drawingItem.originator, 'paste');
-        drawingItem.originator.setImage(image);
+        let sameImage = image.isEqualTo(originalImage);
 
-        this.updateDrawCanvas();
-        this.hidePasteArea();
+        let sameX0 = drawingItem.selectRectangle.x0 == selectX0;
+        let sameY0 = drawingItem.selectRectangle.y0 == selectY0;
+        let sameX1 = drawingItem.selectRectangle.x1 == selectX1;
+        let sameY1 = drawingItem.selectRectangle.y1 == selectY1;
+        let sameSelection = sameX0 && sameY0 && sameX1 && sameY1;
 
-        let message = `paste accept, pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}, modified image and selection`;
+        let message = `paste accept, pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}`;
         this.history.log(message, {
             action: 'paste accept',
             imageHandle: historyImageHandle,
-            modified: 'image,selection',
+            sameImage: sameImage,
+            sameSelection: sameSelection,
             pasteX: pasteMinX,
             pasteY: pasteMinY,
             pasteWidth: pasteWidth,
             pasteHeight: pasteHeight,
-            selectX: clampedX0,
-            selectY: clampedY0,
+            selectX: selectX0,
+            selectY: selectY0,
             selectWidth: selectWidth,
             selectHeight: selectHeight,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after paste.');
+            // It feels weird, not having any undo state after a paste.
+            // Despite the paste not causing any difference.
+            // I guess it's due to the Accept/Reject UI that feels like a major event, thus it should have an undo state.
+        }
+
+        drawingItem.selectRectangle.x0 = selectX0;
+        drawingItem.selectRectangle.y0 = selectY0;
+        drawingItem.selectRectangle.x1 = selectX1;
+        drawingItem.selectRectangle.y1 = selectY1;
+
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+
+        this.updateDrawCanvas();
+        this.hidePasteArea();
     }
 
     pasteFromClipboardReject() {
