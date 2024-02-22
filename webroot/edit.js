@@ -1531,6 +1531,10 @@ class PageController {
     }
 
     hideOverviewShowEditor() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let image = drawingItem.originator.getImageRef();
+
         let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("page-footer-overview-mode");
         let el2 = document.getElementById("draw-area-outer");
@@ -1543,6 +1547,13 @@ class PageController {
         // Sometimes the browser doesn't render the <canvas> after it's hidden and shown again.
         resizeCanvas();
         this.updateDrawCanvas();
+
+        let message = 'hide overview show editor';
+        this.history.log(message, {
+            action: 'hide overview show editor',
+            imageHandle: historyImageHandle,
+            image: image.pixels,
+        });
     }
 
     hideEditorShowOverview(options = {}) {
