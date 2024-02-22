@@ -907,34 +907,26 @@ class PageController {
             console.error('Error setting pixel', error);
             return;
         }
-        if (image.isEqualTo(originalImage)) {
-            // console.log('The image is the same after setPixel.');
-            let message = `draw x: ${x} y: ${y} color: ${color}, no change to image`;
-            this.history.log(message, {
-                action: 'draw',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: x,
-                y: y,
-                color: color,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'draw');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `draw x: ${x} y: ${y} color: ${color}, modified image`;
+        let message = `draw, x: ${x} y: ${y} color: ${color}`;
         this.history.log(message, {
             action: 'draw',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: x,
             y: y,
             color: color,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            // console.log('The image is the same after setPixel.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     floodFill(x, y, color) {
