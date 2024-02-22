@@ -2413,38 +2413,29 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let rectangle = this.getToolRectangle();
         let image = originalImage.moveDown(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the move.');
-            this.hideToolPanel();
-            let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'move down',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'move down');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'move down',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     isToolPanelHidden() {
