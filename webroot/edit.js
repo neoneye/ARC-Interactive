@@ -144,6 +144,7 @@ class DrawingItem {
         };
         this.submitCorrectCount = 0;
         this.submitIncorrectCount = 0;
+        this.startOverCount = 0;
     }
 
     getSelectedRectangleCoordinates() {
@@ -309,7 +310,6 @@ class PageController {
         this.enablePlotDraw = false;
 
         this.statsRevealCount = 0;
-        this.statsStartOverCount = 0;
 
         let maxPixelSize = 100;
         this.maxPixelSize = maxPixelSize;
@@ -1616,6 +1616,7 @@ class PageController {
             correct: isCorrect,
             submitCorrectCount: drawingItem.submitCorrectCount,
             submitIncorrectCount: drawingItem.submitIncorrectCount,
+            startOverCount: drawingItem.startOverCount,
             image: image.pixels,
         });
 
@@ -1761,13 +1762,14 @@ class PageController {
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        this.statsStartOverCount++;
+        drawingItem.startOverCount++;
 
         let message = 'start over';
         this.history.log(message, {
             action: 'start over',
             imageHandle: historyImageHandle,
             sameImage: false,
+            startOverCount: drawingItem.startOverCount,
             image: inputImage.pixels,
         });
     }
@@ -2622,10 +2624,17 @@ class PageController {
             }
         }
 
+        // Number of times the user started over
+        var sumStartOverCount = 0;
+        for (let i = 0; i < this.drawingItems.length; i++) {
+            let drawingItem = this.drawingItems[i];
+            sumStartOverCount += drawingItem.startOverCount;
+        }
+
         let summary = {
             "history count": this.history.items.length,
             "reveal count": this.statsRevealCount,
-            "start over count": this.statsStartOverCount,
+            "start over count": sumStartOverCount,
             "test solved count": testSolvedCount,
             "test unsolved count": testUnsolvedCount,
         };
