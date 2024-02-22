@@ -142,6 +142,8 @@ class DrawingItem {
             x1: 0,
             y1: 0,
         };
+        this.submitCorrectCount = 0;
+        this.submitIncorrectCount = 0;
     }
 
     getSelectedRectangleCoordinates() {
@@ -1602,22 +1604,20 @@ class PageController {
         let isCorrect = json0 == json1;
 
         if (isCorrect) {
-            let message = `submit, correct`;
-            this.history.log(message, {
-                action: 'submit',
-                imageHandle: historyImageHandle,
-                correct: true,
-                image: image.pixels,
-            });
+            drawingItem.submitCorrectCount++;
         } else {
-            let message = `submit, incorrect`;
-            this.history.log(message, {
-                action: 'submit',
-                imageHandle: historyImageHandle,
-                correct: false,
-                image: image.pixels,
-            });
+            drawingItem.submitIncorrectCount++;
         }
+
+        let message = isCorrect ? 'submit, correct' : 'submit, incorrect';
+        this.history.log(message, {
+            action: 'submit',
+            imageHandle: historyImageHandle,
+            correct: isCorrect,
+            submitCorrectCount: drawingItem.submitCorrectCount,
+            submitIncorrectCount: drawingItem.submitIncorrectCount,
+            image: image.pixels,
+        });
 
         var el = null;
         if (isCorrect) {
