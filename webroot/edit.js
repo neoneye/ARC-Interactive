@@ -318,6 +318,9 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
+        this.isUploadDownloadHistoryButtonsVisible = Settings.getAdvancedModeEnabled();
+        this.isReplayUndoListButtonVisible = Settings.getAdvancedModeEnabled();
+
         {
             // Select the radio button with the id 'tool_draw'
             // Sometimes the browser remembers the last selected radio button, across sessions.
@@ -337,6 +340,22 @@ class PageController {
         this.addEventListeners();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
         // await this.replayExampleHistoryFile();
+
+        if (this.isUploadDownloadHistoryButtonsVisible) {
+            {
+                var el = document.getElementById('download-history-button');
+                el.classList.remove('hidden');
+            }
+            {
+                var el = document.getElementById('upload-history-button');
+                el.classList.remove('hidden');
+            }
+        }
+
+        if (this.isReplayUndoListButtonVisible) {
+            var el = document.getElementById('replay-undolist-button');
+            el.classList.remove('hidden');
+        }
     }
 
     async replayExampleHistoryFile() {
@@ -494,8 +513,10 @@ class PageController {
                 this.showToolPanel();
             }
             // Experiments with replaying the recorded history
-            if (event.code === 'KeyQ') {
-                this.replay();
+            if (this.isReplayUndoListButtonVisible) {
+                if (event.code === 'KeyQ') {
+                    this.replayUndoList();
+                }
             }
         }
     }
@@ -2527,7 +2548,7 @@ class PageController {
         }
     }
 
-    replay() {
+    replayUndoList() {
         console.log('Replay start');
         let drawingItem = this.currentDrawingItem();
         // drawingItem.caretaker.printHistory();
@@ -2663,7 +2684,7 @@ class PageController {
         this.updateDrawCanvas();
     }
 
-    downloadReplayFile() {
+    downloadHistoryFile() {
         let user = 'anonymous';
 
         // Date/time formatting
@@ -2716,7 +2737,7 @@ class PageController {
         URL.revokeObjectURL(url);
     }
 
-    clickUploadReplayFile() {
+    clickUploadHistoryFile() {
         document.getElementById('file-input').click(); // Programmatically click the hidden file input
     }
 
