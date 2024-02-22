@@ -118,6 +118,10 @@ body {
     text-align: center; /* Center the text within the div */
 }
 
+#replay-message-step {
+    color: #777;
+}
+
 #draw-area-outer {
     position: absolute;
     display: block;
