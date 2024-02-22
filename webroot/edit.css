@@ -444,3 +444,22 @@ body {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+
+/* Default styles for buttons, showing full titles and hiding short titles */
+.responsive-button .full-title {
+    display: inline;
+}
+
+.responsive-button .short-title {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .responsive-button .full-title {
+        display: none; /* Hide full title on small screens */
+    }
+
+    .responsive-button .short-title {
+        display: inline; /* Show short title on small screens */
+    }
+}
