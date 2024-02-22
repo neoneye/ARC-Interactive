@@ -2573,9 +2573,13 @@ class PageController {
     
         // The undoList contains the history items
         const replayStep = () => {
+            if (this.isReplayLayerHidden()) {
+                console.log('Abort replay');
+                return; // Stop the replay animation if the replay layer is hidden
+            }
             if (index >= undoList.length) {
                 console.log('Replay finished');
-                return; // Stop the replay if we've reached the end of the undo list
+                return; // Stop the replay if we've reached the end of the animation
             }
             let mementoItem = undoList[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
@@ -2628,9 +2632,13 @@ class PageController {
     
         // The undoList contains the history items
         const replayStep = () => {
+            if (this.isReplayLayerHidden()) {
+                console.log('Abort replay');
+                return; // Stop the replay animation if the replay layer is hidden
+            }
             if (index >= history_items.length) {
                 console.log('Replay finished');
-                return; // Stop the replay if we've reached the end of the undo list
+                return; // Stop the replay if we've reached the end of the animation
             }
             let item = history_items[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
@@ -2667,6 +2675,11 @@ class PageController {
         };
     
         replayStep(); // Start the replay loop
+    }
+
+    isReplayLayerHidden() {
+        let el = document.getElementById('replay-area-outer');
+        return el.classList.contains('hidden');
     }
 
     dismissReplayLayer() {
