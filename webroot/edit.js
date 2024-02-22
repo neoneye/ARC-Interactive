@@ -2610,10 +2610,24 @@ class PageController {
 
         let historyJSON = this.history.toJSON();
 
+        // Count the number of test pairs that are solved/unsolved
+        var testSolvedCount = 0;
+        var testUnsolvedCount = 0;
+        for (let i = 0; i < this.drawingItems.length; i++) {
+            let drawingItem = this.drawingItems[i];
+            if (drawingItem.submitCorrectCount > 0) {
+                testSolvedCount++;
+            } else {
+                testUnsolvedCount++;
+            }
+        }
+
         let summary = {
             "history count": this.history.items.length,
             "reveal count": this.statsRevealCount,
             "start over count": this.statsStartOverCount,
+            "test solved count": testSolvedCount,
+            "test unsolved count": testUnsolvedCount,
         };
 
         var dict = {
