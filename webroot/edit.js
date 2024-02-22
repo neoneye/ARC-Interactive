@@ -1030,32 +1030,13 @@ class PageController {
                 image.pixels[y][x] = color;
             }
         }
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after filling the selection.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `fill selection x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}, no change to image`;
-            this.history.log(message, {
-                action: 'fill selection',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: selectX,
-                y: selectY,
-                width: selectWidth,
-                height: selectHeight,
-                color: color,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'fill selection');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-
-        let message = `fill selection x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}, modified image`;
+        let message = `fill selection, x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}`;
         this.history.log(message, {
             action: 'fill selection',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: selectX,
             y: selectY,
             width: selectWidth,
@@ -1063,6 +1044,14 @@ class PageController {
             color: color,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after filling the selection.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     async loadTask() {
