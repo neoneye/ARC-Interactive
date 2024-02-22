@@ -1816,41 +1816,30 @@ class PageController {
         let cropWidth = maxX - minX + 1;
         let cropHeight = maxY - minY + 1;
         let image = originalImage.crop(cropX, cropY, cropWidth, cropHeight);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after crop.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, no change to image`;
-            this.history.log(message, {
-                action: 'crop',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: cropX,
-                y: cropY,
-                width: cropWidth,
-                height: cropHeight,
-                image: image.pixels,
-            });
-
-            this.hideToolPanel();
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'crop selection');
-        drawingItem.originator.setImage(image);
-        drawingItem.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, modified image`;
+        let message = `crop, x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}`;
         this.history.log(message, {
             action: 'crop',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: cropX,
             y: cropY,
             width: cropWidth,
             height: cropHeight,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after crop.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     copyToClipboard() {
