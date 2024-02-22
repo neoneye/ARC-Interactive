@@ -2288,31 +2288,26 @@ class PageController {
         let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCCW();
-        if (image.isEqualTo(originalImage)) {
+        let sameImage = image.isEqualTo(originalImage);
+
+        let message = `rotate entire image counter-clockwise`;
+        this.history.log(message, {
+            action: 'rotate entire image counter-clockwise',
+            imageHandle: historyImageHandle,
+            sameImage: sameImage,
+            image: image.pixels,
+        });
+
+        if (sameImage) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
-            let message = `rotate image counter-clockwise, no change to image`;
-            this.history.log(message, {
-                action: 'rotate image counter-clockwise',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                image: image.pixels,
-            });
             return;
         }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise entire image');
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
         drawingItem.originator.setImage(image);
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
-
-        let message = `rotate image counter-clockwise, modified image`;
-        this.history.log(message, {
-            action: 'rotate image counter-clockwise',
-            imageHandle: historyImageHandle,
-            modified: 'image',
-            image: image.pixels,
-        });
     }
 
     // Move left with wrap around
