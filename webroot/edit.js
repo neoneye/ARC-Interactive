@@ -2081,39 +2081,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
         let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after flip x.');
-            this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'flip x',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'flip x for selection or entire image');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `flip x, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'flip x',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after flip x.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Reverse the y-axis of the selected rectangle or the entire image
