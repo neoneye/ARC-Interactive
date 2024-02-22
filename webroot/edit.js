@@ -337,7 +337,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         await this.loadTask();
-        this.history.log('loaded task');
+        this.history.log('welcome to overview');
         this.addEventListeners();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
         // await this.replayExampleHistoryFile();
