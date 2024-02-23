@@ -118,6 +118,10 @@ body {
     text-align: center; /* Center the text within the div */
 }
 
+#replay-message-step {
+    color: #777;
+}
+
 #draw-area-outer {
     position: absolute;
     display: block;
@@ -162,6 +166,12 @@ body {
 #canvas-size-input {
     font-size: 20px;
     width: 8ch;
+}
+
+#tool-panel-startover-play-buttons {
+    display: flex;
+    justify-content: space-between; /* Aligns children with space between them */
+    gap: 10px; /* Space between the buttons */
 }
 
 #tool-panel-crop-copy-paste {
@@ -439,4 +449,23 @@ body {
     color: rgb(119, 119, 119);
     padding-top: 5px;
     padding-bottom: 5px;
+}
+
+/* Default styles for buttons, showing full titles and hiding short titles */
+.responsive-button .full-title {
+    display: inline;
+}
+
+.responsive-button .short-title {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .responsive-button .full-title {
+        display: none; /* Hide full title on small screens */
+    }
+
+    .responsive-button .short-title {
+        display: inline; /* Show short title on small screens */
+    }
 }
