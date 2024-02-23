@@ -321,9 +321,8 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
-        let experimentalReplayEnabled = true;
-        this.isUploadDownloadHistoryButtonsVisible = experimentalReplayEnabled && Settings.getAdvancedModeEnabled();
-        this.isReplayUndoListButtonVisible = experimentalReplayEnabled && Settings.getAdvancedModeEnabled();
+        this.isUploadDownloadHistoryButtonsVisible = Settings.getAdvancedModeEnabled();
+        this.isReplayUndoListButtonVisible = Settings.getAdvancedModeEnabled();
 
         {
             // Select the radio button with the id 'tool_draw'
