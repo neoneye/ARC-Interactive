@@ -32,7 +32,10 @@
     <div id="tool-panel" class="hidden" onclick="gPageController.dismissToolPanel(event)">
         <div id="tool-panel-inner">
             <div id="tool-panel-inner-inner">
-                <button class="secondary-button" onclick="gPageController.startOverWithInputImage()" title="Go back to the original image">Start over 🥶🙀🙈</button>
+                <div id="tool-panel-startover-play-buttons">
+                    <button class="secondary-button" onclick="gPageController.startOverWithInputImage()" title="Go back to the original image">Start over 🥶🙀🙈</button>
+                    <button id="replay-undolist-button" class="secondary-button hidden" onclick="gPageController.replayUndoList()" title="P = Playback the actions">Play</button>
+                </div>
                 <hr>
                 <div>
                     <h4 id="tool-panel-widthheight-header" class="hidden">Change image size (width x height)</h4>
@@ -99,7 +102,6 @@
                 <div id="tool-with-undo-redo-buttons">
                     <button class="secondary-button" onclick="gPageController.undoAction()" title="CTRL Z = Undo">Undo</button>
                     <button class="secondary-button" onclick="gPageController.redoAction()" title="CTRL SHIFT Z = Redo">Redo</button>
-                    <button id="replay-undolist-button" class="secondary-button hidden" onclick="gPageController.replayUndoList()" title="P = Playback the actions">Play</button>
                 </div>
             </div>
         </div>

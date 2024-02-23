@@ -168,6 +168,12 @@ body {
     width: 8ch;
 }
 
+#tool-panel-startover-play-buttons {
+    display: flex;
+    justify-content: space-between; /* Aligns children with space between them */
+    gap: 10px; /* Space between the buttons */
+}
+
 #tool-panel-crop-copy-paste {
     display: flex;
     justify-content: space-between; /* Aligns children with space between them */
