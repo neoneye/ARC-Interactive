@@ -516,9 +516,8 @@ class PageController {
             if (event.code === 'KeyT') {
                 this.showToolPanel();
             }
-            // Experiments with replaying the recorded history
             if (this.isReplayUndoListButtonVisible) {
-                if (event.code === 'KeyQ') {
+                if (event.code === 'KeyP') {
                     this.replayUndoList();
                 }
             }
@@ -2459,13 +2458,15 @@ class PageController {
 
     replayUndoList() {
         console.log('Replay start');
+        this.hideToolPanel();
+
         let drawingItem = this.currentDrawingItem();
         // drawingItem.caretaker.printHistory();
 
         // History of all actions including the current state
         let undoListRef = drawingItem.caretaker.undoList;
         let undoList = Array.from(undoListRef);
-        let actionName = 'replay';
+        let actionName = 'the end';
         let currentState = drawingItem.originator.saveStateToMemento(actionName);
         undoList.push(currentState);
 
