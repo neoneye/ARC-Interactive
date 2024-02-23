@@ -27,17 +27,17 @@ function enableFullscreenMode() {
 }
 
 class Memento {
-    constructor(state, actionName) {
+    constructor(state, message) {
         this.state = state;
-        this.actionName = actionName;
+        this.message = message;
     }
 
     getState() {
         return this.state;
     }
 
-    getActionName() {
-        return this.actionName;
+    getMessage() {
+        return this.message;
     }
 }
 
@@ -65,11 +65,11 @@ class Originator {
         return this.state.image;
     }
 
-    saveStateToMemento(actionName) {
+    saveStateToMemento(message) {
         let savedState = {
             image: this.state.image.clone(),
         };
-        return new Memento(savedState, actionName);
+        return new Memento(savedState, message);
     }
 
     getStateFromMemento(memento) {
@@ -83,9 +83,9 @@ class Caretaker {
         this.redoList = [];
     }
 
-    saveState(originator, actionName) {
+    saveState(originator, message) {
         this.redoList = []; // Clear the redoList because new action invalidates the redo history
-        this.undoList.push(originator.saveStateToMemento(actionName));
+        this.undoList.push(originator.saveStateToMemento(message));
     }
 
     clearHistory() {
@@ -96,7 +96,7 @@ class Caretaker {
     printHistory() {
         console.log("Action History:");
         this.undoList.forEach((memento, index) => {
-            console.log(`${index + 1}: ${memento.getActionName()}`);
+            console.log(`${index + 1}: ${memento.getMessage()}`);
         });
     }
 
@@ -113,10 +113,10 @@ class Caretaker {
             throw new Error("No actions to undo. undoList is empty");
         }
         let memento = this.undoList.pop();
-        let actionName = memento.getActionName();
-        this.redoList.push(originator.saveStateToMemento(actionName)); // save current state before undoing
+        let message = memento.getMessage();
+        this.redoList.push(originator.saveStateToMemento(message)); // save current state before undoing
         originator.getStateFromMemento(memento);
-        return actionName;
+        return message;
     }
 
     redo(originator) {
@@ -124,10 +124,10 @@ class Caretaker {
             throw new Error("No actions to redo. redoList is empty");
         }
         let memento = this.redoList.pop();
-        let actionName = memento.getActionName();
-        this.undoList.push(originator.saveStateToMemento(actionName)); // save current state before redoing
+        let message = memento.getMessage();
+        this.undoList.push(originator.saveStateToMemento(message)); // save current state before redoing
         originator.getStateFromMemento(memento);
-        return actionName;
+        return message;
     }
 }
 
@@ -142,6 +142,9 @@ class DrawingItem {
             x1: 0,
             y1: 0,
         };
+        this.submitCorrectCount = 0;
+        this.submitIncorrectCount = 0;
+        this.startOverCount = 0;
     }
 
     getSelectedRectangleCoordinates() {
@@ -307,7 +310,7 @@ class PageController {
         this.enablePlotDraw = false;
 
         this.statsRevealCount = 0;
-        this.statsStartOverCount = 0;
+        this.statsShowOverviewCount = 0;
 
         let maxPixelSize = 100;
         this.maxPixelSize = maxPixelSize;
@@ -318,9 +321,8 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
-        let experimentalReplayEnabled = false;
-        this.isUploadDownloadHistoryButtonsVisible = experimentalReplayEnabled && Settings.getAdvancedModeEnabled();
-        this.isReplayUndoListButtonVisible = experimentalReplayEnabled && Settings.getAdvancedModeEnabled();
+        this.isUploadDownloadHistoryButtonsVisible = Settings.getAdvancedModeEnabled();
+        this.isReplayUndoListButtonVisible = true;
 
         {
             // Select the radio button with the id 'tool_draw'
@@ -337,7 +339,7 @@ class PageController {
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
         await this.loadTask();
-        this.history.log('loaded task');
+        this.history.log('welcome to overview');
         this.addEventListeners();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
         // await this.replayExampleHistoryFile();
@@ -513,9 +515,8 @@ class PageController {
             if (event.code === 'KeyT') {
                 this.showToolPanel();
             }
-            // Experiments with replaying the recorded history
             if (this.isReplayUndoListButtonVisible) {
-                if (event.code === 'KeyQ') {
+                if (event.code === 'KeyP') {
                     this.replayUndoList();
                 }
             }
@@ -545,7 +546,6 @@ class PageController {
         var context = {
             action: 'pick tool',
             toolId: toolId,
-            modified: 'none',
             imageHandle: historyImageHandle,
         };
         if (toolId === 'select') {
@@ -569,18 +569,18 @@ class PageController {
         }
 
         let historyImageHandle = drawingItem.getHistoryImageHandle();
-        let actionName = drawingItem.caretaker.undo(drawingItem.originator);
+        let undoMessage = drawingItem.caretaker.undo(drawingItem.originator);
         let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        console.log(`Undid action: ${actionName}`);
-        let message = `undo, modified image`;
+        console.log(`Undid action: ${undoMessage}`);
+        let message = `undo action: ${undoMessage}`;
         this.history.log(message, {
             action: 'undo',
-            actionName: actionName,
+            undoMessage: undoMessage,
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: false,
             image: image.pixels,
         });
     }
@@ -595,18 +595,18 @@ class PageController {
         }
 
         let historyImageHandle = drawingItem.getHistoryImageHandle();
-        let actionName = drawingItem.caretaker.redo(drawingItem.originator);
+        let redoMessage = drawingItem.caretaker.redo(drawingItem.originator);
         let image = drawingItem.originator.getImageClone();
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        console.log(`Redid action: ${actionName}`);
-        let message = `redo, modified image`;
+        console.log(`Redid action: ${redoMessage}`);
+        let message = `redo action: ${redoMessage}`;
         this.history.log(message, {
             action: 'redo',
-            actionName: actionName,
+            redoMessage: redoMessage,
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: false,
             image: image.pixels,
         });
     }
@@ -811,17 +811,24 @@ class PageController {
         let originalImage = drawingItem.originator.getImageRef();
         let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
         let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
+        
+        let sameX0 = drawingItem.selectRectangle.x0 == x;
+        let sameY0 = drawingItem.selectRectangle.y0 == y;
+        let sameX1 = drawingItem.selectRectangle.x1 == x;
+        let sameY1 = drawingItem.selectRectangle.y1 == y;
+        let sameSelection = sameX0 && sameY0 && sameX1 && sameY1;
+
         drawingItem.selectRectangle.x0 = x;
         drawingItem.selectRectangle.y0 = y;
         drawingItem.selectRectangle.x1 = x;
         drawingItem.selectRectangle.y1 = y;
         this.updateDrawCanvas();
 
-        let message = `create selection begin x: ${x} y: ${y}, modified selection`;
+        let message = `create selection begin, x: ${x} y: ${y}`;
         this.history.log(message, {
             action: 'create selection begin',
             imageHandle: historyImageHandle,
-            modified: 'selection',
+            sameSelection: sameSelection,
             x: x,
             y: y,
             selectX: x,
@@ -838,8 +845,8 @@ class PageController {
 
         let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
         let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
-        let isSame = drawingItem.selectRectangle.x1 === x && drawingItem.selectRectangle.y1 === y;
-        if (isSame) {
+        let sameSelection = drawingItem.selectRectangle.x1 === x && drawingItem.selectRectangle.y1 === y;
+        if (sameSelection) {
             // console.log('The selection is the same after createSelectionUpdate.');
             return;
         }
@@ -851,11 +858,11 @@ class PageController {
         let selectWidth = maxX - minX + 1;
         let selectHeight = maxY - minY + 1;
 
-        let message = `create selection update x: ${x} y: ${y}, modified selection`;
+        let message = `create selection update, x: ${x} y: ${y}`;
         this.history.log(message, {
             action: 'create selection update',
             imageHandle: historyImageHandle,
-            modified: 'selection',
+            sameSelection: sameSelection,
             x: x,
             y: y,
             selectX: minX,
@@ -907,34 +914,26 @@ class PageController {
             console.error('Error setting pixel', error);
             return;
         }
-        if (image.isEqualTo(originalImage)) {
-            // console.log('The image is the same after setPixel.');
-            let message = `draw x: ${x} y: ${y} color: ${color}, no change to image`;
-            this.history.log(message, {
-                action: 'draw',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: x,
-                y: y,
-                color: color,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'draw');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `draw x: ${x} y: ${y} color: ${color}, modified image`;
+        let message = `draw, x: ${x} y: ${y} color: ${color}`;
         this.history.log(message, {
             action: 'draw',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: x,
             y: y,
             color: color,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            // console.log('The image is the same after setPixel.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     floodFill(x, y, color) {
@@ -943,35 +942,26 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         var image = originalImage.clone();
         image.floodFill(x, y, color);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after floodFill.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `flood fill x: ${x} y: ${y} color: ${color}, no change to image`;
-            this.history.log(message, {
-                action: 'flood fill',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: x,
-                y: y,
-                color: color,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'flood fill');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-
-        let message = `flood fill x: ${x} y: ${y} color: ${color}, modified image`;
+        let message = `flood fill, x: ${x} y: ${y} color: ${color}`;
         this.history.log(message, {
             action: 'flood fill',
+            sameImage: sameImage,
             imageHandle: historyImageHandle,
-            modified: 'image',
             x: x,
             y: y,
             color: color,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after floodFill.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     pickColor(colorValue) {
@@ -995,23 +985,13 @@ class PageController {
             return;
         }        
 
-        if (isSameColor) {
-            let message = `pick color ${colorValue}, no change to current color`;
-            this.history.log(message, {
-                action: 'pick color',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                color: colorValue,
-            });
-        } else {
-            let message = `pick color ${colorValue}, modified current color`;
-            this.history.log(message, {
-                action: 'pick color',
-                imageHandle: historyImageHandle,
-                modified: 'color',
-                color: colorValue,
-            });
-        }
+        let message = `pick color ${colorValue}`;
+        this.history.log(message, {
+            action: 'pick color',
+            sameColor: isSameColor,
+            imageHandle: historyImageHandle,
+            color: colorValue,
+        });
     }
 
     fillSelectedRectangle() {
@@ -1039,32 +1019,13 @@ class PageController {
                 image.pixels[y][x] = color;
             }
         }
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after filling the selection.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `fill selection x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}, no change to image`;
-            this.history.log(message, {
-                action: 'fill selection',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: selectX,
-                y: selectY,
-                width: selectWidth,
-                height: selectHeight,
-                color: color,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'fill selection');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-
-        let message = `fill selection x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}, modified image`;
+        let message = `fill selection, x: ${selectX} y: ${selectY} width: ${selectWidth} height: ${selectHeight} color: ${color}`;
         this.history.log(message, {
             action: 'fill selection',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: selectX,
             y: selectY,
             width: selectWidth,
@@ -1072,6 +1033,14 @@ class PageController {
             color: color,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after filling the selection.');
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
     }
 
     async loadTask() {
@@ -1198,9 +1167,7 @@ class PageController {
         this.statsRevealCount++;
 
         let message = 'reveal begin';
-        this.history.log(message, {
-            modified: 'none',
-        });
+        this.history.log(message);
     }
 
     // The user is releasing the button that reveals the solutions. So the solutions are hidden again.
@@ -1209,9 +1176,7 @@ class PageController {
         this.updateOverview();
 
         let message = 'reveal end';
-        this.history.log(message, {
-            modified: 'none',
-        });
+        this.history.log(message);
     }
 
     // Rebuild the overview table, so it shows what the user has drawn so far.
@@ -1531,6 +1496,10 @@ class PageController {
     }
 
     hideOverviewShowEditor() {
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let image = drawingItem.originator.getImageRef();
+
         let el0 = document.getElementById("task-overview");
         let el1 = document.getElementById("page-footer-overview-mode");
         let el2 = document.getElementById("draw-area-outer");
@@ -1543,6 +1512,13 @@ class PageController {
         // Sometimes the browser doesn't render the <canvas> after it's hidden and shown again.
         resizeCanvas();
         this.updateDrawCanvas();
+
+        let message = 'hide overview show editor';
+        this.history.log(message, {
+            action: 'hide overview show editor',
+            imageHandle: historyImageHandle,
+            image: image.pixels,
+        });
     }
 
     hideEditorShowOverview(options = {}) {
@@ -1560,6 +1536,9 @@ class PageController {
 
         this.updateOverview();
 
+        this.statsShowOverviewCount++;
+        // console.log('statsShowOverviewCount:', this.statsShowOverviewCount);
+
         var shouldHistoryLog = true;
         if (options.hasOwnProperty('shouldHistoryLog')) {
             shouldHistoryLog = options.shouldHistoryLog;
@@ -1570,7 +1549,6 @@ class PageController {
             this.history.log(message, {
                 action: 'hide editor show overview',
                 imageHandle: historyImageHandle,
-                modified: 'none',
             });
         }
     }
@@ -1628,24 +1606,22 @@ class PageController {
         let isCorrect = json0 == json1;
 
         if (isCorrect) {
-            let message = `submit, correct`;
-            this.history.log(message, {
-                action: 'submit',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                correct: true,
-                image: image.pixels,
-            });
+            drawingItem.submitCorrectCount++;
         } else {
-            let message = `submit, incorrect`;
-            this.history.log(message, {
-                action: 'submit',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                correct: false,
-                image: image.pixels,
-            });
+            drawingItem.submitIncorrectCount++;
         }
+
+        let message = isCorrect ? 'submit, correct' : 'submit, incorrect';
+        this.history.log(message, {
+            action: 'submit',
+            imageHandle: historyImageHandle,
+            correct: isCorrect,
+            submitCorrectCount: drawingItem.submitCorrectCount,
+            submitIncorrectCount: drawingItem.submitIncorrectCount,
+            startOverCount: drawingItem.startOverCount,
+            showOverviewCount: this.statsShowOverviewCount,
+            image: image.pixels,
+        });
 
         var el = null;
         if (isCorrect) {
@@ -1672,6 +1648,16 @@ class PageController {
         console.log(`Activate test: ${value0} -> ${value1}`);
         this.updateOverview();
         this.updateDrawCanvas();
+
+        let drawingItem = this.currentDrawingItem();
+        let historyImageHandle = drawingItem.getHistoryImageHandle();
+        let message = `activate test ${value1}`;
+        this.history.log(message, {
+            action: 'activate test',
+            valueOld: value0,
+            valueNew: value1,
+            imageHandle: historyImageHandle,
+        });
     }
 
     getWidthHeightFromTextfield() {
@@ -1727,40 +1713,30 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let emptyImage = ARCImage.color(size.width, size.height, this.currentColor);
         let image = emptyImage.overlay(originalImage, 0, 0);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after resize.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, no change to image`;
-            this.history.log(message, {
-                action: 'resize',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                width: size.width,
-                height: size.height,
-                color: this.currentColor,
-                image: image.pixels,
-            });
-
-            this.hideToolPanel();
-            return;
-        }
-
-        drawingItem.caretaker.saveState(drawingItem.originator, 'resize image');
-        drawingItem.originator.setImage(image);
-        drawingItem.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `resize width: ${size.width} height: ${size.height} color: ${this.currentColor}, modified image`;
+        let message = `resize, width: ${size.width} height: ${size.height} color: ${this.currentColor}`;
         this.history.log(message, {
             action: 'resize',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             width: size.width,
             height: size.height,
             color: this.currentColor,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after resize.');
+            this.hideToolPanel();
+            return;
+        }
+
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     startOverWithInputImage() {
@@ -1789,13 +1765,14 @@ class PageController {
         this.updateDrawCanvas();
         this.hideToolPanel();
 
-        this.statsStartOverCount++;
+        drawingItem.startOverCount++;
 
-        let message = `start over, modified image`;
+        let message = 'start over';
         this.history.log(message, {
             action: 'start over',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: false,
+            startOverCount: drawingItem.startOverCount,
             image: inputImage.pixels,
         });
     }
@@ -1825,41 +1802,30 @@ class PageController {
         let cropWidth = maxX - minX + 1;
         let cropHeight = maxY - minY + 1;
         let image = originalImage.crop(cropX, cropY, cropWidth, cropHeight);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after crop.');
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, no change to image`;
-            this.history.log(message, {
-                action: 'crop',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: cropX,
-                y: cropY,
-                width: cropWidth,
-                height: cropHeight,
-                image: image.pixels,
-            });
-
-            this.hideToolPanel();
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'crop selection');
-        drawingItem.originator.setImage(image);
-        drawingItem.assignSelectRectangleFromCurrentImage();
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `crop x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}, modified image`;
+        let message = `crop, x: ${cropX} y: ${cropY} width: ${cropWidth} height: ${cropHeight}`;
         this.history.log(message, {
             action: 'crop',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: cropX,
             y: cropY,
             width: cropWidth,
             height: cropHeight,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after crop.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        drawingItem.assignSelectRectangleFromCurrentImage();
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     copyToClipboard() {
@@ -1868,20 +1834,30 @@ class PageController {
         let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        this.clipboard = cropImage;
-        this.hideToolPanel();
-        console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
+        var sameClipboard = false;
+        if (this.clipboard) {
+            sameClipboard = cropImage.isEqualTo(this.clipboard);
+        }
 
-        let message = `copy x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified clipboard`;
+        let message = `copy, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'copy',
             imageHandle: historyImageHandle,
-            modified: 'clipboard',
+            sameClipboard: sameClipboard,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
         });
+
+        if (sameClipboard) {
+            console.log('Copied to clipboard. The clipboard already contains the same image.');
+            this.hideToolPanel();
+            return;
+        }
+        this.clipboard = cropImage;
+        this.hideToolPanel();
+        console.log(`Copied to clipboard. width: ${cropImage.width}, height: ${cropImage.height}`);
     }
 
     pasteFromClipboard() {
@@ -1901,11 +1877,10 @@ class PageController {
         resizeCanvas();
         this.updateDrawCanvas();
 
-        let message = `paste begin width: ${image.width} height: ${image.height}, no change to image`;
+        let message = `paste begin, width: ${image.width} height: ${image.height}`;
         this.history.log(message, {
             action: 'paste begin',
             imageHandle: historyImageHandle,
-            modified: 'none',
             width: image.width,
             height: image.height,
         });
@@ -1951,9 +1926,9 @@ class PageController {
 
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
-        let image = drawingItem.originator.getImageClone();
+        let originalImage = drawingItem.originator.getImageClone();
 
-        let cellSize = image.cellSize(width, height);
+        let cellSize = originalImage.cellSize(width, height);
 
         let pasteCenterX = this.pasteCenterX;
         let pasteCenterY = this.pasteCenterY;
@@ -1963,47 +1938,64 @@ class PageController {
         let halfWidth = Math.floor(pasteWidth * cellSize / 2);
         let halfHeight = Math.floor(pasteHeight * cellSize / 2);
 
-        let x0 = image.calcX0(0, width, cellSize) + inset;
-        let y0 = image.calcY0(0, height, cellSize) + inset;
+        let x0 = originalImage.calcX0(0, width, cellSize) + inset;
+        let y0 = originalImage.calcY0(0, height, cellSize) + inset;
 
         let pasteMinX = Math.floor((pasteCenterX - halfWidth - x0) / cellSize + 0.5);
         let pasteMinY = Math.floor((pasteCenterY - halfHeight - y0) / cellSize + 0.5);
 
-        let image2 = image.overlay(clipboardImage, pasteMinX, pasteMinY);
+        let image = originalImage.overlay(clipboardImage, pasteMinX, pasteMinY);
         this.isPasteMode = false;
 
-        let clampedX0 = Math.max(0, Math.min(pasteMinX, image2.width - 1));
-        let clampedY0 = Math.max(0, Math.min(pasteMinY, image2.height - 1));
-        let clampedX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image2.width - 1));
-        let clampedY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image2.height - 1));
-        let selectWidth = clampedX1 - clampedX0 + 1;
-        let selectHeight = clampedY1 - clampedY0 + 1;
-        drawingItem.selectRectangle.x0 = clampedX0;
-        drawingItem.selectRectangle.y0 = clampedY0;
-        drawingItem.selectRectangle.x1 = clampedX1;
-        drawingItem.selectRectangle.y1 = clampedY1;
+        let selectX0 = Math.max(0, Math.min(pasteMinX, image.width - 1));
+        let selectY0 = Math.max(0, Math.min(pasteMinY, image.height - 1));
+        let selectX1 = Math.max(0, Math.min(pasteMinX + pasteWidth - 1, image.width - 1));
+        let selectY1 = Math.max(0, Math.min(pasteMinY + pasteHeight - 1, image.height - 1));
+        let selectWidth = selectX1 - selectX0 + 1;
+        let selectHeight = selectY1 - selectY0 + 1;
 
-        drawingItem.caretaker.saveState(drawingItem.originator, 'paste');
-        drawingItem.originator.setImage(image2);
+        let sameImage = image.isEqualTo(originalImage);
 
-        this.updateDrawCanvas();
-        this.hidePasteArea();
+        let sameX0 = drawingItem.selectRectangle.x0 == selectX0;
+        let sameY0 = drawingItem.selectRectangle.y0 == selectY0;
+        let sameX1 = drawingItem.selectRectangle.x1 == selectX1;
+        let sameY1 = drawingItem.selectRectangle.y1 == selectY1;
+        let sameSelection = sameX0 && sameY0 && sameX1 && sameY1;
 
-        let message = `paste accept pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}, modified image and selection`;
+        let message = `paste accept, pasteX: ${pasteMinX} pasteY: ${pasteMinY} pasteWidth: ${pasteWidth} pasteHeight: ${pasteHeight}`;
         this.history.log(message, {
             action: 'paste accept',
             imageHandle: historyImageHandle,
-            modified: 'image,selection',
+            sameImage: sameImage,
+            sameSelection: sameSelection,
             pasteX: pasteMinX,
             pasteY: pasteMinY,
             pasteWidth: pasteWidth,
             pasteHeight: pasteHeight,
-            selectX: clampedX0,
-            selectY: clampedY0,
+            selectX: selectX0,
+            selectY: selectY0,
             selectWidth: selectWidth,
             selectHeight: selectHeight,
-            image: image2.pixels,
+            image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after paste.');
+            // It feels weird, not having any undo state after a paste.
+            // Despite the paste not causing any difference.
+            // I guess it's due to the Accept/Reject UI that feels like a major event, thus it should have an undo state.
+        }
+
+        drawingItem.selectRectangle.x0 = selectX0;
+        drawingItem.selectRectangle.y0 = selectY0;
+        drawingItem.selectRectangle.x1 = selectX1;
+        drawingItem.selectRectangle.y1 = selectY1;
+
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+
+        this.updateDrawCanvas();
+        this.hidePasteArea();
     }
 
     pasteFromClipboardReject() {
@@ -2015,11 +2007,10 @@ class PageController {
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
 
-        let message = `paste reject, no change to image`;
+        let message = `paste reject`;
         this.history.log(message, {
             action: 'paste reject',
-            imageHandle: historyImageHandle,
-            modified: 'none'
+            imageHandle: historyImageHandle
         });
     }
 
@@ -2060,39 +2051,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipX();
         let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after flip x.');
-            this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'flip x',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'flip x for selection or entire image');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `flip x-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `flip x, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'flip x',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after flip x.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Reverse the y-axis of the selected rectangle or the entire image
@@ -2104,39 +2085,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let flippedImage = cropImage.flipY();
         let image = originalImage.overlay(flippedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after flip y.');
-            this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-            let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'flip y',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'flip y for selection or entire image');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
-
-        let message = `flip y-axis x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `flip y, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'flip y',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after flip y.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Rotate clockwise
@@ -2156,11 +2127,11 @@ class PageController {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
-            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection`;
             this.history.log(message, {
                 action: 'rotate selection clockwise',
                 imageHandle: historyImageHandle,
-                modified: 'none',
+                sameImage: true,
                 x: rectangle.x,
                 y: rectangle.y,
                 width: rectangle.width,
@@ -2172,38 +2143,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after rotate.');
-            this.hideToolPanel();
-            let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'rotate selection clockwise',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise selection');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `rotate selection clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `rotate selection clockwise, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'rotate selection clockwise',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     rotateCW_entireImage() {
@@ -2211,31 +2173,26 @@ class PageController {
         let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCW();
-        if (image.isEqualTo(originalImage)) {
+        let sameImage = image.isEqualTo(originalImage);
+
+        let message = `rotate entire image clockwise`;
+        this.history.log(message, {
+            action: 'rotate entire image clockwise',
+            imageHandle: historyImageHandle,
+            sameImage: sameImage,
+            image: image.pixels,
+        });
+
+        if (sameImage) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
-            let message = `rotate image clockwise, no change to image`;
-            this.history.log(message, {
-                action: 'rotate image clockwise',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                image: image.pixels,
-            });
             return;
         }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate clockwise entire image');
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
         drawingItem.originator.setImage(image);
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
-
-        let message = `rotate image clockwise, modified image`;
-        this.history.log(message, {
-            action: 'rotate image clockwise',
-            imageHandle: historyImageHandle,
-            modified: 'image',
-            image: image.pixels,
-        });
     }
 
     // Rotate counter clockwise
@@ -2255,11 +2212,11 @@ class PageController {
         let rectangle = this.getToolRectangle();
         if (rectangle.width != rectangle.height) {
             console.log('Rotate is only available for square selections.');
-            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection, no change to image`;
+            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, cannot rotate non-square selection`;
             this.history.log(message, {
                 action: 'rotate selection counter-clockwise',
                 imageHandle: historyImageHandle,
-                modified: 'none',
+                sameImage: true,
                 x: rectangle.x,
                 y: rectangle.y,
                 width: rectangle.width,
@@ -2271,38 +2228,29 @@ class PageController {
         let cropImage = originalImage.crop(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         let rotatedImage = cropImage.rotateCCW();
         let image = originalImage.overlay(rotatedImage, rectangle.x, rectangle.y);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after rotate.');
-            this.hideToolPanel();
-            let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'rotate selection counter-clockwise',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise selection');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `rotate selection counter-clockwise x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `rotate selection counter-clockwise, x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'rotate selection counter-clockwise',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after rotate.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     rotateCCW_entireImage() {
@@ -2310,31 +2258,26 @@ class PageController {
         let historyImageHandle = drawingItem.getHistoryImageHandle();
         let originalImage = drawingItem.originator.getImageClone();
         let image = originalImage.rotateCCW();
-        if (image.isEqualTo(originalImage)) {
+        let sameImage = image.isEqualTo(originalImage);
+
+        let message = `rotate entire image counter-clockwise`;
+        this.history.log(message, {
+            action: 'rotate entire image counter-clockwise',
+            imageHandle: historyImageHandle,
+            sameImage: sameImage,
+            image: image.pixels,
+        });
+
+        if (sameImage) {
             console.log('The image is the same after rotate.');
             this.hideToolPanel();
-            let message = `rotate image counter-clockwise, no change to image`;
-            this.history.log(message, {
-                action: 'rotate image counter-clockwise',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                image: image.pixels,
-            });
             return;
         }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'rotate counter-clockwise entire image');
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
         drawingItem.originator.setImage(image);
         drawingItem.assignSelectRectangleFromCurrentImage();
         this.updateDrawCanvas();
         this.hideToolPanel();
-
-        let message = `rotate image counter-clockwise, modified image`;
-        this.history.log(message, {
-            action: 'rotate image counter-clockwise',
-            imageHandle: historyImageHandle,
-            modified: 'image',
-            image: image.pixels,
-        });
     }
 
     // Move left with wrap around
@@ -2344,38 +2287,29 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let rectangle = this.getToolRectangle();
         let image = originalImage.moveLeft(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the move.');
-            this.hideToolPanel();
-            let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'move left',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'move left');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `move left x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'move left',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Move right with wrap around
@@ -2385,38 +2319,29 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let rectangle = this.getToolRectangle();
         let image = originalImage.moveRight(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the move.');
-            this.hideToolPanel();
-            let message = `move right x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'move right',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'move right');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `move right x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `move right x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'move right',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Move up with wrap around
@@ -2426,38 +2351,29 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let rectangle = this.getToolRectangle();
         let image = originalImage.moveUp(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the move.');
-            this.hideToolPanel();
-            let message = `move up x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'move up',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'move up');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `move up x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `move up x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'move up',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     // Move down with wrap around
@@ -2467,38 +2383,29 @@ class PageController {
         let originalImage = drawingItem.originator.getImageClone();
         let rectangle = this.getToolRectangle();
         let image = originalImage.moveDown(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-        if (image.isEqualTo(originalImage)) {
-            console.log('The image is the same after the move.');
-            this.hideToolPanel();
-            let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, no change to image`;
-            this.history.log(message, {
-                action: 'move down',
-                imageHandle: historyImageHandle,
-                modified: 'none',
-                x: rectangle.x,
-                y: rectangle.y,
-                width: rectangle.width,
-                height: rectangle.height,
-                image: image.pixels,
-            });
-            return;
-        }
-        drawingItem.caretaker.saveState(drawingItem.originator, 'move down');
-        drawingItem.originator.setImage(image);
-        this.updateDrawCanvas();
-        this.hideToolPanel();
+        let sameImage = image.isEqualTo(originalImage);
 
-        let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}, modified image`;
+        let message = `move down x: ${rectangle.x} y: ${rectangle.y} width: ${rectangle.width} height: ${rectangle.height}`;
         this.history.log(message, {
             action: 'move down',
             imageHandle: historyImageHandle,
-            modified: 'image',
+            sameImage: sameImage,
             x: rectangle.x,
             y: rectangle.y,
             width: rectangle.width,
             height: rectangle.height,
             image: image.pixels,
         });
+
+        if (sameImage) {
+            console.log('The image is the same after the move.');
+            this.hideToolPanel();
+            return;
+        }
+        drawingItem.caretaker.saveState(drawingItem.originator, message);
+        drawingItem.originator.setImage(image);
+        this.updateDrawCanvas();
+        this.hideToolPanel();
     }
 
     isToolPanelHidden() {
@@ -2527,8 +2434,7 @@ class PageController {
         let message = 'show tool panel';
         this.history.log(message, {
             action: 'show tool panel',
-            imageHandle: historyImageHandle,
-            modified: 'none',
+            imageHandle: historyImageHandle
         });
     }
 
@@ -2551,13 +2457,15 @@ class PageController {
 
     replayUndoList() {
         console.log('Replay start');
+        this.hideToolPanel();
+
         let drawingItem = this.currentDrawingItem();
         // drawingItem.caretaker.printHistory();
 
         // History of all actions including the current state
         let undoListRef = drawingItem.caretaker.undoList;
         let undoList = Array.from(undoListRef);
-        let actionName = 'replay';
+        let actionName = 'the end';
         let currentState = drawingItem.originator.saveStateToMemento(actionName);
         undoList.push(currentState);
 
@@ -2571,15 +2479,25 @@ class PageController {
         var el_canvas = document.getElementById('replay-canvas');
         var ctx = el_canvas.getContext('2d');
     
+        var el_message_step = document.getElementById('replay-message-step');
+        var el_message_text = document.getElementById('replay-message-text');
+
         // The undoList contains the history items
         const replayStep = () => {
+            if (this.isReplayLayerHidden()) {
+                console.log('Abort replay');
+                return; // Stop the replay animation if the replay layer is hidden
+            }
             if (index >= undoList.length) {
                 console.log('Replay finished');
-                return; // Stop the replay if we've reached the end of the undo list
+                return; // Stop the replay if we've reached the end of the animation
             }
             let mementoItem = undoList[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
         
+            el_message_step.textContent = `${index} of ${undoList.length}`;
+            el_message_text.textContent = mementoItem.getMessage();
+
             // Clear the canvas for the next drawing state
             ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
 
@@ -2624,19 +2542,24 @@ class PageController {
         var el_canvas = document.getElementById('replay-canvas');
         var ctx = el_canvas.getContext('2d');
 
-        var el_message = document.getElementById('replay-message');
+        var el_message_step = document.getElementById('replay-message-step');
+        var el_message_text = document.getElementById('replay-message-text');
     
         // The undoList contains the history items
         const replayStep = () => {
+            if (this.isReplayLayerHidden()) {
+                console.log('Abort replay');
+                return; // Stop the replay animation if the replay layer is hidden
+            }
             if (index >= history_items.length) {
                 console.log('Replay finished');
-                return; // Stop the replay if we've reached the end of the undo list
+                return; // Stop the replay if we've reached the end of the animation
             }
             let item = history_items[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
 
-            let message = item.message;
-            el_message.textContent = `Step ${index} of ${history_items.length}` + message;
+            el_message_step.textContent = `${index} of ${history_items.length}`;
+            el_message_text.textContent = item.message;
 
             // Clear the canvas for the next drawing state
             ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
@@ -2669,6 +2592,11 @@ class PageController {
         replayStep(); // Start the replay loop
     }
 
+    isReplayLayerHidden() {
+        let el = document.getElementById('replay-area-outer');
+        return el.classList.contains('hidden');
+    }
+
     dismissReplayLayer() {
         var el = document.getElementById('replay-area-outer');
         el.classList.add('hidden');
@@ -2689,13 +2617,36 @@ class PageController {
 
         let historyJSON = this.history.toJSON();
 
+        // Count the number of test pairs that are solved/unsolved
+        var testSolvedCount = 0;
+        var testUnsolvedCount = 0;
+        for (let i = 0; i < this.drawingItems.length; i++) {
+            let drawingItem = this.drawingItems[i];
+            if (drawingItem.submitCorrectCount > 0) {
+                testSolvedCount++;
+            } else {
+                testUnsolvedCount++;
+            }
+        }
+
+        // Number of times the user started over
+        var sumStartOverCount = 0;
+        for (let i = 0; i < this.drawingItems.length; i++) {
+            let drawingItem = this.drawingItems[i];
+            sumStartOverCount += drawingItem.startOverCount;
+        }
+
         let summary = {
             "history count": this.history.items.length,
             "reveal count": this.statsRevealCount,
-            "start over count": this.statsStartOverCount,
+            "start over count": sumStartOverCount,
+            "test solved count": testSolvedCount,
+            "test unsolved count": testUnsolvedCount,
+            "show overview count": this.statsShowOverviewCount,
         };
 
         var dict = {
+            "fileType": "ARC-Interactive, history file, version 0.1.0",
             "startTime": utcTimestampWithoutSubsecond,
             "user": user,
             "dataset": this.datasetId, 
