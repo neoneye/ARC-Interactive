@@ -35,7 +35,6 @@ const META_ARC_LEVELS = {
     "1e0a9b12",
     "9565186b",
     "29c11459",
-    "4c4377d9",
     "67a3c6ac",
     "272f95fa",
     "3618c87e",
@@ -180,6 +179,7 @@ const META_ARC_LEVELS = {
     "b7249182"
   ],
   "intermediate": [
+    "4c4377d9",
     "a3f84088",
     "5b526a93",
     "ba9d41b8",
@@ -214,7 +214,6 @@ const META_ARC_LEVELS = {
     "e6721834",
     "fcb5c309",
     "9c1e755f",
-    "10fcaaa3",
     "2f0c5170",
     "5bd6f4ac",
     "f1cefba8",
@@ -328,6 +327,7 @@ const META_ARC_LEVELS = {
     "ce8d95cc",
     "bf699163",
     "a416b8f3",
+    "73182012",
   ],
   "medium": [
     "eb281b96",
@@ -420,7 +420,6 @@ const META_ARC_LEVELS = {
     "7b7f7511",
     "746b3537",
     "3979b1a8",
-    "73182012",
     "aee291af",
     "c8b7cc0f",
     "0520fde7",
@@ -491,7 +490,6 @@ const META_ARC_LEVELS = {
     "d07ae81c",
     "cdecee7f",
     "1acc24af",
-    "9aec4887",
     "2685904e",
     "3490cc26",
     "e78887d1",
@@ -564,7 +562,6 @@ const META_ARC_LEVELS = {
     "2a5f8217",
     "2c0b0aff",
     "2c737e39",
-    "310f3251",
     "3391f8c0",
     "37d3e8b2",
     "477d2879",
@@ -753,6 +750,7 @@ const META_ARC_LEVELS = {
     "3ee1011a",
   ],
   "expert": [
+    "10fcaaa3",
     "c92b942c",
     "b4a43f3b",
     "c64f1187",
@@ -809,6 +807,8 @@ const META_ARC_LEVELS = {
     "dd2401ed",
     "b0f4d537",
     "6d0160f0",
+    "9aec4887",
+    "310f3251",
   ],
   "unfixed": [
     "58e15b12",
