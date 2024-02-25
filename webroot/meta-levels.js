@@ -473,6 +473,7 @@ const META_ARC_LEVELS = {
     "2c608aff",
     "770cc55f",
     "150deff5",
+    "bbb1b8b6",
   ],
   "hard": [
     "d19f7514",
@@ -683,7 +684,6 @@ const META_ARC_LEVELS = {
     "af24b4cc",
     "c074846d",
     "53b68214",
-    "bbb1b8b6",
     "e21a174a",
     "d4469b4b",
     "31d5ba1a",
