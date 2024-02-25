@@ -331,6 +331,7 @@ const META_ARC_LEVELS = {
     "73182012",
   ],
   "medium": [
+    "68b16354",
     "bcb3040b",
     "eb281b96",
     "c97c0139",
@@ -736,7 +737,6 @@ const META_ARC_LEVELS = {
     "1e97544e",
     "e1d2900e",
     "a64e4611",
-    "68b16354",
     "d931c21c",
     "39e1d7f9",
     "52fd389e",
