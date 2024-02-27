@@ -1330,7 +1330,7 @@ class PageController {
                 el_td2.classList.add('test-output-cell');
 
                 var image = null;
-                if (this.drawingItems[i].caretaker.undoList.length > 0) {
+                {
                     // Only show an image when the user have drawn something.
                     // If there are no actions to undo, then the user have not drawn anything.
                     image = this.drawingItems[i].originator.getImageRef();
@@ -2603,61 +2603,31 @@ class PageController {
         replayStep(); // Start the replay loop
     }
 
+    // Show the replay animations inside the "overview" page.
     replayHistoryItems2(history_items) {
         console.log('Replay start');
 
-        let index = 0; // Start from the first item in the undo list
-    
-        // Show the replay area
-        var el_outer = document.getElementById('replay-area-outer');
-        el_outer.classList.remove('hidden');
-        resizeCanvas();
-    
-        var el_canvas = document.getElementById('replay-canvas');
-        var ctx = el_canvas.getContext('2d');
-
-        var el_message_step = document.getElementById('replay-message-step');
-        var el_message_text = document.getElementById('replay-message-text');
+        let index = 0; // Start from the first item in the history list
     
         // The undoList contains the history items
         const replayStep = () => {
-            if (this.isReplayLayerHidden()) {
-                console.log('Abort replay');
-                return; // Stop the replay animation if the replay layer is hidden
-            }
             if (index >= history_items.length) {
                 console.log('Replay finished');
                 return; // Stop the replay if we've reached the end of the animation
             }
             let item = history_items[index]; // Get the current item to be drawn
             index++; // Move to the next item for the next iteration
+            console.log(`Replay index ${index} of ${history_items.length}`);
 
-            el_message_step.textContent = `${index} of ${history_items.length}`;
-            el_message_text.textContent = item.message;
+            // el_message_step.textContent = `${index} of ${history_items.length}`;
+            // el_message_text.textContent = item.message;
 
-            // Clear the canvas for the next drawing state
-            ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
+            // translate from the imageHandle to the drawingItem index.
+            let drawingItemIndex = 0;
 
-            let image = item.image;
-            let inset = 5;
-            let width = el_canvas.width - inset * 2;
-            let height = el_canvas.height - inset * 2;    
-            let cellSize = image.cellSize(width, height);
-            let gapSize = this.isGridVisible ? 1 : 0;
-    
-            // Draw an outline around the image
-            {
-                let x = image.calcX0(0, width, cellSize) + inset - 1;
-                let y = image.calcY0(0, height, cellSize) + inset - 1;
-                let w = image.width * cellSize + 2 - gapSize;
-                let h = image.height * cellSize + 2 - gapSize;
-                ctx.fillStyle = '#555';
-                ctx.fillRect(x, y, w, h);
-            }
-            let options = {
-                gapSize: gapSize,
-            };
-            image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
+            this.drawingItems[drawingItemIndex].originator.setImage(item.image);
+
+            this.updateOverview();
 
             // Schedule the next step
             setTimeout(replayStep, 10);
