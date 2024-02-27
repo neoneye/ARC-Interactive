@@ -343,6 +343,7 @@ class PageController {
         this.addEventListeners();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
         // await this.replayExampleHistoryFile();
+        await this.replayExampleHistoryFile2();
 
         if (this.isUploadDownloadHistoryButtonsVisible) {
             {
@@ -368,6 +369,16 @@ class PageController {
         let uint8Array = new Uint8Array(arrayBuffer);
         let jsonString = new TextDecoder().decode(uint8Array);
         this.replayHistoryFile(jsonString);
+    }
+
+    async replayExampleHistoryFile2() {
+        // const response = await fetch('history1.json');
+        const response = await fetch('ARC-Interactive history 2024-02-24T16-00-24Z.json');
+        // console.log('response:', response);
+        const arrayBuffer = await response.arrayBuffer();
+        let uint8Array = new Uint8Array(arrayBuffer);
+        let jsonString = new TextDecoder().decode(uint8Array);
+        this.replayHistoryFile2(jsonString);
     }
 
     addEventListeners() {
@@ -2592,6 +2603,69 @@ class PageController {
         replayStep(); // Start the replay loop
     }
 
+    replayHistoryItems2(history_items) {
+        console.log('Replay start');
+
+        let index = 0; // Start from the first item in the undo list
+    
+        // Show the replay area
+        var el_outer = document.getElementById('replay-area-outer');
+        el_outer.classList.remove('hidden');
+        resizeCanvas();
+    
+        var el_canvas = document.getElementById('replay-canvas');
+        var ctx = el_canvas.getContext('2d');
+
+        var el_message_step = document.getElementById('replay-message-step');
+        var el_message_text = document.getElementById('replay-message-text');
+    
+        // The undoList contains the history items
+        const replayStep = () => {
+            if (this.isReplayLayerHidden()) {
+                console.log('Abort replay');
+                return; // Stop the replay animation if the replay layer is hidden
+            }
+            if (index >= history_items.length) {
+                console.log('Replay finished');
+                return; // Stop the replay if we've reached the end of the animation
+            }
+            let item = history_items[index]; // Get the current item to be drawn
+            index++; // Move to the next item for the next iteration
+
+            el_message_step.textContent = `${index} of ${history_items.length}`;
+            el_message_text.textContent = item.message;
+
+            // Clear the canvas for the next drawing state
+            ctx.clearRect(0, 0, el_canvas.width, el_canvas.height);
+
+            let image = item.image;
+            let inset = 5;
+            let width = el_canvas.width - inset * 2;
+            let height = el_canvas.height - inset * 2;    
+            let cellSize = image.cellSize(width, height);
+            let gapSize = this.isGridVisible ? 1 : 0;
+    
+            // Draw an outline around the image
+            {
+                let x = image.calcX0(0, width, cellSize) + inset - 1;
+                let y = image.calcY0(0, height, cellSize) + inset - 1;
+                let w = image.width * cellSize + 2 - gapSize;
+                let h = image.height * cellSize + 2 - gapSize;
+                ctx.fillStyle = '#555';
+                ctx.fillRect(x, y, w, h);
+            }
+            let options = {
+                gapSize: gapSize,
+            };
+            image.draw(this.theme, ctx, inset, inset, width, height, cellSize, options);
+
+            // Schedule the next step
+            setTimeout(replayStep, 10);
+        };
+    
+        replayStep(); // Start the replay loop
+    }
+
     isReplayLayerHidden() {
         let el = document.getElementById('replay-area-outer');
         return el.classList.contains('hidden');
@@ -2731,6 +2805,38 @@ class PageController {
         }
         const callback = () => {
             this.replayHistoryItems(history_items2);
+        };
+        setTimeout(callback, 100);
+    }
+
+    replayHistoryFile2(jsonString) {
+        // console.log('json:', jsonString);
+        let obj = JSON.parse(jsonString);
+        // console.log('obj:', obj);
+        let history_items = obj.history;
+        let history_items2 = []; 
+        for (let i = 0; i < history_items.length; i++) {
+            let item = history_items[i];
+            console.log('item:', item);
+
+            var arc_image = null;
+            if (item.context && item.context.image) {
+                arc_image = new ARCImage(item.context.image);
+            }
+            if (!arc_image) {
+                arc_image = ARCImage.color(5, 5, 0);
+            }
+
+            var message = item.message;
+
+            let history_item2 = {
+                message: message,
+                image: arc_image,
+            };
+            history_items2.push(history_item2);
+        }
+        const callback = () => {
+            this.replayHistoryItems2(history_items2);
         };
         setTimeout(callback, 100);
     }
