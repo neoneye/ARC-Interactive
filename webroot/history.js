@@ -2630,7 +2630,7 @@ class PageController {
             this.updateOverview();
 
             // Schedule the next step
-            setTimeout(replayStep, 10);
+            setTimeout(replayStep, 50);
         };
     
         replayStep(); // Start the replay loop
@@ -2783,18 +2783,35 @@ class PageController {
         // console.log('json:', jsonString);
         let obj = JSON.parse(jsonString);
         // console.log('obj:', obj);
+
+        let current_images = {};
+
         let history_items = obj.history;
-        let history_items2 = []; 
+        let history_items2 = [];
         for (let i = 0; i < history_items.length; i++) {
             let item = history_items[i];
             console.log('item:', item);
 
             var arc_image = null;
-            if (item.context && item.context.image) {
-                arc_image = new ARCImage(item.context.image);
+            var arc_imageHandle = null;
+            if (item.context) {
+                if (item.context.image) {
+                    arc_image = new ARCImage(item.context.image);
+                }
+                if (item.context.imageHandle) {
+                    arc_imageHandle = item.context.imageHandle;
+                }
             }
-            if (!arc_image) {
-                arc_image = ARCImage.color(5, 5, 0);
+
+            let last_image = current_images[arc_imageHandle];
+            var isSame = true;
+            if(last_image !== undefined) {
+                if (arc_image) {
+                    isSame = last_image.isEqualTo(arc_image);
+                }
+            }
+            if (arc_image) {
+                current_images[arc_imageHandle] = arc_image;
             }
 
             var message = item.message;
@@ -2802,11 +2819,17 @@ class PageController {
             let history_item2 = {
                 message: message,
                 image: arc_image,
+                isSame: isSame,
             };
             history_items2.push(history_item2);
         }
+
+        // Don't show the same frame over and over again.
+        // Filter out the items that are the same as the previous item
+        let history_items2_filtered = history_items2.filter(item => !item.isSame);
+
         const callback = () => {
-            this.replayHistoryItems2(history_items2);
+            this.replayHistoryItems2(history_items2_filtered);
         };
         setTimeout(callback, 100);
     }
