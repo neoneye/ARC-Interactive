@@ -372,8 +372,11 @@ class PageController {
     }
 
     async replayExampleHistoryFile2() {
-        // const response = await fetch('history1.json');
-        const response = await fetch('ARC-Interactive history 2024-02-24T16-00-24Z.json');
+        // let s = 'history1.json';
+        let s = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
+        // let s = 'ARC-Interactive history 2024-02-24T15-47-27Z.json';
+        // let s = 'ARC-Interactive history 2024-02-24T21-11-02Z.json';
+        const response = await fetch(s);
         // console.log('response:', response);
         const arrayBuffer = await response.arrayBuffer();
         let uint8Array = new Uint8Array(arrayBuffer);
