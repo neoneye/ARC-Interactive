@@ -307,7 +307,6 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
-        this.isUploadDownloadHistoryButtonsVisible = Settings.getAdvancedModeEnabled();
         this.isReplayUndoListButtonVisible = true;
 
         {
@@ -327,17 +326,6 @@ class PageController {
         this.history.log('welcome to overview');
         this.addEventListeners();
         await this.replayExampleHistoryFile2();
-
-        if (this.isUploadDownloadHistoryButtonsVisible) {
-            {
-                var el = document.getElementById('download-history-button');
-                el.classList.remove('hidden');
-            }
-            {
-                var el = document.getElementById('upload-history-button');
-                el.classList.remove('hidden');
-            }
-        }
 
         if (this.isReplayUndoListButtonVisible) {
             var el = document.getElementById('replay-undolist-button');
@@ -497,9 +485,6 @@ class PageController {
         }
         if (event.code === 'Space') {
             this.playAction();
-        }
-        if (event.code === 'KeyO') {
-            this.toggleOverview();
         }
 
         if (this.isEditorShownAndPasteModeFalse()) {
@@ -1309,7 +1294,8 @@ class PageController {
                 el_td1.classList.add('active-test');
                 el_td2.classList.add('active-test');
                 let handler = () => {
-                    this.hideOverviewShowEditor();
+                    console.log('Clicked on active test');
+                    // this.hideOverviewShowEditor();
                 };
                 el_td0.onpointerdown = handler;
                 el_td1.onpointerdown = handler;
