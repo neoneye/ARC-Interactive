@@ -2625,11 +2625,14 @@ class PageController {
             // el_message_step.textContent = `${index} of ${history_items.length}`;
             // el_message_text.textContent = item.message;
 
-            // translate from the imageHandle to the drawingItem index.
-            let drawingItemIndex = 0;
-
+            var drawingItemIndex = item.testOutputIndex;
+            if (drawingItemIndex < 0 || drawingItemIndex >= this.drawingItems.length) {
+                console.error(`Invalid drawingItemIndex: ${drawingItemIndex}`);
+                drawingItemIndex = 0;
+            }
             this.drawingItems[drawingItemIndex].originator.setImage(item.image);
 
+            this.activateTestIndex(drawingItemIndex);
             this.updateOverview();
 
             // Schedule the next step
@@ -2817,12 +2820,23 @@ class PageController {
                 current_images[arc_imageHandle] = arc_image;
             }
 
+            var testOutputIndex = 0;
+            // translate from the imageHandle to the drawingItem index.
+            // Extract integer value strings like "test 3 output"
+            if (arc_imageHandle !== null) {
+                var match = arc_imageHandle.match(/\d+/);
+                if (match) {
+                    testOutputIndex = parseInt(match[0]);
+                }
+            }
+
             var message = item.message;
 
             let history_item2 = {
                 message: message,
                 image: arc_image,
                 isSame: isSame,
+                testOutputIndex: testOutputIndex,
             };
             history_items2.push(history_item2);
         }
