@@ -242,38 +242,23 @@ class PageController {
         this.drawInteractionState = null;
         this.db = null;
         this.theme = null;
+        this.taskId = null;
+        this.datasetId = null;
 
         // Create URLSearchParams object
         let urlParams = new URLSearchParams(window.location.search);
 
-        // Get the 'task' parameter
-        let urlParamTask = urlParams.get('task');
+        // Get the 'historyUrl' parameter
+        let urlParamHistoryUrl = urlParams.get('historyUrl');
 
-        // If 'task' parameter exists, decode it
-        if (urlParamTask) {
-            let decodedTask = decodeURIComponent(urlParamTask);
-            console.log("Task:", decodedTask);
-            this.taskId = decodedTask;
-
-            document.title = decodedTask;
-
-            document.getElementById('title_task').innerText = decodedTask;
+        // If 'historyUrl' parameter exists, decode it
+        if (urlParamHistoryUrl) {
+            let decodedHistoryUrl = decodeURIComponent(urlParamHistoryUrl);
+            console.log("historyUrl:", decodedHistoryUrl);
+            this.historyUrl = decodedHistoryUrl;
         } else {
-            this.taskId = null;
-            console.error("URLSearchParams does not contain 'task' parameter.");
-        }
-
-        // Get the 'dataset' parameter
-        let urlParamDataset = urlParams.get('dataset');
-
-        // If 'dataset' parameter exists, decode it
-        if (urlParamDataset) {
-            let decodedDataset = decodeURIComponent(urlParamDataset);
-            console.log("Dataset:", decodedDataset);
-            this.datasetId = decodedDataset;
-        } else {
-            this.datasetId = 'ARC';
-            console.error("URLSearchParams does not contain 'dataset' parameter.");
+            this.historyUrl = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
+            console.error("URLSearchParams does not contain 'historyUrl' parameter.");
         }
 
         // Assign link to "Back button", so it preserves the URL parameters.
@@ -370,11 +355,12 @@ class PageController {
 
     async replayExampleHistoryFile2() {
         // let s = 'history1.json';
-        let s = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
+        // let s = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
         // let s = 'ARC-Interactive history 2024-02-24T15-47-27Z.json';
         // let s = 'ARC-Interactive history 2024-02-24T21-11-02Z.json';
         // let s = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/11/ARC-Interactive%20history%202024-02-26T16-32-31Z.json';
         // let s = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/11/ARC-Interactive%20history%202024-02-26T16-37-56Z.json';
+        let s = this.historyUrl;
         const response = await fetch(s);
         // console.log('response:', response);
         const arrayBuffer = await response.arrayBuffer();
@@ -388,6 +374,8 @@ class PageController {
         if (obj.task) {
             this.taskId = obj.task;
         }
+
+        this.updateTaskId();
 
         await this.loadTask();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
@@ -441,6 +429,11 @@ class PageController {
                 }
             });
         });
+    }
+
+    updateTaskId() {
+        document.title = this.taskId;
+        document.getElementById('title_task').innerText = this.taskId;
     }
 
     resizeOrChangeOrientation() {
