@@ -338,11 +338,8 @@ class PageController {
         
         this.db = await DatabaseWrapper.create();
         console.log('PageController.onload()', this.db);
-        await this.loadTask();
         this.history.log('welcome to overview');
         this.addEventListeners();
-        this.hideEditorShowOverview({ shouldHistoryLog: false });
-        // await this.replayExampleHistoryFile();
         await this.replayExampleHistoryFile2();
 
         if (this.isUploadDownloadHistoryButtonsVisible) {
@@ -383,6 +380,18 @@ class PageController {
         const arrayBuffer = await response.arrayBuffer();
         let uint8Array = new Uint8Array(arrayBuffer);
         let jsonString = new TextDecoder().decode(uint8Array);
+
+        let obj = JSON.parse(jsonString);
+        if (obj.dataset) {
+            this.datasetId = obj.dataset;
+        }
+        if (obj.task) {
+            this.taskId = obj.task;
+        }
+
+        await this.loadTask();
+        this.hideEditorShowOverview({ shouldHistoryLog: false });
+
         this.replayHistoryFile2(jsonString);
     }
 
