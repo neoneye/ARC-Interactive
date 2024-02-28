@@ -453,8 +453,9 @@ class PageController {
 
             let historyTasks = this.historyDirectoryContent[this.datasetId];
             if (historyTasks) {
-                let historyTaskPath = historyTasks[task.taskId];
-                if (historyTaskPath) {
+                let historyTaskPathArray = historyTasks[task.taskId];
+                if (historyTaskPathArray) {
+                    let historyTaskPath = historyTaskPathArray[0];
                     let baseUrl = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/';
                     let historyUrl = baseUrl + historyTaskPath;
                     let historyTask = encodeURIComponent(historyUrl);
