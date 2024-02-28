@@ -255,7 +255,7 @@ class PageController {
         // Set the selected option in the dropdown
         {
             let toolIdentifier = localStorage.getItem('task-gallery-tool');
-            let availableTools = ['edit', 'custom-a', 'custom-b'];
+            let availableTools = ['edit', 'history', 'custom-a', 'custom-b'];
             if (!availableTools.includes(toolIdentifier)) {
                 toolIdentifier = 'edit';
             }
@@ -449,9 +449,7 @@ class PageController {
             el_a.href = task.openUrl + filterUrlParam;
             el_a.setAttribute("data-tool-edit", task.openUrl + filterUrlParam);
             el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a') + filterUrlParam);
-            // el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b') + filterUrlParam);
-            // el_a.setAttribute("data-tool-custom-b", 'history.html?historyUrl=https%3A%2F%2Fraw.githubusercontent.com%2Fneoneye%2FARC-Interactive-History-Dataset%2Fmain%2Fhistory_files%2F11%2FARC-Interactive%2520history%25202024-02-26T16-37-56Z.json');
-
+            el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b') + filterUrlParam);
 
             let historyTasks = this.historyDirectoryContent[this.datasetId];
             if (historyTasks) {
@@ -460,7 +458,7 @@ class PageController {
                     let baseUrl = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/';
                     let historyUrl = baseUrl + historyTaskPath;
                     let historyTask = encodeURIComponent(historyUrl);
-                    el_a.setAttribute("data-tool-custom-b", `history.html?historyUrl=${historyTask}`);
+                    el_a.setAttribute("data-tool-history", `history.html?historyUrl=${historyTask}`);
                 }
             }
 
@@ -475,7 +473,7 @@ class PageController {
 
     assignThumbnailUrlsBasedOnCurrentTool() {
         let toolIdentifier = localStorage.getItem('task-gallery-tool');
-        let availableTools = ['edit', 'custom-a', 'custom-b'];
+        let availableTools = ['edit', 'history', 'custom-a', 'custom-b'];
         if (!availableTools.includes(toolIdentifier)) {
             toolIdentifier = 'edit';
         }
