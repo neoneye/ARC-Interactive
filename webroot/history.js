@@ -244,6 +244,7 @@ class PageController {
         this.theme = null;
         this.taskId = null;
         this.datasetId = null;
+        this.currentHistoryJsonString = null;
 
         // Create URLSearchParams object
         let urlParams = new URLSearchParams(window.location.search);
@@ -367,6 +368,8 @@ class PageController {
         let uint8Array = new Uint8Array(arrayBuffer);
         let jsonString = new TextDecoder().decode(uint8Array);
 
+        this.currentHistoryJsonString = jsonString;
+
         let obj = JSON.parse(jsonString);
         if (obj.dataset) {
             this.datasetId = obj.dataset;
@@ -381,6 +384,15 @@ class PageController {
         this.hideEditorShowOverview({ shouldHistoryLog: false });
 
         this.replayHistoryFile2(jsonString);
+    }
+
+    playAction() {
+        console.log('playAction');
+        if (!this.currentHistoryJsonString) {
+            console.error('currentHistoryJsonString is not set');
+            return;
+        }
+        this.replayHistoryFile2(this.currentHistoryJsonString);
     }
 
     addEventListeners() {
@@ -482,6 +494,9 @@ class PageController {
         }
         if (event.code === 'KeyG') {
             this.toggleGrid();
+        }
+        if (event.code === 'Space') {
+            this.playAction();
         }
         if (event.code === 'KeyO') {
             this.toggleOverview();
