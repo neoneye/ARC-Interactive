@@ -3,6 +3,7 @@ class PageController {
         this.db = null;
         this.dataset = null;
         this.theme = null;
+        this.historyDirectoryContent = null;
         this.visibleTasks = [];
 
         // Assign urls to buttons in the navigation bar, so the URL parameters gets preserved.
@@ -57,6 +58,9 @@ class PageController {
         this.theme = Theme.themeFromBody();
 
         this.db = await DatabaseWrapper.create();
+
+        this.historyDirectoryContent = await PageController.fetchHistoryDirectoryContent();
+
         // console.log('PageController.onload()', this.db);
         this.setupDatasetPicker();
         this.setupAdvancedFilterTag();
@@ -76,6 +80,19 @@ class PageController {
 
         // Listen for the keyup event
         window.addEventListener('keyup', (event) => { this.keyUp(event); });
+    }
+
+    static async fetchHistoryDirectoryContent() {
+        let url = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/directory_content.json';
+        const response = await fetch(url);
+        // console.log('response:', response);
+        const arrayBuffer = await response.arrayBuffer();
+        let uint8Array = new Uint8Array(arrayBuffer);
+        let jsonString = new TextDecoder().decode(uint8Array);
+        let json = JSON.parse(jsonString);
+        // console.log('json:', json);
+        console.log('number of items in historyDirectoryContent json:', Object.keys(json).length);
+        return json;
     }
 
     // Keyboard shortcuts
@@ -238,7 +255,7 @@ class PageController {
         // Set the selected option in the dropdown
         {
             let toolIdentifier = localStorage.getItem('task-gallery-tool');
-            let availableTools = ['edit', 'custom-a', 'custom-b'];
+            let availableTools = ['edit', 'history', 'custom-a', 'custom-b'];
             if (!availableTools.includes(toolIdentifier)) {
                 toolIdentifier = 'edit';
             }
@@ -433,6 +450,20 @@ class PageController {
             el_a.setAttribute("data-tool-edit", task.openUrl + filterUrlParam);
             el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a') + filterUrlParam);
             el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b') + filterUrlParam);
+
+            let historyTasks = this.historyDirectoryContent[this.datasetId];
+            if (historyTasks) {
+                let historyTaskPathArray = historyTasks[task.taskId];
+                if (historyTaskPathArray) {
+                    let historyTaskPath = historyTaskPathArray[0];
+                    let baseUrl = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/';
+                    let historyUrl = baseUrl + historyTaskPath;
+                    let historyTask = encodeURIComponent(historyUrl);
+                    el_a.setAttribute("data-tool-history", `history.html?historyUrl=${historyTask}`);
+                }
+            }
+
+
             if (openInNewTab) {
                 el_a.target = "_blank";
             }
@@ -443,7 +474,7 @@ class PageController {
 
     assignThumbnailUrlsBasedOnCurrentTool() {
         let toolIdentifier = localStorage.getItem('task-gallery-tool');
-        let availableTools = ['edit', 'custom-a', 'custom-b'];
+        let availableTools = ['edit', 'history', 'custom-a', 'custom-b'];
         if (!availableTools.includes(toolIdentifier)) {
             toolIdentifier = 'edit';
         }
