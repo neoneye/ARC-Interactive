@@ -15,6 +15,22 @@
 <body onload="body_onload()">
     <input type="file" id="file-input" accept=".json" onchange="gPageController.changeInputFile(event)">
 
+    <div id="replay-with-details-outer" class="hidden">
+        <div id="replay-with-details">
+            <table>
+                <tr><td>0</td><td>welcome to overview</td></tr>
+                <tr><td>1</td><td>hide overview show editor</td></tr>
+                <tr><td>2</td><td>draw x: 3 y: 8 color: 9</td></tr>
+                <tr><td>3</td><td>draw x: 4 y: 8 color: 9</td></tr>
+                <tr><td>4</td><td>draw x: 5 y: 8 color: 9</td></tr>
+                <tr><td>5</td><td>draw x: 5 y: 9 color: 9</td></tr>
+                <tr><td>6</td><td>change color: 3</td></tr>
+                <tr><td>7</td><td>create selection update</td></tr>
+                <tr><td>8</td><td>submit, correct</td></tr>
+            </table>
+        </div>
+    </div>
+
     <div id="replay-area-outer" class="hidden" onclick="gPageController.dismissReplayLayer()">
         <canvas id="replay-canvas"></canvas>
         <div id="replay-message">
