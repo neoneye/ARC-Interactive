@@ -54,6 +54,31 @@ body {
     background-color: rgba(42, 42, 42, 0.801);
 }
 
+#history-detail-table {
+    border-collapse: collapse;
+}
+
+#history-detail-table tr td:nth-child(1) {
+    /* background-color: yellow; */
+    padding-left: 0.5em;
+    text-align: right;
+    font-feature-settings: "tnum"; /* Integer digits aligns nicely */
+}
+
+#history-detail-table tr td:nth-child(2) {
+    /* background-color: blue; */
+    padding-left: 0.5em;
+}
+
+#history-detail-table td {
+    border-bottom: 1px solid #000; /* Creates the line between rows */
+}
+
+/* Don't want a line below the last row */
+#history-detail-table tr:last-child td {
+    border-bottom: none;
+}
+
 #paste-area-outer {
     position: absolute;
     display: block;
