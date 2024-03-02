@@ -326,6 +326,7 @@ class PageController {
         this.history.log('welcome to overview');
         this.addEventListeners();
         await this.replayExampleHistoryFile2();
+        this.resizeOrChangeOrientation();
 
         if (this.isReplayUndoListButtonVisible) {
             var el = document.getElementById('replay-undolist-button');
@@ -439,6 +440,10 @@ class PageController {
     }
 
     resizeOrChangeOrientation() {
+        // In Safari on iPhone, the bottom of the <table> gets cut off. This prevents that.
+        var viewportHeight = window.innerHeight;
+        document.getElementById('replay-with-details-middle').style.height = viewportHeight + 'px';
+
         resizeCanvas();
         if (this.isOverviewHidden()) {
             this.updateDrawCanvas();
