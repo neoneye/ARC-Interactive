@@ -51,11 +51,23 @@ body {
     left: 0;
     right: 0;
     z-index: 200;
-    background-color: rgba(42, 42, 42, 0.801);
+    background-color: rgba(41, 41, 41, 0.91);
+}
+
+#replay-with-details-middle {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#replay-with-details-inner {
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 #history-detail-table {
     border-collapse: collapse;
+    width: 50%;
 }
 
 #history-detail-table tr td:nth-child(1) {
@@ -63,6 +75,7 @@ body {
     padding-left: 0.5em;
     text-align: right;
     font-feature-settings: "tnum"; /* Integer digits aligns nicely */
+    color: grey;
 }
 
 #history-detail-table tr td:nth-child(2) {
@@ -71,7 +84,9 @@ body {
 }
 
 #history-detail-table td {
-    border-bottom: 1px solid #000; /* Creates the line between rows */
+    border-bottom: 1px solid #474747; /* Creates the line between rows */
+    padding-top: 0.33em;
+    padding-bottom: 0.33em;
 }
 
 /* Don't want a line below the last row */
