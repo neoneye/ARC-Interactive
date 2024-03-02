@@ -371,6 +371,8 @@ class PageController {
         await this.loadTask();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
 
+        this.updateHistoryDetailsTable(jsonString);
+
         this.replayHistoryFile2(jsonString);
     }
 
@@ -1522,6 +1524,30 @@ class PageController {
     hideHistoryDetailsOverlay() {
         let el = document.getElementById("replay-with-details-outer");
         el.classList.add('hidden');
+    }
+
+    updateHistoryDetailsTable(jsonString) {
+        let el = document.getElementById('history-details-table');
+        el.innerText = '';
+
+        // console.log('json:', jsonString);
+        let obj = JSON.parse(jsonString);
+        // console.log('obj:', obj);
+
+        let history_items = obj.history;
+        for (let i = 0; i < history_items.length; i++) {
+            let item = history_items[i];
+            console.log('item:', item);
+
+            let el_tr = document.createElement('tr');
+            let el_td0 = document.createElement('td');
+            let el_td1 = document.createElement('td');
+            el_td0.innerText = item.id;
+            el_td1.innerText = item.message;
+            el_tr.appendChild(el_td0);
+            el_tr.appendChild(el_td1);
+            el.appendChild(el_tr);
+        }
     }
 
     hideOverviewShowEditor() {
