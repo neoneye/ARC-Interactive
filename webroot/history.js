@@ -326,6 +326,7 @@ class PageController {
         this.history.log('welcome to overview');
         this.addEventListeners();
         await this.replayExampleHistoryFile2();
+        this.resizeOrChangeOrientation();
 
         if (this.isReplayUndoListButtonVisible) {
             var el = document.getElementById('replay-undolist-button');
@@ -370,6 +371,8 @@ class PageController {
 
         await this.loadTask();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
+
+        this.updateHistoryDetailsTable(jsonString);
 
         this.replayHistoryFile2(jsonString);
     }
@@ -437,6 +440,10 @@ class PageController {
     }
 
     resizeOrChangeOrientation() {
+        // In Safari on iPhone, the bottom of the <table> gets cut off. This prevents that.
+        var viewportHeight = window.innerHeight;
+        document.getElementById('replay-with-details-middle').style.height = viewportHeight + 'px';
+
         resizeCanvas();
         if (this.isOverviewHidden()) {
             this.updateDrawCanvas();
@@ -485,6 +492,10 @@ class PageController {
         }
         if (event.code === 'Space') {
             this.playAction();
+        }
+
+        if (event.code === 'KeyD') {
+            this.toggleHistoryDetailsOverlay();
         }
 
         if (this.isEditorShownAndPasteModeFalse()) {
@@ -1511,6 +1522,53 @@ class PageController {
             this.hideEditorShowOverview();
         } else {
             this.hideOverviewShowEditor();
+        }
+    }
+
+    isHistoryDetailsOverlayHidden() {
+        let el = document.getElementById("replay-with-details-outer");
+        return el.classList.contains('hidden');
+    }
+
+    toggleHistoryDetailsOverlay() {
+        if (this.isHistoryDetailsOverlayHidden()) {
+            this.showHistoryDetailsOverlay();
+        } else {
+            this.hideHistoryDetailsOverlay();
+        }
+    }
+
+    showHistoryDetailsOverlay() {
+        let el = document.getElementById("replay-with-details-outer");
+        el.classList.remove('hidden');
+    }
+
+    hideHistoryDetailsOverlay() {
+        let el = document.getElementById("replay-with-details-outer");
+        el.classList.add('hidden');
+    }
+
+    updateHistoryDetailsTable(jsonString) {
+        let el = document.getElementById('history-details-table');
+        el.innerText = '';
+
+        // console.log('json:', jsonString);
+        let obj = JSON.parse(jsonString);
+        // console.log('obj:', obj);
+
+        let history_items = obj.history;
+        for (let i = 0; i < history_items.length; i++) {
+            let item = history_items[i];
+            console.log('item:', item);
+
+            let el_tr = document.createElement('tr');
+            let el_td0 = document.createElement('td');
+            let el_td1 = document.createElement('td');
+            el_td0.innerText = item.id;
+            el_td1.innerText = item.message;
+            el_tr.appendChild(el_td0);
+            el_tr.appendChild(el_td1);
+            el.appendChild(el_tr);
         }
     }
 
