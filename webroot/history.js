@@ -1514,6 +1514,16 @@ class PageController {
         }
     }
 
+    showHistoryDetailsOverlay() {
+        let el = document.getElementById("replay-with-details-outer");
+        el.classList.remove('hidden');
+    }
+
+    hideHistoryDetailsOverlay() {
+        let el = document.getElementById("replay-with-details-outer");
+        el.classList.add('hidden');
+    }
+
     hideOverviewShowEditor() {
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();

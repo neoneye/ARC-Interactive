@@ -15,7 +15,7 @@
 <body onload="body_onload()">
     <input type="file" id="file-input" accept=".json" onchange="gPageController.changeInputFile(event)">
 
-    <div id="replay-with-details-outer" class="hidden">
+    <div id="replay-with-details-outer" class="hidden" onclick="gPageController.hideHistoryDetailsOverlay()">
         <div id="replay-with-details-middle">
             <div id="replay-with-details-inner">
                 <table id="history-detail-table">
@@ -221,7 +221,7 @@
     <div id="page-footer-overview-mode" class="page-footer user-select-none">
         <div class="page-footer-left">
             <!-- Left -->
-            <button class="secondary-button" onclick="gPageController.playAction()" title="Space = Play the animation.">Play</button>
+            <button class="secondary-button"  onclick="gPageController.showHistoryDetailsOverlay()" title="Show history details">Details</button>
             <button id="grid-button" class="secondary-button" onclick="gPageController.toggleGrid()" title="G = Toggle grid">Grid</button>
             <button id="fullscreen-button" class="secondary-button responsive-button hidden" onclick="gPageController.toggleFullscreen()" title="F = Toggle fullscreen">
                 <span class="full-title">Fullscreen</span>
@@ -233,6 +233,7 @@
         </div>
         <div class="page-footer-right">
             <!-- Right -->
+            <button class="secondary-button" onclick="gPageController.playAction()" title="Space = Play the animation.">Play</button>
         </div>
     </div>
 </body>
