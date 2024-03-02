@@ -51,7 +51,8 @@ body {
     left: 0;
     right: 0;
     z-index: 200;
-    background-color: rgba(41, 41, 41, 0.91);
+    background-color: rgba(41, 41, 41, 0.933);
+    backdrop-filter: blur(5px);
 }
 
 #replay-with-details-middle {
@@ -67,7 +68,7 @@ body {
 
 #history-details-table {
     border-collapse: collapse;
-    width: 50%;
+    width: 100%;
 }
 
 #history-details-table tr td:nth-child(1) {
@@ -84,9 +85,9 @@ body {
 }
 
 #history-details-table td {
-    border-bottom: 1px solid #474747; /* Creates the line between rows */
-    padding-top: 0.33em;
-    padding-bottom: 0.33em;
+    border-bottom: 1px solid #5f5f5f; 
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
 }
 
 /* Don't want a line below the last row */
