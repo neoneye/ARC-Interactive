@@ -65,12 +65,12 @@ body {
     flex-grow: 1;
 }
 
-#history-detail-table {
+#history-details-table {
     border-collapse: collapse;
     width: 50%;
 }
 
-#history-detail-table tr td:nth-child(1) {
+#history-details-table tr td:nth-child(1) {
     /* background-color: yellow; */
     padding-left: 0.5em;
     text-align: right;
@@ -78,19 +78,19 @@ body {
     color: grey;
 }
 
-#history-detail-table tr td:nth-child(2) {
+#history-details-table tr td:nth-child(2) {
     /* background-color: blue; */
     padding-left: 0.5em;
 }
 
-#history-detail-table td {
+#history-details-table td {
     border-bottom: 1px solid #474747; /* Creates the line between rows */
     padding-top: 0.33em;
     padding-bottom: 0.33em;
 }
 
 /* Don't want a line below the last row */
-#history-detail-table tr:last-child td {
+#history-details-table tr:last-child td {
     border-bottom: none;
 }
 
