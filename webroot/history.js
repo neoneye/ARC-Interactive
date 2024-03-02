@@ -2857,6 +2857,22 @@ class PageController {
 
         let history_items = obj.history;
         let history_items2 = [];
+
+        // Use the input image as the start state
+        {
+            let arc_image = this.drawingItems[0].originator.getImageClone();
+            let history_item2 = {
+                message: "start",
+                image: arc_image,
+                isSame: false,
+                testOutputIndex: 0,
+            };
+            history_items2.push(history_item2);
+
+            let arc_imageHandle = "test 0 output";
+            current_images[arc_imageHandle] = arc_image;
+        }
+
         for (let i = 0; i < history_items.length; i++) {
             let item = history_items[i];
             console.log('item:', item);
