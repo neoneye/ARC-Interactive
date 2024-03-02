@@ -489,6 +489,10 @@ class PageController {
             this.playAction();
         }
 
+        if (event.code === 'KeyD') {
+            this.toggleHistoryDetailsOverlay();
+        }
+
         if (this.isEditorShownAndPasteModeFalse()) {
             // Only while the "editor" is visible, and no paste layer is active, the following keys are handled.
 
@@ -1513,6 +1517,19 @@ class PageController {
             this.hideEditorShowOverview();
         } else {
             this.hideOverviewShowEditor();
+        }
+    }
+
+    isHistoryDetailsOverlayHidden() {
+        let el = document.getElementById("replay-with-details-outer");
+        return el.classList.contains('hidden');
+    }
+
+    toggleHistoryDetailsOverlay() {
+        if (this.isHistoryDetailsOverlayHidden()) {
+            this.showHistoryDetailsOverlay();
+        } else {
+            this.hideHistoryDetailsOverlay();
         }
     }
 
