@@ -12,6 +12,10 @@ Try it here: [ARC-Interactive](https://neoneye.github.io/arc/)
 
 <img src="https://raw.githubusercontent.com/neoneye/ARC-Interactive/develop/metadata/arc-interactive-editor-18419cfa.gif" alt="ARC-Interactive: Solving the ARC task 18419cfa"/>
 
+## More screenshots
+
+[ARC-Interactive presentation](metadata/arc-interactive-presentation-2024-mar-07.pdf)
+
 ## How to Contribute
 
 ARC-Interactive is an open-source project, and contributions are warmly welcomed. Whether it's through code contributions, bug reports, feature requests, or feedback, your input is invaluable for making ARC-Interactive better for everyone.
