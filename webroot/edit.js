@@ -2604,7 +2604,7 @@ class PageController {
         this.updateDrawCanvas();
     }
 
-    downloadHistoryFile() {
+    generateHistoryFile() {
         let user = 'anonymous';
 
         // Date/time formatting
@@ -2657,6 +2657,14 @@ class PageController {
         let jsonString = JSON.stringify(dict);
 
         let filename = `ARC-Interactive history ${utcTimestampWithoutColon}.json`;
+        return { 
+            filename,
+            jsonString, 
+        };
+    }
+
+    downloadHistoryFile() {
+        let { filename, jsonString } = this.generateHistoryFile();
 
         // Convert the JSON string to a Blob
         var blob = new Blob([jsonString], { type: 'application/json' });

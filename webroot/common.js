@@ -136,12 +136,24 @@ class Dataset {
 
         let uint8Array = await Dataset.fetchDatasetJsonGz(database, datasetId);
 
-        let time1 = Date.now();
-
+        
         // Decompress data
-        let decompressed = pako.inflate(uint8Array, { to: 'string' });
-        console.log('decompressed.length', decompressed.length);
-        let jsonData = JSON.parse(decompressed);
+        
+        let time1 = Date.now();
+        var jsonData = null;
+        console.log('will decompress uint8Array.length', uint8Array.length);
+        try {
+            // Attempt to parse the data directly
+            let text = new TextDecoder().decode(uint8Array);
+            jsonData = JSON.parse(text);
+            console.log('Data is already a json string, decompression not needed.');
+        } catch (error) {
+            // Data might be compressed, attempt to decompress
+            let decompressed = pako.inflate(uint8Array, { to: 'string' });
+            console.log('decompressed.length', decompressed.length);
+            jsonData = JSON.parse(decompressed);
+            console.log('Successfully decompressed json data');
+        }
 
         let time2 = Date.now();
 
@@ -169,7 +181,11 @@ class Dataset {
         console.log('No cached dataset. Will fetch now.');
 
         // Fetch data if not in cache
-        const response = await fetch(`dataset/${datasetId}.json.gz`);
+        let url = `dataset/${datasetId}.json.gz`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch dataset. Status: ${response.status} url: ${url}`);
+        }
         const arrayBuffer = await response.arrayBuffer();
         let uint8Array = new Uint8Array(arrayBuffer);
         console.log('Did fetch dataset.');
