@@ -181,7 +181,11 @@ class Dataset {
         console.log('No cached dataset. Will fetch now.');
 
         // Fetch data if not in cache
-        const response = await fetch(`dataset/${datasetId}.json.gz`);
+        let url = `dataset/${datasetId}.json.gz`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch dataset. Status: ${response.status} url: ${url}`);
+        }
         const arrayBuffer = await response.arrayBuffer();
         let uint8Array = new Uint8Array(arrayBuffer);
         console.log('Did fetch dataset.');
