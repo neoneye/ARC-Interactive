@@ -317,7 +317,7 @@ class PageController {
         this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
 
         this.isFullscreen = false;
-        this.isGridVisible = PageController.getItemIsGridVisible();
+        this.isGridVisible = true;
 
         this.overviewRevealSolutions = false;
 
@@ -461,9 +461,6 @@ class PageController {
             if (enableFullscreenMode()) {
                 this.toggleFullscreen();
             }
-        }
-        if (event.code === 'KeyG') {
-            this.toggleGrid();
         }
         if (event.code === 'KeyO') {
             this.toggleOverview();
@@ -1570,26 +1567,6 @@ class PageController {
             // Fullscreen API is not supported
             alert("Fullscreen mode is not supported in your browser.");
         }
-    }
-
-    static gridKey() {
-        return 'grid-visible';
-    }
-
-    static getItemIsGridVisible() {
-        let rawValue = localStorage.getItem(PageController.gridKey());
-        if (rawValue === null) {
-            // For new users, show the grid by default
-            return true;
-        }
-        return rawValue == 'true';
-    }
-
-    toggleGrid() {
-        this.isGridVisible = !this.isGridVisible;
-        localStorage.setItem(PageController.gridKey(), this.isGridVisible);
-        this.updateDrawCanvas();
-        this.updateOverview();
     }
 
     submitDrawing() {
