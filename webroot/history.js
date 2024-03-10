@@ -473,7 +473,7 @@ class PageController {
             if (event.code === 'KeyS') {
                 this.keyboardShortcutPickTool('tool_select');
             }
-            if (event.code === 'KeyL') {
+            if (event.code === 'KeyF') {
                 this.keyboardShortcutPickTool('tool_fill');
             }
             if (event.code === 'ArrowUp') {
