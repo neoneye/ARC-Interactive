@@ -3,29 +3,6 @@ function goBack() {
     return false;  // Prevents the default anchor action
 }
 
-// https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
-function iOS() {
-    return [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod'
-    ].includes(navigator.platform)
-    // iPad on iOS 13 detection
-    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-}
-
-function enableFullscreenMode() {
-    if (iOS()) {
-        // Fullscreen mode behaves weird on iPad. It's better to disable it.
-        // Fullscreen mode is not available on iPhone. It's better to disable it.
-        return false;
-    }
-    return true;
-}
-
 class Memento {
     constructor(state, message) {
         this.state = state;
@@ -273,11 +250,6 @@ class PageController {
             console.log('setting back button url:', el.href);
         }
 
-        if (enableFullscreenMode()) {
-            let el = document.getElementById('fullscreen-button');
-            el.classList.remove('hidden');
-        }
-
         this.drawCanvas = document.getElementById('draw-canvas');
         this.pasteCanvas = document.getElementById('paste-canvas');
         this.isDrawing = false;
@@ -302,7 +274,6 @@ class PageController {
         this.maxPixelSize = maxPixelSize;
         this.image = ARCImage.color(maxPixelSize, maxPixelSize, 0);
 
-        this.isFullscreen = false;
         this.isGridVisible = true;
 
         this.overviewRevealSolutions = false;
@@ -412,16 +383,6 @@ class PageController {
         // Listen for the keyup event
         window.addEventListener('keyup', (event) => { this.keyUp(event); });
         
-        document.addEventListener("fullscreenchange", (event) => {
-            if (document.fullscreenElement) {
-                console.log(`Element: ${document.fullscreenElement.id} entered full-screen mode.`);
-                this.isFullscreen = true;
-            } else {
-                console.log('Leaving full-screen mode.');
-                this.isFullscreen = false;
-            }
-        });
-
         // Get all radio buttons with the name 'tool_switching'
         var radios = document.querySelectorAll('input[name="tool_switching"]');
         radios.forEach(radio => {
@@ -482,11 +443,6 @@ class PageController {
             return;
         }
 
-        if (event.code === 'KeyF') {
-            if (enableFullscreenMode()) {
-                this.toggleFullscreen();
-            }
-        }
         if (event.code === 'Space') {
             this.playAction();
         }
@@ -1624,25 +1580,6 @@ class PageController {
                 action: 'hide editor show overview',
                 imageHandle: historyImageHandle,
             });
-        }
-    }
-
-    toggleFullscreen() {
-        if (this.isFullscreen) {
-            const cancelFullScreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
-            cancelFullScreen.call(document);
-            this.isFullscreen = false;
-            return;
-        }
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-            this.isFullscreen = true;
-        } else if (document.documentElement.webkitRequestFullscreen) { // Safari specific
-            document.documentElement.webkitRequestFullscreen();
-            this.isFullscreen = true;
-        } else {
-            // Fullscreen API is not supported
-            alert("Fullscreen mode is not supported in your browser.");
         }
     }
 
