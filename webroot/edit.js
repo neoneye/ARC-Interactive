@@ -295,6 +295,8 @@ class PageController {
         this.isUploadDownloadHistoryButtonsVisible = Settings.getAdvancedModeEnabled();
         this.isReplayUndoListButtonVisible = true;
 
+        this.blockForStartDrawUntil = Date.now();
+
         {
             // Select the radio button with the id 'tool_draw'
             // Sometimes the browser remembers the last selected radio button, across sessions.
@@ -640,6 +642,10 @@ class PageController {
 
     startDraw(event) {
         event.preventDefault();
+        const now = Date.now();
+        if (now < this.blockForStartDrawUntil) {
+            return;
+        }
         this.isDrawing = true;
         var ctx = this.drawCanvas.getContext('2d');
         let position = this.getPosition(event);
@@ -1229,6 +1235,7 @@ class PageController {
                 el_td1.classList.add('active-test');
                 el_td2.classList.add('active-test');
                 let handler = () => {
+                    this.brieflyBlockForStartDraw();
                     this.hideOverviewShowEditor();
                 };
                 el_td0.onpointerdown = handler;
@@ -1446,6 +1453,15 @@ class PageController {
         } else {
             this.hideOverviewShowEditor();
         }
+    }
+
+    // Workaround for Chrome on Android devices.
+    // When dismissing the overview and showing the editor, the touchstart event is fired immediately.
+    // This method blocks the startDraw() method for a short time.
+    brieflyBlockForStartDraw() {
+        // timestamp now in milliseconds plus 0.4 second
+        let timestamp = Date.now() + 400;
+        this.blockForStartDrawUntil = timestamp;
     }
 
     hideOverviewShowEditor() {
