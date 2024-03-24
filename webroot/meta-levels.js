@@ -2,6 +2,7 @@
 // https://github.com/volotat/ARC-Game
 const META_ARC_LEVELS = {
   "entry": [
+    "292dd178",
     "bb43febb",
     "6f8cd79b",
     "a79310a0",
@@ -10,7 +11,6 @@ const META_ARC_LEVELS = {
     "b1948b0a",
     "3aa6fb7a",
     "d037b0a7",
-    "0b17323b",
     "fc754716",
     "4258a5f9",
     "aabf363d",
@@ -28,6 +28,7 @@ const META_ARC_LEVELS = {
     "25ff71a9"
   ],
   "easy": [
+    "0b17323b",
     "aedd82e4",
     "28e73c20",
     "694f12f3",
@@ -146,7 +147,6 @@ const META_ARC_LEVELS = {
     "8403a5d5",
     "c9f8e694",
     "84f2aca1",
-    "292dd178",
     "639f5a19",
     "d4f3cd78",
     "56dc2b01",
