@@ -85,6 +85,7 @@ class PageController {
     static async fetchHistoryDirectoryContent() {
         let url = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/directory_content.json';
         try {
+            console.log('fetching historyDiectoryContent json', url);
             const response = await fetch(url);
             // console.log('response:', response);
             const arrayBuffer = await response.arrayBuffer();
