@@ -84,15 +84,20 @@ class PageController {
 
     static async fetchHistoryDirectoryContent() {
         let url = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/directory_content.json';
-        const response = await fetch(url);
-        // console.log('response:', response);
-        const arrayBuffer = await response.arrayBuffer();
-        let uint8Array = new Uint8Array(arrayBuffer);
-        let jsonString = new TextDecoder().decode(uint8Array);
-        let json = JSON.parse(jsonString);
-        // console.log('json:', json);
-        console.log('number of items in historyDirectoryContent json:', Object.keys(json).length);
-        return json;
+        try {
+            const response = await fetch(url);
+            // console.log('response:', response);
+            const arrayBuffer = await response.arrayBuffer();
+            let uint8Array = new Uint8Array(arrayBuffer);
+            let jsonString = new TextDecoder().decode(uint8Array);
+            let json = JSON.parse(jsonString);
+            // console.log('json:', json);
+            console.log('number of items in historyDirectoryContent json:', Object.keys(json).length);            
+            return json;
+        } catch (error) {
+            console.error('unable to fetch historyDirectoryContent json', error, url);
+            return [];
+        }
     }
 
     // Keyboard shortcuts
