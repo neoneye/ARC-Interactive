@@ -4,7 +4,7 @@ You have a bunch of ARC like json files in a single dir, that you want to see vi
 
 ### Step 1 - edit run.rb
 
-Open `run.rb` in an editor.
+Open `run.py` in an editor.
 
 Insert your dirpath.
 ```
@@ -13,7 +13,7 @@ directory = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC'
 
 ### Step 2 - run script
 
-Run the `ruby run.rb`.
+Run the `python run.py`.
 
 That should give you a file with the named `dataset.json.gz`. 
 You can rename it to `JoanOfARC.json.gz`.
