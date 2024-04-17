@@ -1072,7 +1072,7 @@ class PageController {
         let height = el.clientHeight;
         // console.log('calcCellSizeForOverview() width:', width, 'height:', height);
 
-        let heightOfNonImage = 2;
+        let heightOfNonImage = 75;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
