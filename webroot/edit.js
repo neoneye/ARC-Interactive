@@ -1072,7 +1072,7 @@ class PageController {
         let height = el.clientHeight;
         // console.log('calcCellSizeForOverview() width:', width, 'height:', height);
 
-        let heightOfNonImage = showSizeAndGrid ? 140 : 80;
+        let heightOfNonImage = 2;
         let separatorWidth = 10;
         let paddingWidth = (task.train.length + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
@@ -1153,12 +1153,10 @@ class PageController {
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
-        let el_tr2 = document.getElementById('task-overview-table-row2');
 
         // Remove all children
         el_tr0.innerText = '';
         el_tr1.innerText = '';
-        el_tr2.innerText = '';
 
         // Populate table for `train` pairs.
         for (let i = 0; i < task.train.length; i++) {
@@ -1166,48 +1164,40 @@ class PageController {
             let output = task.train[i].output;
             let el_td0 = document.createElement('td');
             let el_td1 = document.createElement('td');
-            let el_td2 = document.createElement('td');
-            // el_td0.innerText = `Train ${i + 1}`;
-            // el_td1.innerText = `Input ${i + 1}`;
-            // el_td2.innerText = `Output ${i + 1}`;
+            // el_td0.innerText = `Input ${i + 1}`;
+            // el_td1.innerText = `Output ${i + 1}`;
 
             {
+                el_td0.classList.add('input-image-cell');
                 el_td0.classList.add('center-x');
-                el_td0.innerText = `${i + 1}`;
-            }
-
-            {
-                el_td1.classList.add('input-image-cell');
-                el_td1.classList.add('center-x');
 
                 let el_div = document.createElement('div');
                 el_div.className = 'image-size-label';
                 el_div.innerText = `${input.width}x${input.height}`;
                 if (showSizeAndGrid) {
-                    el_td1.appendChild(el_div);
+                    el_td0.appendChild(el_div);
                 }
 
                 let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td1.appendChild(canvas);
+                el_td0.appendChild(canvas);
             }
 
             {
-                el_td2.classList.add('output-image-cell');
-                el_td2.classList.add('center-x');
+                el_td1.classList.add('output-image-cell');
+                el_td1.classList.add('center-x');
 
                 let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td2.appendChild(canvas);
+                el_td1.appendChild(canvas);
 
                 let el_div = document.createElement('div');
                 el_div.className = 'image-size-label';
                 el_div.innerText = `${output.width}x${output.height}`;
                 if (showSizeAndGrid) {
-                    el_td2.appendChild(el_div);
+                    el_td1.appendChild(el_div);
                 }
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
-            el_tr2.appendChild(el_td2);
         }
 
         // Separate the `train` pairs and the `test` pairs.
@@ -1215,7 +1205,7 @@ class PageController {
             let el_td0 = document.createElement('td');
             el_td0.innerHTML = '&nbsp;';
             el_td0.classList.add('seperator-column');
-            el_td0.rowSpan = 3;
+            el_td0.rowSpan = 2;
             el_tr0.appendChild(el_td0);
         }
 
@@ -1225,58 +1215,47 @@ class PageController {
             let output = task.test[i].output;
             let el_td0 = document.createElement('td');
             let el_td1 = document.createElement('td');
-            let el_td2 = document.createElement('td');
-            // el_td0.innerText = `Test ${i + 1}`;
-            // el_td1.innerText = `Input ${i + 1}`;
-            // el_td2.innerText = `Output ${i + 1}`;
+            // el_td0.innerText = `Input ${i + 1}`;
+            // el_td1.innerText = `Output ${i + 1}`;
 
             if (i == this.currentTest) {
                 el_td0.classList.add('active-test');
                 el_td1.classList.add('active-test');
-                el_td2.classList.add('active-test');
                 let handler = () => {
                     this.brieflyBlockForStartDraw();
                     this.hideOverviewShowEditor();
                 };
                 el_td0.onpointerdown = handler;
                 el_td1.onpointerdown = handler;
-                el_td2.onpointerdown = handler;
             } else {
                 el_td0.classList.add('click-to-active-test');
                 el_td1.classList.add('click-to-active-test');
-                el_td2.classList.add('click-to-active-test');
                 let handler = () => {
                     this.activateTestIndex(i);
                 };
                 el_td0.onpointerdown = handler;
                 el_td1.onpointerdown = handler;
-                el_td2.onpointerdown = handler;
             }
 
             {
+                el_td0.classList.add('input-image-cell');
                 el_td0.classList.add('center-x');
-                el_td0.innerText = `${i + 1}`;
-            }
-
-            {
-                el_td1.classList.add('input-image-cell');
-                el_td1.classList.add('center-x');
 
                 let el_div = document.createElement('div');
                 el_div.className = 'image-size-label';
                 el_div.innerText = `${input.width}x${input.height}`;
                 if (showSizeAndGrid) {
-                    el_td1.appendChild(el_div);
+                    el_td0.appendChild(el_div);
                 }
 
                 let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td1.appendChild(canvas);
+                el_td0.appendChild(canvas);
             }
 
             {
-                el_td2.classList.add('output-image-cell');
-                el_td2.classList.add('center-x');
-                el_td2.classList.add('test-output-cell');
+                el_td1.classList.add('output-image-cell');
+                el_td1.classList.add('center-x');
+                el_td1.classList.add('test-output-cell');
 
                 var image = null;
                 if (this.drawingItems[i].caretaker.undoList.length > 0) {
@@ -1289,24 +1268,23 @@ class PageController {
                     image = output;
                 }
                 if (!image) {
-                    el_td2.innerText = '?';
+                    el_td1.innerText = '?';
                 } else {
 
                     let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                    el_td2.appendChild(canvas);
+                    el_td1.appendChild(canvas);
     
                     let el_div = document.createElement('div');
                     el_div.className = 'image-size-label';
                     el_div.innerText = `${image.width}x${image.height}`;
                     if (showSizeAndGrid) {
-                        el_td2.appendChild(el_div);
+                        el_td1.appendChild(el_div);
                     }
                 }
     
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
-            el_tr2.appendChild(el_td2);
         }
     }
 
