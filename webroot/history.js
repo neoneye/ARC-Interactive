@@ -226,18 +226,38 @@ class PageController {
         // Create URLSearchParams object
         let urlParams = new URLSearchParams(window.location.search);
 
+        // Get the 'historyIndex' parameter
+        let urlParamIndex = urlParams.get('historyIndex');
+        console.log('historyIndex:', urlParamIndex);
+
+        // Get the 'historyJson' parameter
+        let urlParamJson = urlParams.get('historyJson');
+        console.log('json:', urlParamJson);
+        if (urlParamJson) {
+            let jsonString = decodeURIComponent(urlParamJson);
+            console.log('jsonString:', jsonString);
+            let json = JSON.parse(jsonString);
+
+            let path = json[0];
+
+            let baseUrl = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/';
+            let historyUrl = baseUrl + path + ".json";
+            console.log('historyUrl:', historyUrl);
+            this.historyUrl = historyUrl;
+        }
+
         // Get the 'historyUrl' parameter
-        let urlParamHistoryUrl = urlParams.get('historyUrl');
+        // let urlParamHistoryUrl = urlParams.get('historyUrl');
 
         // If 'historyUrl' parameter exists, decode it
-        if (urlParamHistoryUrl) {
-            let decodedHistoryUrl = decodeURIComponent(urlParamHistoryUrl);
-            console.log("historyUrl:", decodedHistoryUrl);
-            this.historyUrl = decodedHistoryUrl;
-        } else {
-            this.historyUrl = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
-            console.error("URLSearchParams does not contain 'historyUrl' parameter.");
-        }
+        // if (urlParamHistoryUrl) {
+        //     let decodedHistoryUrl = decodeURIComponent(urlParamHistoryUrl);
+        //     console.log("historyUrl:", decodedHistoryUrl);
+        //     this.historyUrl = decodedHistoryUrl;
+        // } else {
+        //     this.historyUrl = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
+        //     console.error("URLSearchParams does not contain 'historyUrl' parameter.");
+        // }
 
         // Assign link to "Back button", so it preserves the URL parameters.
         {
