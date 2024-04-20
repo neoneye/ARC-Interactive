@@ -238,11 +238,13 @@ class PageController {
                 index = rawIndex;
                 console.log('historyIndex:', index);
             }
+        } else {
+            console.error("Expected 'historyIndex' url parameter.");
         }
 
         // Get the 'historyJson' parameter
         let urlParamJson = urlParams.get('historyJson');
-        console.log('json:', urlParamJson);
+        // console.log('json:', urlParamJson);
         let count = 0;
         if (urlParamJson) {
             let jsonString = decodeURIComponent(urlParamJson);
@@ -260,10 +262,10 @@ class PageController {
             console.log('historyUrl:', historyUrl);
             this.historyUrl = historyUrl;
 
-            {
-                let el = document.getElementById('task-number');
-                el.innerText = `${index + 1} of ${count}`;
-            }
+            let el = document.getElementById('task-number');
+            el.innerText = `${index + 1} of ${count}`;
+        } else {
+            console.error("Expected 'historyJson' url parameter.");
         }
 
         if (count > 0) {
@@ -289,19 +291,6 @@ class PageController {
             let el = document.getElementById('goto-next-file');
             el.href = newUrl;
         }
-
-        // Get the 'historyUrl' parameter
-        // let urlParamHistoryUrl = urlParams.get('historyUrl');
-
-        // If 'historyUrl' parameter exists, decode it
-        // if (urlParamHistoryUrl) {
-        //     let decodedHistoryUrl = decodeURIComponent(urlParamHistoryUrl);
-        //     console.log("historyUrl:", decodedHistoryUrl);
-        //     this.historyUrl = decodedHistoryUrl;
-        // } else {
-        //     this.historyUrl = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
-        //     console.error("URLSearchParams does not contain 'historyUrl' parameter.");
-        // }
 
         // Assign link to "Back button", so it preserves the URL parameters.
         {
