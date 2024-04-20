@@ -228,22 +228,66 @@ class PageController {
 
         // Get the 'historyIndex' parameter
         let urlParamIndex = urlParams.get('historyIndex');
-        console.log('historyIndex:', urlParamIndex);
+        // console.log('historyIndex:', urlParamIndex);
+        let index = 0;
+        if (urlParamIndex) {
+            let rawIndex = parseInt(urlParamIndex);
+            if (isNaN(rawIndex)) {
+                console.error("URLSearchParams 'historyIndex' parameter is not a number.");
+            } else {
+                index = rawIndex;
+                console.log('historyIndex:', index);
+            }
+        }
 
         // Get the 'historyJson' parameter
         let urlParamJson = urlParams.get('historyJson');
         console.log('json:', urlParamJson);
+        let count = 0;
         if (urlParamJson) {
             let jsonString = decodeURIComponent(urlParamJson);
             console.log('jsonString:', jsonString);
             let json = JSON.parse(jsonString);
+            count = json.length;
 
-            let path = json[0];
+            if ((index >= count) || (index < 0)) {
+                index = 0;
+            }
+            let path = json[index];
 
             let baseUrl = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/';
             let historyUrl = baseUrl + path + ".json";
             console.log('historyUrl:', historyUrl);
             this.historyUrl = historyUrl;
+
+            {
+                let el = document.getElementById('task-number');
+                el.innerText = `${index + 1} of ${count}`;
+            }
+        }
+
+        if (count > 0) {
+            let indexWrapped = (index + count - 1) % count;
+            let urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('historyIndex', indexWrapped.toString());
+            let newUrl = window.location.protocol + "//" 
+                 + window.location.host 
+                 + window.location.pathname 
+                 + '?' + urlParams.toString();
+            let el = document.getElementById('goto-prev-file');
+            el.href = newUrl;
+        }
+
+        if (count > 0) {
+            let indexWrapped = (index + 1) % count;
+            let urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('historyIndex', indexWrapped.toString());
+            let newUrl = window.location.protocol + "//" 
+                 + window.location.host 
+                 + window.location.pathname 
+                 + '?' + urlParams.toString();
+            let el = document.getElementById('goto-next-file');
+            el.href = newUrl;
         }
 
         // Get the 'historyUrl' parameter
