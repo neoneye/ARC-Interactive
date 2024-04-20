@@ -462,7 +462,7 @@ class PageController {
                 el_a.setAttribute("data-tool-history", historyUrl);
             } catch (error) {
                 // console.error('Unable to set historyUrl', error);
-                el_a.setAttribute("data-tool-history", '#');
+                el_a.setAttribute("data-tool-history", 'disablelink');
             }
 
             if (openInNewTab) {
@@ -518,7 +518,13 @@ class PageController {
         let links = document.querySelectorAll('a[data-tool-edit]'); // Assuming all links have a `data-tool-edit` attribute
         let attributeName = `data-tool-${toolIdentifier}`;
         links.forEach(link => {
-            link.href = link.getAttribute(attributeName);
+            let href = link.getAttribute(attributeName);
+            link.href = href;
+            if (href == 'disablelink') {
+                link.classList.add('disabled');
+            } else {
+                link.classList.remove('disabled');
+            }
         });
     }
 
