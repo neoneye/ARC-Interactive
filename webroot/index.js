@@ -457,29 +457,12 @@ class PageController {
             el_a.setAttribute("data-tool-custom-a", task.customUrl(customUrl, 'custom-a') + filterUrlParam);
             el_a.setAttribute("data-tool-custom-b", task.customUrl(customUrl, 'custom-b') + filterUrlParam);
 
-            let historyTasks = this.historyDirectoryContent[this.datasetId];
-            if (historyTasks) {
-                let historyTaskPathArray = historyTasks[task.taskId];
-                if (historyTaskPathArray) {
-                    var paths = [];
-                    // remove the .json suffix from all paths
-                    for (let j = 0; j < historyTaskPathArray.length; j++) {
-                        let pathWithoutSuffix = historyTaskPathArray[j].replace('.json', '');
-                        paths.push(pathWithoutSuffix);
-                    }
-                    let jsonString = JSON.stringify(paths);
-                    let jsonStringUrlEncoded = encodeURIComponent(jsonString);
-
-                    let encodedTaskId = encodeURIComponent(task.taskId);
-                    let encodedDatasetId = encodeURIComponent(task.datasetId);
-                    let historyUrl = 'history.html?' +
-                        'dataset=' + encodedDatasetId +
-                        '&task=' + encodedTaskId +
-                        'historyIndex=0&historyJson=' + 
-                        jsonStringUrlEncoded + 
-                        filterUrlParam;
-                    el_a.setAttribute("data-tool-history", historyUrl);
-                }
+            try {
+                let historyUrl = this.historyUrl(task) + filterUrlParam;
+                el_a.setAttribute("data-tool-history", historyUrl);
+            } catch (error) {
+                // console.error('Unable to set historyUrl', error);
+                el_a.setAttribute("data-tool-history", '#');
             }
 
             if (openInNewTab) {
@@ -488,6 +471,38 @@ class PageController {
             el_a.appendChild(el_img);    
             el_gallery.appendChild(el_a);
         }
+    }
+
+    historyUrl(task) {
+        let historyTasks = this.historyDirectoryContent[this.datasetId];
+        if (!historyTasks) {
+            throw new Error(`No history tasks for datasetId: ${this.datasetId}`);
+        }
+        let historyTaskPathArray = historyTasks[task.taskId];
+        if (!historyTaskPathArray) {
+            throw new Error(`No history tasks for taskId: ${task.taskId} datasetId: ${this.dataset}`);
+        }
+        if (historyTaskPathArray.length == 0) {
+            throw new Error(`Empty history task array for taskId: ${task.taskId} datasetId: ${this.dataset}`);
+        }
+
+        var paths = [];
+        // remove the .json suffix from all paths
+        for (let j = 0; j < historyTaskPathArray.length; j++) {
+            let pathWithoutSuffix = historyTaskPathArray[j].replace('.json', '');
+            paths.push(pathWithoutSuffix);
+        }
+        let jsonString = JSON.stringify(paths);
+        let jsonStringUrlEncoded = encodeURIComponent(jsonString);
+
+        let encodedTaskId = encodeURIComponent(task.taskId);
+        let encodedDatasetId = encodeURIComponent(task.datasetId);
+        let historyUrl = 'history.html?' +
+            'dataset=' + encodedDatasetId +
+            '&task=' + encodedTaskId +
+            'historyIndex=0&historyJson=' + 
+            jsonStringUrlEncoded;
+        return historyUrl;
     }
 
     assignThumbnailUrlsBasedOnCurrentTool() {
