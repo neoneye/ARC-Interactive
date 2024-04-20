@@ -469,11 +469,18 @@ class PageController {
                     }
                     let jsonString = JSON.stringify(paths);
                     let jsonStringUrlEncoded = encodeURIComponent(jsonString);
-                    let historyUrl = 'history.html?historyIndex=0&historyJson=' + jsonStringUrlEncoded + filterUrlParam;
+
+                    let encodedTaskId = encodeURIComponent(task.taskId);
+                    let encodedDatasetId = encodeURIComponent(task.datasetId);
+                    let historyUrl = 'history.html?' +
+                        'dataset=' + encodedDatasetId +
+                        '&task=' + encodedTaskId +
+                        'historyIndex=0&historyJson=' + 
+                        jsonStringUrlEncoded + 
+                        filterUrlParam;
                     el_a.setAttribute("data-tool-history", historyUrl);
                 }
             }
-
 
             if (openInNewTab) {
                 el_a.target = "_blank";

@@ -307,6 +307,8 @@ class PageController {
         {
             let urlParams2 = new URLSearchParams(window.location.search);
             urlParams2.delete('task');
+            urlParams2.delete('historyJson');
+            urlParams2.delete('historyIndex');
 
             let url = `.?` + urlParams2.toString();
             let el = document.getElementById('link-to-tasks-page');
