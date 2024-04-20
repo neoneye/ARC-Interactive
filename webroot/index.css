@@ -149,6 +149,12 @@ html {
   grid-column: span 2; /* Span across two columns */
 }
 
+.gallery a.disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.25;
+}
+
 #tool-label {
   display: none;
 }

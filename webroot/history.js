@@ -226,23 +226,78 @@ class PageController {
         // Create URLSearchParams object
         let urlParams = new URLSearchParams(window.location.search);
 
-        // Get the 'historyUrl' parameter
-        let urlParamHistoryUrl = urlParams.get('historyUrl');
-
-        // If 'historyUrl' parameter exists, decode it
-        if (urlParamHistoryUrl) {
-            let decodedHistoryUrl = decodeURIComponent(urlParamHistoryUrl);
-            console.log("historyUrl:", decodedHistoryUrl);
-            this.historyUrl = decodedHistoryUrl;
+        // Get the 'historyIndex' parameter
+        let urlParamIndex = urlParams.get('historyIndex');
+        // console.log('historyIndex:', urlParamIndex);
+        let index = 0;
+        if (urlParamIndex) {
+            let rawIndex = parseInt(urlParamIndex);
+            if (isNaN(rawIndex)) {
+                console.error("URLSearchParams 'historyIndex' parameter is not a number.");
+            } else {
+                index = rawIndex;
+                console.log('historyIndex:', index);
+            }
         } else {
-            this.historyUrl = 'ARC-Interactive history 2024-02-24T16-00-24Z.json';
-            console.error("URLSearchParams does not contain 'historyUrl' parameter.");
+            console.error("Expected 'historyIndex' url parameter.");
+        }
+
+        // Get the 'historyJson' parameter
+        let urlParamJson = urlParams.get('historyJson');
+        // console.log('json:', urlParamJson);
+        let count = 0;
+        if (urlParamJson) {
+            let jsonString = decodeURIComponent(urlParamJson);
+            console.log('jsonString:', jsonString);
+            let json = JSON.parse(jsonString);
+            count = json.length;
+
+            if ((index >= count) || (index < 0)) {
+                index = 0;
+            }
+            let path = json[index];
+
+            let baseUrl = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/';
+            let historyUrl = baseUrl + path + ".json";
+            console.log('historyUrl:', historyUrl);
+            this.historyUrl = historyUrl;
+
+            let el = document.getElementById('task-number');
+            el.innerText = `${index + 1} of ${count}`;
+        } else {
+            console.error("Expected 'historyJson' url parameter.");
+        }
+
+        if (count > 0) {
+            let indexWrapped = (index + count - 1) % count;
+            let urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('historyIndex', indexWrapped.toString());
+            let newUrl = window.location.protocol + "//" 
+                 + window.location.host 
+                 + window.location.pathname 
+                 + '?' + urlParams.toString();
+            let el = document.getElementById('goto-prev-file');
+            el.href = newUrl;
+        }
+
+        if (count > 0) {
+            let indexWrapped = (index + 1) % count;
+            let urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('historyIndex', indexWrapped.toString());
+            let newUrl = window.location.protocol + "//" 
+                 + window.location.host 
+                 + window.location.pathname 
+                 + '?' + urlParams.toString();
+            let el = document.getElementById('goto-next-file');
+            el.href = newUrl;
         }
 
         // Assign link to "Back button", so it preserves the URL parameters.
         {
             let urlParams2 = new URLSearchParams(window.location.search);
             urlParams2.delete('task');
+            urlParams2.delete('historyJson');
+            urlParams2.delete('historyIndex');
 
             let url = `.?` + urlParams2.toString();
             let el = document.getElementById('link-to-tasks-page');
