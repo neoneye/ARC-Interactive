@@ -233,10 +233,6 @@ class PageController {
             let decodedTask = decodeURIComponent(urlParamTask);
             console.log("Task:", decodedTask);
             this.taskId = decodedTask;
-
-            document.title = decodedTask;
-
-            document.getElementById('title_task').innerText = decodedTask;
         } else {
             this.taskId = null;
             console.error("URLSearchParams does not contain 'task' parameter.");
