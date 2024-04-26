@@ -326,17 +326,36 @@ class PageController {
         } else {
             console.log('No filter');
         }
-        var filteredTasksStage1 = [];
-        if (includedTaskIds.length > 0) {
+
+        // Don't show the buggy tasks.
+        var filteredTasksStage0 = [];
+        if (this.datasetId === "ARC") {
             for(let i = 0; i < this.dataset.tasks.length; i++) {
                 let task = this.dataset.tasks[i];
+                if (META_ARC_ISSUE[task.taskId]) {
+                    // console.log('Skipping task with issue:', task.taskId);
+                    continue;
+                }
+                filteredTasksStage0.push(task);
+            }
+        } else {
+            filteredTasksStage0 = this.dataset.tasks;
+        }
+
+        // Filter tasks based on the "includedTaskIds".
+        var filteredTasksStage1 = [];
+        if (includedTaskIds.length > 0) {
+            for(let i = 0; i < filteredTasksStage0.length; i++) {
+                let task = filteredTasksStage0[i];
                 if (includedTaskIds.includes(task.taskId)) {
                     filteredTasksStage1.push(task);
                 }
             }
         } else {
-            filteredTasksStage1 = this.dataset.tasks;
+            filteredTasksStage1 = filteredTasksStage0;
         }
+
+        // Filter tasks based on the "excludedTaskIds".
         let filteredTasksStage2 = [];
         if (excludedTaskIds.length > 0) {
             for(let i = 0; i < filteredTasksStage1.length; i++) {
