@@ -327,7 +327,7 @@ class PageController {
             console.log('No filter');
         }
 
-        // Don't show the buggy tasks.
+        // Hide the buggy tasks.
         var filteredTasksStage0 = [];
         if (this.datasetId === "ARC") {
             for(let i = 0; i < this.dataset.tasks.length; i++) {

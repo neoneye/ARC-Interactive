@@ -5,7 +5,7 @@ const indexdb_store_name_other = 'other';
 
 function initializeDatabase() {
     return new Promise((resolve, reject) => {
-        const openRequest = indexedDB.open(indexdb_database_name, 6);
+        const openRequest = indexedDB.open(indexdb_database_name, 7);
 
         openRequest.onupgradeneeded = function(event) {
             const db = event.target.result;
