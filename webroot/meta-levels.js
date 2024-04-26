@@ -814,12 +814,5 @@ const META_ARC_LEVELS = {
     "423a55dc_v2",
     "58e15b12_v2",
     "b4a43f3b_v2",
-  ],
-  "unfixed": [
-    "58e15b12",
-    "a8610ef7",
-    "423a55dc",
-    "bd14c3bf",
-    "b4a43f3b",
   ]
 };
