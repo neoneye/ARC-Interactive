@@ -172,7 +172,9 @@ class Dataset {
             throw new Error(`database is not an instance of DatabaseWrapper. database: ${database}`);
         }
 
-        let cacheKey = `dataset_${datasetId}_json_gz`;
+        // Increment this counter to force invalidating the cache, so new data can be fetched
+        let cacheBustingCounter = 1;
+        let cacheKey = `dataset_${datasetId}_json_gz_${cacheBustingCounter}`;
         let cachedData = await database.getData(cacheKey);
         if (cachedData) {
             console.log(`Using cached dataset. Key: ${cacheKey} Length: ${cachedData.length}`);
