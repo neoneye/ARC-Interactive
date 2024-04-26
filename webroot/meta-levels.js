@@ -175,10 +175,11 @@ const META_ARC_LEVELS = {
     "67a423a3",
     "95990924",
     "d5d6de2d",
-    "dc433765",
+    "dc433765_v2",
     "b7249182"
   ],
   "intermediate": [
+    "9172f3a0",
     "95a58926",
     "4c4377d9",
     "a3f84088",
@@ -623,6 +624,8 @@ const META_ARC_LEVELS = {
     "c444b776",
     "d4469b4b",
     "dae9d2b5",
+    "a8610ef7_v2",
+    "bd14c3bf_v2",
   ],
   "very-hard": [
     "4852f2fa",
@@ -806,14 +809,10 @@ const META_ARC_LEVELS = {
     "6d0160f0",
     "9aec4887",
     "484b58aa",
-  ],
-  "unfixed": [
-    "58e15b12",
-    "a8610ef7",
-    "423a55dc",
-    "bd14c3bf",
     "310f3251",
     "79fb03f4",
-    "b4a43f3b",
+    "423a55dc_v2",
+    "58e15b12_v2",
+    "b4a43f3b_v2",
   ]
 };
