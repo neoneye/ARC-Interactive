@@ -473,7 +473,7 @@ const META_ARC_CATEGORY_50 = {
       "8f2ea7aa",
       "ad7e01d0",
       "b190f7f5",
-      "b4a43f3b",
+      "b4a43f3b_v2",
       "c3e719e8",
       "cce03e0d"
     ],
