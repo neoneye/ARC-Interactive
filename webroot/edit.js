@@ -1064,7 +1064,7 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSizeForOverview(task, dpr) {
+    calcCellSizeForOverview(task, dpr, revealSolutions) {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
@@ -1088,6 +1088,9 @@ class PageController {
             if (!output) {
                 output = input;
             }
+            if (revealSolutions) {
+                output = task.test[i].output;
+            }
             sumPixelWidth += Math.max(input.width, output.width);
         }
         sumPixelWidth += separatorSize * (task.train.length + task.test.length - 1);
@@ -1104,6 +1107,9 @@ class PageController {
             var output = this.imageForTestIndex(i);
             if (!output) {
                 output = input;
+            }
+            if (revealSolutions) {
+                output = task.test[i].output;
             }
             let pixelHeight = input.height + output.height;
             maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
@@ -1144,7 +1150,7 @@ class PageController {
         // console.log('devicePixelRatio:', devicePixelRatio);
 
         let task = this.task;
-        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio);
+        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions);
         // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
 
