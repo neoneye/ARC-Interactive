@@ -468,6 +468,36 @@ class PageController {
             if (event.code === 'KeyT') {
                 this.showToolPanel();
             }
+            if (event.code === 'Digit0') {
+                this.pickColor(0);
+            }
+            if (event.code === 'Digit1') {
+                this.pickColor(1);
+            }
+            if (event.code === 'Digit2') {
+                this.pickColor(2);
+            }
+            if (event.code === 'Digit3') {
+                this.pickColor(3);
+            }
+            if (event.code === 'Digit4') {
+                this.pickColor(4);
+            }
+            if (event.code === 'Digit5') {
+                this.pickColor(5);
+            }
+            if (event.code === 'Digit6') {
+                this.pickColor(6);
+            }
+            if (event.code === 'Digit7') {
+                this.pickColor(7);
+            }
+            if (event.code === 'Digit8') {
+                this.pickColor(8);
+            }
+            if (event.code === 'Digit9') {
+                this.pickColor(9);
+            }
             if (this.isReplayUndoListButtonVisible) {
                 if (event.code === 'KeyP') {
                     this.replayUndoList();
