@@ -9,6 +9,22 @@
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <title>About - ARC-Interactive</title>
 
+    <style>
+.video-responsive {
+  position: relative;
+  padding-bottom: 56.25%; /* Aspect ratio of 16:9 */
+  height: 0;
+  overflow: hidden;
+}
+
+.video-responsive iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+    </style>
     <script>
         function body_onload() {
             // Assign link to "Back button", so it preserves the URL parameters.
@@ -30,21 +46,42 @@
 
     <main id="main-outer">
         <div id="main-inner">
-            <h3>Welcome to ARC-Interactive!</h3>
-<p>ARC-Interactive is a tool for researchers and enthusiasts working with the Abstraction and Reasoning Corpus (ARC). 
-    It runs in the browser and does not need a backend.</p>
+<p><a href="https://github.com/neoneye/ARC-Interactive">GitHub</a>, 
+    <a href="https://braingridgame.com/discord">Discord</a>,
+    <a href="https://lab42.global/arcathon/">ARCathon</a>.</p>
 
-<p>The source code is on <a href="https://github.com/neoneye/ARC-Interactive">GitHub</a>.</p>
+<h1 style="padding-top: 1em; padding-bottom: 0.5em">What is ARC?</h1>
+<p>The <b>Abstraction and Reasoning Corpus</b> (ARC) is a collection of tasks designed to measure a system's or 
+    individual's intelligence, especially their ability to perform abstraction and reasoning.
+    Each task in ARC consists of a few input-output examples, followed by one or more test inputs.
+    It's up to a human or AI to predict the correct outputs.</p>
 
-<p>Join the community on <a href="https://discord.gg/waRCYPEc6C">Discord</a>.</p>
+<p><b>Constants and Variables</b>. Notice what stays the same across examples. Notice what changes across examples. 
+    This might be the shape, color, number of elements, arrangement, rotation, resizing, flipping, or repetition.</p>
 
-<h3>What is ARC?</h3>
-<p>The Abstraction and Reasoning Corpus (ARC) is a groundbreaking dataset aimed at advancing 
-    artificial intelligence research by focusing on abstract problem solving and reasoning capabilities. 
-    It challenges both humans and AI systems with a variety of tasks that require deep understanding and 
-    innovative thinking.</p>
+<p><b>Generalize the Rules</b>. Based on observations, hypothesize a set of rules that can transform 
+    the given inputs into their corresponding outputs. Sometimes, rules can conflict, or one rule needs 
+    to be applied before another. Determine the hierarchy or order of rule application if necessary.</p>
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/QrSCwxrLrRc?si=YWERdPK-wGGN-17-" title="Introduction to ARC" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<p><b>Apply to Test Input</b>. Use the hypothesized rules to transform the test input into the output. 
+    This is the critical test of whether the identified patterns and rules are correct.
+    Check for overlooked patterns or incorrect assumptions.
+    Double-check that the rules work consistently across all given examples and all the tests.</p>
+
+    <h3 style="padding-top: 1em">Short video about ARC</h3>
+    <div class="video-responsive">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/vQt7UZsYooQ?si=BEdIShgFqdW09-lI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+    <h3 style="padding-top: 2em">Medium video about ARC</h3>
+    <div class="video-responsive">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/QrSCwxrLrRc?si=iGi8wosSH6y2uzNZ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+    <h3 style="padding-top: 2em">Long video about ARC</h3>
+    <div class="video-responsive">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/PUAdj3w3wO4?si=IRvz4Df-_hfJGydk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
 
         </div>
     </main>
