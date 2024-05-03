@@ -1,8 +1,14 @@
-# ARC-Interactive: Puzzle-Solving in Your Browser
+<p align="center">
+  <a href="https://neoneye.github.io/arc/"><strong>Try it here</strong></a> · <a href="https://braingridgame.com/discord"><strong>Discord</strong></a>
+</p>
 
-Explore the challenges of the Abstraction and Reasoning Corpus (ARC) with ARC-Interactive, a browser-based tool designed to bring these fascinating puzzles to life. No backend required.
+# Puzzle-Solving in Your Browser
 
-Try it here: [ARC-Interactive](https://neoneye.github.io/arc/)
+Explore the puzzles of the Abstraction and Reasoning Corpus (ARC).
+
+[ARC-Interactive](https://neoneye.github.io/arc/) is coded in HTML + CSS + JS. No backend.
+
+[BrainGridGame](https://braingridgame.com) is ARC-Interactive with a Django backend for collecting interaction histories.
 
 ## Gallery of tasks in the ARC datasets
 
@@ -18,8 +24,7 @@ Try it here: [ARC-Interactive](https://neoneye.github.io/arc/)
 
 ## How to Contribute
 
-ARC-Interactive is an open-source project, and contributions are warmly welcomed. Whether it's through code contributions, bug reports, feature requests, or feedback, your input is invaluable for making ARC-Interactive better for everyone.
+Share your thoughts on [Discord](https://braingridgame.com/discord).
 
-- **Feedback**: Share your thoughts, suggestions, or report issues directly through GitHub Issues.
-- **Code Contribution**: Feel free to fork the repository, make changes, and submit pull requests.
-- **Support the Project**: If you find ARC-Interactive useful, consider [buying a coffee for Simon Strandgaard](https://ko-fi.com/simonstrandgaard) to show your support.
+Code contributions, bug reports, feature requests, or feedback, 
+your input is invaluable for making this project better for everyone.
