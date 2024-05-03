@@ -7,10 +7,16 @@
     margin: 0 auto;
     max-width: 100%;
     width: 640px;
-    padding: 2em;
+    padding: 2em 1em;
     background-color: var(--ui-footer-background);
-    border-left: 1px solid var(--ui-separator);
-    border-right: 1px solid var(--ui-separator);
+}
+
+@media (min-width: 620px) { 
+    #custom-main-inner {
+        border-left: 1px solid var(--ui-separator);
+        border-right: 1px solid var(--ui-separator);
+        padding: 2em;
+    }
 }
 
 #custom-main-inner a {
