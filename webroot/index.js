@@ -92,8 +92,9 @@ class PageController {
             let uint8Array = new Uint8Array(arrayBuffer);
             let jsonString = new TextDecoder().decode(uint8Array);
             let json = JSON.parse(jsonString);
-            // console.log('json:', json);
-            console.log('number of items in historyDirectoryContent json:', Object.keys(json).length);            
+            console.log('historyDirectoryContent, size in bytes', uint8Array.length);
+            let generatedOn = json['generatedOn'];
+            console.log('historyDirectoryContent, generatedOn', generatedOn);
             return json;
         } catch (error) {
             console.error('unable to fetch historyDirectoryContent json', error, url);
@@ -519,7 +520,7 @@ class PageController {
         let historyUrl = 'history.html?' +
             'dataset=' + encodedDatasetId +
             '&task=' + encodedTaskId +
-            'historyIndex=0&historyJson=' + 
+            '&historyIndex=0&historyJson=' + 
             jsonStringUrlEncoded;
         return historyUrl;
     }
