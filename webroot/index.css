@@ -93,7 +93,8 @@ html {
 .gallery {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  grid-gap: 0; 
+  grid-gap: 0;
+  margin-bottom: 2em;
 }
 
 .gallery_cell {
