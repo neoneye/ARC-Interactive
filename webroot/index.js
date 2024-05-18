@@ -330,11 +330,12 @@ class PageController {
 
         // Hide the buggy tasks.
         var filteredTasksStage0 = [];
-        if (this.datasetId === "ARC") {
+        const meta_issue_dict = META_ISSUE[this.datasetId];
+        if (meta_issue_dict) {
             for(let i = 0; i < this.dataset.tasks.length; i++) {
                 let task = this.dataset.tasks[i];
-                if (META_ARC_ISSUE[task.taskId]) {
-                    // console.log('Skipping task with issue:', task.taskId);
+                if (meta_issue_dict[task.taskId]) {
+                    console.log('Skipping task with issue:', task.taskId);
                     continue;
                 }
                 filteredTasksStage0.push(task);
