@@ -31,7 +31,7 @@ const META_ARC_CATEGORY_50 = {
       "5ad4f10b",
       "642d658d",
       "6b9890af",
-      "7039b2d7",
+      "7039b2d7_v2",
       "7837ac64",
       "8731374e",
       "aee291af",

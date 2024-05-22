@@ -40,6 +40,11 @@ const META_ISSUE = {
             "title": "Test is solvable. Minor inconsistency, remove wrap around in training pair 2.",
             "fix": "c92b942c_v2",
         },
+        "7039b2d7": {
+            "url": "https://github.com/fchollet/ARC/pull/75",
+            "title": "Test is solvable. Minor inconsistency, wrong number of columns.",
+            "fix": "7039b2d7_v2",
+        },
         "bd14c3bf": {
             "url": "https://github.com/fchollet/ARC/issues/73",
             "title": "Test is solvable. Minor inconsistency. Input top left object should be red.",
