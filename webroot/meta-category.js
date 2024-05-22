@@ -84,7 +84,7 @@ const META_ARC_CATEGORY_50 = {
       "b8825c91"
     ],
     "8": [
-      "469497ad",
+      "469497ad_v2",
       "46f33fce",
       "60c09cac",
       "9172f3a0",

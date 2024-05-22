@@ -59,6 +59,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/pull/85",
             "title": "Test is solvable. Minor inconsistency, missing grey cells.",
             "fix": "e7b06bea_v2",
+        },
+        "469497ad": {
+            "url": "https://github.com/fchollet/ARC/pull/79",
+            "title": "Test is solvable. Minor inconsistency, Three pink blocks on the right should be orange.",
+            "fix": "469497ad_v2",
         }
     },
     "ConceptARC": {
