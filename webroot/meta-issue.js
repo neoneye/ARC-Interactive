@@ -10,6 +10,11 @@ const META_ISSUE = {
             "title": "Test is unsolvable, when green and aqua lines are intersect they should produce magenta color. But in the provided test output single magenta cell is missing.",
             "fix": "58e15b12_v2",
         },
+        "58e15b12_v2": {
+            "url": "https://github.com/fchollet/ARC/issues/86",
+            "title": "Test is solvable. Has a tailing newline. Otherwise the same as v2",
+            "fix": "58e15b12_v3",
+        },
         "a8610ef7": {
             "url": "https://github.com/fchollet/ARC/issues/89",
             "title": "Test is unsolvable, all cyan cells should be grey.",
