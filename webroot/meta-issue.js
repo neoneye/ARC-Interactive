@@ -69,6 +69,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/pull/72",
             "title": "Test is solvable. Minor inconsistency, Frame color shouldn't interfer with boxes.",
             "fix": "6d0160f0_v2",
+        },
+        "54db823b": {
+            "url": "https://github.com/fchollet/ARC/commit/b7fd42c53f0c26a807ba0b00e42f858d2c11d125#diff-f0f2417d9757edfc08cee5fd123f4fac5a6b6941b20e348db88ca20e4118bd45",
+            "title": "Test is solvable. Minor inconsistency, Swap 2 pixels in first training pair.",
+            "fix": "54db823b_v2",
         }
     },
     "ConceptARC": {
