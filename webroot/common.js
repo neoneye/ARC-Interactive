@@ -173,7 +173,7 @@ class Dataset {
         }
 
         // Increment this counter to force invalidating the cache, so new data can be fetched
-        let cacheBustingCounter = 2;
+        let cacheBustingCounter = 3;
         let cacheKey = `dataset_${datasetId}_json_gz_${cacheBustingCounter}`;
         let cachedData = await database.getData(cacheKey);
         if (cachedData) {
