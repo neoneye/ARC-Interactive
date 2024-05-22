@@ -20,6 +20,11 @@ const META_ISSUE = {
             "title": "Test is unsolvable, all cyan cells should be grey.",
             "fix": "a8610ef7_v2",
         },
+        "a8610ef7_v2": {
+            "url": "https://github.com/fchollet/ARC/issues/89",
+            "title": "Test is solvable, 2 grey cells should be red.",
+            "fix": "a8610ef7_v3",
+        },
         "b4a43f3b": {
             "url": "https://github.com/fchollet/ARC/issues/101",
             "title": "Test is unsolvable, missing 2 green pixels.",
