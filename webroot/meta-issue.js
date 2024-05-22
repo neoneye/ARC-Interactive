@@ -30,6 +30,11 @@ const META_ISSUE = {
             "title": "Test is unsolvable, missing 2 green pixels.",
             "fix": "b4a43f3c_v2",
         },
+        "310f3251": {
+            "url": "https://github.com/fchollet/ARC/issues/99",
+            "title": "Test is unsolvable, wrap around",
+            "fix": "310f3251_v2",
+        },
         "bd14c3bf": {
             "url": "https://github.com/fchollet/ARC/issues/73",
             "title": "Test is solvable. Minor inconsistency. Input top left object should be red.",
