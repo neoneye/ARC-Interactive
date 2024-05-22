@@ -806,7 +806,7 @@ const META_ARC_LEVELS = {
     "c87289bb",
     "dd2401ed",
     "b0f4d537",
-    "6d0160f0",
+    "6d0160f0_v2",
     "9aec4887",
     "484b58aa",
     "310f3251_v2",

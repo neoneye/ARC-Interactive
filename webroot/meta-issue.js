@@ -64,6 +64,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/pull/79",
             "title": "Test is solvable. Minor inconsistency, Three pink blocks on the right should be orange.",
             "fix": "469497ad_v2",
+        },
+        "6d0160f0": {
+            "url": "https://github.com/fchollet/ARC/pull/72",
+            "title": "Test is solvable. Minor inconsistency, Frame color shouldn't interfer with boxes.",
+            "fix": "6d0160f0_v2",
         }
     },
     "ConceptARC": {

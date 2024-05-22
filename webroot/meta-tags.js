@@ -346,7 +346,7 @@ const META_ARC_TAGS = {
         "54d9e175",
         "5daaa586",
         "6773b310",
-        "6d0160f0",
+        "6d0160f0_v2",
         "77fdfe62",
         "780d0b14",
         "7837ac64",
@@ -964,7 +964,7 @@ const META_ARC_TAGS = {
         "5117e062",
         "662c240a",
         "6cdd2623",
-        "6d0160f0",
+        "6d0160f0_v2",
         "72ca375d",
         "776ffc46",
         "88a62173",
@@ -1578,7 +1578,7 @@ const META_ARC_TAGS = {
         "6aa20dc0",
         "6ad5bdfd",
         "6cf79266",
-        "6d0160f0",
+        "6d0160f0_v2",
         "6e02f1e3",
         "6e19193c",
         "6ecd11f4",
@@ -2273,7 +2273,7 @@ const META_ARC_TAGS = {
         "6855a6e4",
         "6a1e5592",
         "6b9890af",
-        "6d0160f0",
+        "6d0160f0_v2",
         "846bdb03",
         "97a05b5b",
         "98cf29f8",
@@ -2520,7 +2520,7 @@ const META_ARC_TAGS = {
         "d90796e8"
     ],
     "separate_image": [
-        "6d0160f0"
+        "6d0160f0_v2"
     ],
     "separate_images": [
         "0520fde7",
@@ -2821,7 +2821,7 @@ const META_ARC_TAGS = {
         "6c434453",
         "6cdd2623",
         "6cf79266",
-        "6d0160f0",
+        "6d0160f0_v2",
         "6d0aefbc",
         "6d58a25d",
         "6d75e8bb",
