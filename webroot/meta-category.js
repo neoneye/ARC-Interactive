@@ -31,7 +31,7 @@ const META_ARC_CATEGORY_50 = {
       "5ad4f10b",
       "642d658d",
       "6b9890af",
-      "7039b2d7",
+      "7039b2d7_v2",
       "7837ac64",
       "8731374e",
       "aee291af",
@@ -84,7 +84,7 @@ const META_ARC_CATEGORY_50 = {
       "b8825c91"
     ],
     "8": [
-      "469497ad",
+      "469497ad_v2",
       "46f33fce",
       "60c09cac",
       "9172f3a0",
@@ -133,7 +133,7 @@ const META_ARC_CATEGORY_50 = {
       "917bccba",
       "95a58926",
       "ac3e2b04",
-      "b0f4d537",
+      "b0f4d537_v2",
       "ba97ae07",
       "bdad9b1f",
       "c97c0139",
@@ -197,7 +197,7 @@ const META_ARC_CATEGORY_50 = {
       "4c5c2cf0",
       "4e469f39",
       "55783887",
-      "58e15b12_v2",
+      "58e15b12_v3",
       "5c0a986e",
       "69889d6e",
       "760b3cac",
@@ -320,7 +320,7 @@ const META_ARC_CATEGORY_50 = {
       "9caba7c3",
       "9edfc990",
       "a64e4611",
-      "a8610ef7_v2",
+      "a8610ef7_v3",
       "a8d7556c",
       "bcb3040b",
       "c1d99e64",
@@ -374,7 +374,7 @@ const META_ARC_CATEGORY_50 = {
       "45737921",
       "50cb2852",
       "516b51b7",
-      "54db823b",
+      "54db823b_v2",
       "551d5bf1",
       "575b1a71",
       "604001fa",
@@ -454,8 +454,8 @@ const META_ARC_CATEGORY_50 = {
     ],
     "22": [
       "10fcaaa3",
-      "310f3251",
-      "c92b942c",
+      "310f3251_v2",
+      "c92b942c_v2",
       "f5b8619d"
     ],
     "23": [
@@ -586,7 +586,7 @@ const META_ARC_CATEGORY_50 = {
       "beb8660c",
       "c074846d",
       "d8c310e9",
-      "e7b06bea"
+      "e7b06bea_v2"
     ],
     "32": [
       "0520fde7",
@@ -658,7 +658,7 @@ const META_ARC_CATEGORY_50 = {
       "29623171",
       "42a15761",
       "4f537728",
-      "6d0160f0",
+      "6d0160f0_v2",
       "7447852a",
       "85b81ff1",
       "97239e3d",
