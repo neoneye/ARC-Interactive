@@ -74,6 +74,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/commit/b7fd42c53f0c26a807ba0b00e42f858d2c11d125#diff-f0f2417d9757edfc08cee5fd123f4fac5a6b6941b20e348db88ca20e4118bd45",
             "title": "Test is solvable. Minor inconsistency, Swap 2 pixels in first training pair.",
             "fix": "54db823b_v2",
+        },
+        "b0f4d537": {
+            "url": "https://github.com/fchollet/ARC/issues/63",
+            "title": "Test is solvable. Minor inconsistency, middle line need move 1px righter.",
+            "fix": "b0f4d537_v2",
         }
     },
     "ConceptARC": {
