@@ -54,6 +54,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/issues/29",
             "title": "Test is solvable. Minor inconsistency. Redundant train and test.",
             "fix": "dc433765_v2",
+        },
+        "e7b06bea": {
+            "url": "https://github.com/fchollet/ARC/pull/85",
+            "title": "Test is solvable. Minor inconsistency, missing grey cells.",
+            "fix": "e7b06bea_v2",
         }
     },
     "ConceptARC": {
