@@ -33,7 +33,7 @@ const META_ISSUE = {
         "310f3251": {
             "url": "https://github.com/fchollet/ARC/issues/99",
             "title": "Test is unsolvable, wrap around",
-            "fix": "310f3251_v2",
+            "fix": "310f3251_v3",
         },
         "c92b942c": {
             "url": "https://github.com/fchollet/ARC/commit/b7fd42c53f0c26a807ba0b00e42f858d2c11d125#diff-5449fd633a009a5f87bd1b7c19afd8048470161cc66bfced69ad0ffe8f2487a2",
