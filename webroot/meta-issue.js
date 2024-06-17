@@ -33,7 +33,12 @@ const META_ISSUE = {
         "310f3251": {
             "url": "https://github.com/fchollet/ARC/issues/99",
             "title": "Test is unsolvable, wrap around",
-            "fix": "310f3251_v2",
+            "fix": "310f3251_v3",
+        },
+        "310f3251_v2": {
+            "url": "https://github.com/fchollet/ARC/issues/99",
+            "title": "Test is unsolvable, wrap around",
+            "fix": "310f3251_v3",
         },
         "c92b942c": {
             "url": "https://github.com/fchollet/ARC/commit/b7fd42c53f0c26a807ba0b00e42f858d2c11d125#diff-5449fd633a009a5f87bd1b7c19afd8048470161cc66bfced69ad0ffe8f2487a2",
@@ -79,6 +84,51 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/issues/63",
             "title": "Test is solvable. Minor inconsistency, middle line need move 1px righter.",
             "fix": "b0f4d537_v2",
+        },
+        "4852f2fa": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/94",
+            "title": "Test is solvable. Minor inconsistency, move one pixel",
+            "fix": "4852f2fa_v2",
+        },
+        "79fb03f4": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/100",
+            "title": "Test is unsolvable, water flow",
+            "fix": "79fb03f4_v2",
+        },
+        "c35c1b4c": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/96",
+            "title": "Minor inconsistency, train output 3 is asymmetric",
+            "fix": "c35c1b4c_v2",
+        },
+        "e6de6e8f": {
+            "url": "https://x.com/fchollet/status/1802448195110457630",
+            "title": "Minor inconsistency, misleading training pair, bending the opposite way",
+            "fix": "e6de6e8f_v2",
+        },
+        "b230c067": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/97",
+            "title": "Minor inconsistency, make less ambiguous, so it doesn't require 2 attempts",
+            "fix": "b230c067_v2",
+        },
+        "05a7bcf2": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/105",
+            "title": "Minor inconsistency, incorrect pixels in training pair",
+            "fix": "05a7bcf2_v2",
+        },
+        "20818e16": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/63",
+            "title": "Minor inconsistency, incorrect size of purple rectangle in training pair",
+            "fix": "20818e16_v2",
+        },
+        "9def23fe": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/74",
+            "title": "Minor inconsistency, two extra red pixels in first training pair",
+            "fix": "9def23fe_v2",
+        },
+        "9edfc990": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/77",
+            "title": "Minor inconsistency, one incorrect pixel in training pair",
+            "fix": "9edfc990_v2",
         }
     },
     "ConceptARC": {
