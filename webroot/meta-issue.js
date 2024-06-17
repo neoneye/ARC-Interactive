@@ -94,6 +94,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC-AGI/issues/96",
             "title": "Minor inconsistency, train output 3 is asymmetric",
             "fix": "c35c1b4c_v2",
+        },
+        "e6de6e8f": {
+            "url": "https://x.com/fchollet/status/1802448195110457630",
+            "title": "Minor inconsistency, misleading training pair, bending the opposite way",
+            "fix": "e6de6e8f_v2",
         }
     },
     "ConceptARC": {
