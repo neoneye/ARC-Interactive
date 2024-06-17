@@ -109,6 +109,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC-AGI/issues/105",
             "title": "Minor inconsistency, incorrect pixels in training pair",
             "fix": "05a7bcf2_v2",
+        },
+        "20818e16": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/63",
+            "title": "Minor inconsistency, incorrect size of purple rectangle in training pair",
+            "fix": "20818e16_v2",
         }
     },
     "ConceptARC": {
