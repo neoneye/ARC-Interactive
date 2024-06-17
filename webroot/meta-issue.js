@@ -79,6 +79,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC/issues/63",
             "title": "Test is solvable. Minor inconsistency, middle line need move 1px righter.",
             "fix": "b0f4d537_v2",
+        },
+        "4852f2fa": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/94",
+            "title": "Test is solvable. Minor inconsistency, move one pixel",
+            "fix": "4852f2fa_v2",
         }
     },
     "ConceptARC": {
