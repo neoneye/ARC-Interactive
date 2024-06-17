@@ -89,6 +89,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC-AGI/issues/100",
             "title": "Test is unsolvable, water flow",
             "fix": "79fb03f4_v2",
+        },
+        "c35c1b4c": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/96",
+            "title": "Minor inconsistency, train output 3 is asymmetric",
+            "fix": "c35c1b4c_v2",
         }
     },
     "ConceptARC": {
