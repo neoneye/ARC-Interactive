@@ -104,6 +104,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC-AGI/issues/97",
             "title": "Minor inconsistency, make less ambiguous, so it doesn't require 2 attempts",
             "fix": "b230c067_v2",
+        },
+        "05a7bcf2": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/105",
+            "title": "Minor inconsistency, incorrect pixels in training pair",
+            "fix": "05a7bcf2_v2",
         }
     },
     "ConceptARC": {
