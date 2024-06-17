@@ -84,6 +84,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC-AGI/issues/94",
             "title": "Test is solvable. Minor inconsistency, move one pixel",
             "fix": "4852f2fa_v2",
+        },
+        "79fb03f4": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/100",
+            "title": "Test is unsolvable, water flow",
+            "fix": "79fb03f4_v2",
         }
     },
     "ConceptARC": {
