@@ -86,7 +86,7 @@ const META_ARC_TAGS = {
     "background_filling": [
         "2bcee788",
         "7b6016b9",
-        "9edfc990",
+        "9edfc990_v2",
         "a64e4611",
         "f8c80d96"
     ],
@@ -1009,7 +1009,7 @@ const META_ARC_TAGS = {
         "3bdb4ada",
         "50cb2852",
         "855e0971",
-        "9edfc990",
+        "9edfc990_v2",
         "e8593010"
     ],
     "homeomorphism": [
@@ -1662,7 +1662,7 @@ const META_ARC_TAGS = {
         "9d9215db",
         "9ddd00f0",
         "9ecd008a",
-        "9edfc990",
+        "9edfc990_v2",
         "a04b2602",
         "a096bf4d",
         "a3325580",
@@ -2901,7 +2901,7 @@ const META_ARC_TAGS = {
         "9d9215db",
         "9dfd6313",
         "9ecd008a",
-        "9edfc990",
+        "9edfc990_v2",
         "9f236235",
         "a1570a43",
         "a2fd1cf0",

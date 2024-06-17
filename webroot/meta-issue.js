@@ -119,6 +119,11 @@ const META_ISSUE = {
             "url": "https://github.com/fchollet/ARC-AGI/issues/74",
             "title": "Minor inconsistency, two extra red pixels in first training pair",
             "fix": "9def23fe_v2",
+        },
+        "9edfc990": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/77",
+            "title": "Minor inconsistency, one incorrect pixel in training pair",
+            "fix": "9edfc990_v2",
         }
     },
     "ConceptARC": {
