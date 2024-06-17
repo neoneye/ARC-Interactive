@@ -99,6 +99,11 @@ const META_ISSUE = {
             "url": "https://x.com/fchollet/status/1802448195110457630",
             "title": "Minor inconsistency, misleading training pair, bending the opposite way",
             "fix": "e6de6e8f_v2",
+        },
+        "b230c067": {
+            "url": "https://github.com/fchollet/ARC-AGI/issues/97",
+            "title": "Minor inconsistency, make less ambiguous, so it doesn't require 2 attempts",
+            "fix": "b230c067_v2",
         }
     },
     "ConceptARC": {
