@@ -1094,7 +1094,8 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSizeForOverview(task, dpr, revealSolutions) {
+    calcCellSizeForOverview(task, dpr, revealSolutions, maxTrain) {
+        let n_train = Math.min(task.train.length, maxTrain);
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
@@ -1107,7 +1108,7 @@ class PageController {
 
         let separatorSize = 1;
         var sumPixelWidth = 0;
-        for (let i = 0; i < task.train.length; i++) {
+        for (let i = 0; i < n_train; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
             sumPixelWidth += Math.max(input.width, output.width);
@@ -1123,10 +1124,10 @@ class PageController {
             }
             sumPixelWidth += Math.max(input.width, output.width);
         }
-        sumPixelWidth += separatorSize * (task.train.length + task.test.length - 1);
+        sumPixelWidth += separatorSize * (n_train + task.test.length - 1);
 
         var maxPixelHeight = 0;
-        for (let i = 0; i < task.train.length; i++) {
+        for (let i = 0; i < n_train; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
             let pixelHeight = input.height + output.height + separatorSize;
@@ -1179,8 +1180,11 @@ class PageController {
         // let devicePixelRatio = 1;
         // console.log('devicePixelRatio:', devicePixelRatio);
 
+        
         let task = this.task;
-        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions);
+
+        var n_train = Math.min(task.train.length, 4);
+        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
         // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
 
@@ -1192,7 +1196,7 @@ class PageController {
         el_tr1.innerText = '';
 
         // Populate table for `train` pairs.
-        for (let i = 0; i < task.train.length; i++) {
+        for (let i = 0; i < n_train; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
             let el_td0 = document.createElement('td');
