@@ -290,7 +290,6 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
-        this.isUploadDownloadHistoryButtonsVisible = Settings.getAdvancedModeEnabled();
         this.isReplayUndoListButtonVisible = true;
 
         this.blockForStartDrawUntil = Date.now();
@@ -314,17 +313,6 @@ class PageController {
         this.addEventListeners();
         this.hideEditorShowOverview({ shouldHistoryLog: false });
         // await this.replayExampleHistoryFile();
-
-        if (this.isUploadDownloadHistoryButtonsVisible) {
-            {
-                var el = document.getElementById('download-history-button');
-                el.classList.remove('hidden');
-            }
-            {
-                var el = document.getElementById('upload-history-button');
-                el.classList.remove('hidden');
-            }
-        }
 
         if (this.isReplayUndoListButtonVisible) {
             var el = document.getElementById('replay-undolist-button');
@@ -2659,10 +2647,6 @@ class PageController {
         // Clean up by removing the anchor element and revoking the Blob URL
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }
-
-    clickUploadHistoryFile() {
-        document.getElementById('file-input').click(); // Programmatically click the hidden file input
     }
 
     changeInputFile(event) {
