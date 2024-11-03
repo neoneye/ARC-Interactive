@@ -1,6 +1,7 @@
 const indexdb_database_name = 'ARCDatabase';
 const indexdb_store_name_image = 'image';
 const indexdb_store_name_other = 'other';
+const thumbnail_max_train_count = 6;
     
 
 function initializeDatabase() {
@@ -739,18 +740,22 @@ class ARCTask {
         let height = 150 * scale;
         let inset = insetValue * scale;
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = width;
-        canvas.height = height;
-        
-        let count = this.train.length + this.test.length;
-        let n_train = this.train.length;
-        let n_test = this.test.length;
-
         let inputOutputGapSize = 5 * scale;
         let pairGapSize = 5 * scale;
         let trainTestGapSize = 5 * scale;
+
+        // Some puzzles are too wide to fit in the thumbnail, so we reduce the number of pairs to fit
+        var n_train = Math.min(this.train.length, thumbnail_max_train_count);
+        for(let i = 0; i < 3; i++) {
+            let total_width = this.calcThumbnailWidth(pairGapSize, n_train);
+            if (total_width <= 150) {
+                break;
+            }
+            n_train -= 1;
+        }
+
+        let n_test = this.test.length;
+        let count = n_train + n_test;
 
         let cellWidthTotalAvailable = width - 2 * inset;
 
@@ -759,6 +764,11 @@ class ARCTask {
         let cellHeight = (height - inputOutputGapSize - 2 * inset) / 2;
 
 
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = width;
+        canvas.height = height;
+ 
         // ctx.fillStyle = 'white';
         // ctx.fillRect(0, 0, width, height);
         // ctx.fillStyle = '#282828';
@@ -791,25 +801,25 @@ class ARCTask {
 
 
         var cellSize = 1000000;
-        for (let i = 0; i < this.train.length; i++) {
+        for (let i = 0; i < n_train; i++) {
             let size0 = this.train[i].input.cellSize(cellWidthWithGap, cellHeight);
             let size1 = this.train[i].output.cellSize(cellWidthWithGap, cellHeight);
             cellSize = Math.min(cellSize, Math.min(size0, size1));
         }
-        for (let i = 0; i < this.test.length; i++) {
+        for (let i = 0; i < n_test; i++) {
             let size0 = this.test[i].input.cellSize(cellWidthWithGap, cellHeight);
             let size1 = this.test[i].output.cellSize(cellWidthWithGap, cellHeight);
             cellSize = Math.min(cellSize, Math.min(size0, size1));
         }
     
-        for (let i = 0; i < this.train.length; i++) {
+        for (let i = 0; i < n_train; i++) {
             let x = (i * cellWidthTotalAvailable) / count + inset;
             let y0 = inset;
             let y1 = height / 2;
             this.train[i].input.draw(theme, ctx, x, y0, cellWidthWithoutGap, cellHeight, cellSize, {alignBottom: true});
             this.train[i].output.draw(theme, ctx, x, y1, cellWidthWithoutGap, cellHeight, cellSize, {alignTop: true});
         }
-        for (let i = 0; i < this.test.length; i++) {
+        for (let i = 0; i < n_test; i++) {
             let x = ((n_train + i) * cellWidthTotalAvailable) / count + inset;
             let y0 = inset;
             let y1 = height / 2;
@@ -844,9 +854,10 @@ class ARCTask {
     }
 
     // Return an integer with the accumulated width of all the pairs in the task
-    calcThumbnailWidth(gapSize) {
+    calcThumbnailWidth(gapSize, maxTrain) {
+        let n_train = Math.min(this.train.length, maxTrain);
         var accumulatedWidth = 0;
-        for (let i = 0; i < this.train.length; i++) {
+        for (let i = 0; i < n_train; i++) {
             let image0 = this.train[i].input;
             let image1 = this.train[i].output;
             accumulatedWidth += Math.max(image0.width, image1.width);
@@ -888,8 +899,12 @@ class ARCTask {
     //
     // Return false if the task is normal.
     isExtraWideThumbnail() {
+        if (this.train.length >= thumbnail_max_train_count) {
+            return true;
+        }
+
         let gapSize = 1;
-        let width = this.calcThumbnailWidth(gapSize);
+        let width = this.calcThumbnailWidth(gapSize, thumbnail_max_train_count);
         let height = this.calcThumbnailHeight(gapSize);
         if (width > 150) {
             return true;
