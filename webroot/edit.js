@@ -290,6 +290,8 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
+        this.overviewPageIndex = 0;
+
         this.isReplayUndoListButtonVisible = true;
 
         this.blockForStartDrawUntil = Date.now();
@@ -1171,7 +1173,27 @@ class PageController {
         
         let task = this.task;
 
-        var n_train = Math.min(task.train.length, 4);
+        let pageCapacity = Math.min(task.train.length, 4);
+        let pageCount = Math.floor((task.train.length - 1) / pageCapacity) + 1;
+        console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
+        let lastPageIndex = pageCount - 1;
+        // Clamp the overviewPageIndex to a valid range.
+        if (this.overviewPageIndex < 0) {
+            this.overviewPageIndex = lastPageIndex;
+            // console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+        } else if (this.overviewPageIndex > lastPageIndex) {
+            this.overviewPageIndex = 0;
+            // console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+        }
+
+        // Show the current page index in the UI
+        let el_pagination_status = document.getElementById('pagination-status');
+        el_pagination_status.innerText = `Page ${this.overviewPageIndex + 1} of ${lastPageIndex + 1}`;
+
+        let train_offset = this.overviewPageIndex * pageCapacity;
+        let n_train = Math.min(task.train.length - train_offset, pageCapacity);
+        console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
+
         let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
         // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
@@ -1185,8 +1207,8 @@ class PageController {
 
         // Populate table for `train` pairs.
         for (let i = 0; i < n_train; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
+            let input = task.train[i + train_offset].input;
+            let output = task.train[i + train_offset].output;
             let el_td0 = document.createElement('td');
             let el_td1 = document.createElement('td');
             // el_td0.innerText = `Input ${i + 1}`;
@@ -2698,6 +2720,16 @@ class PageController {
             this.replayHistoryItems(history_items2);
         };
         setTimeout(callback, 100);
+    }
+
+    paginationGotoPreviousPage() {
+        this.overviewPageIndex -= 1;
+        this.updateOverview();
+    }
+
+    paginationGotoNextPage() {
+        this.overviewPageIndex += 1;
+        this.updateOverview();
     }
 }
 

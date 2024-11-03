@@ -164,15 +164,9 @@
     <div id="page-footer-overview-mode" class="page-footer user-select-none">
         <div class="page-footer-left">
             <!-- Left -->
-            <button id="pagination-prev" class="secondary-button responsive-button" onclick="gPageController.downloadHistoryFile()" title="Go to previous page">
-                <span class="full-title">Prev</span>
-                <span class="short-title">P</span>
-            </button>
-            <div style="display: inline">Page 1 of 5</div>
-            <button id="pagination-next" class="secondary-button responsive-button" onclick="gPageController.downloadHistoryFile()" title="Go to previous page">
-                <span class="full-title">Next</span>
-                <span class="short-title">N</span>
-            </button>
+            <button id="pagination-prev" class="secondary-button responsive-button" onclick="gPageController.paginationGotoPreviousPage()" title="Go to previous page">←</button>
+            <div id="pagination-status" style="display: inline">Page 1 of ?</div>
+            <button id="pagination-next" class="secondary-button responsive-button" onclick="gPageController.paginationGotoNextPage()" title="Go to previous page">→</button>
         </div>
         <div class="page-footer-center">
             <!-- Center -->
