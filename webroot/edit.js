@@ -215,7 +215,16 @@ class DrawInteractionState {
 
 class PageController {
     constructor() {
-        this.updateUuid = crypto.randomUUID();
+        if (crypto.randomUUID) {
+            console.log('crypto.randomUUID() is available.');
+            this.updateUuid = crypto.randomUUID();
+        } else {
+            // Safari oddity:
+            // In Safari on iPhone, crypto.randomUUID() is not available, when using http://
+            // In Safari on iPhone, crypto.randomUUID() is available, when using https://
+            console.log('crypto.randomUUID() is NOT available.');
+            this.updateUuid = 'no-crypto-random-uuid';
+        }
 
         this.history = new HistoryContainer();
         this.drawInteractionState = null;
