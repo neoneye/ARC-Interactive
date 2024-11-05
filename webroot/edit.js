@@ -1177,7 +1177,7 @@ class PageController {
         // Get the device pixel ratio, falling back to 1.
         let devicePixelRatio = window.devicePixelRatio || 1;
         // let devicePixelRatio = 1;
-        // console.log('devicePixelRatio:', devicePixelRatio);
+        console.log('devicePixelRatio:', devicePixelRatio);
 
         
         let task = this.task;
@@ -1203,9 +1203,9 @@ class PageController {
         let n_train = Math.min(task.train.length - train_offset, pageCapacity);
         console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
 
-        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
-        // console.log('cellSize:', cellSize);
-        cellSize = cellSize / devicePixelRatio;
+        let cellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
+        let cellSize = cellSizeRaw / devicePixelRatio;
+        console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
