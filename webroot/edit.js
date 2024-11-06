@@ -1195,6 +1195,12 @@ class PageController {
             // console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
         }
 
+        if (pageCount <= 1) {
+            this.hidePagination();
+        } else {
+            this.showPagination();
+        }
+
         // Show the current page index in the UI
         let el_pagination_status = document.getElementById('pagination-status');
         el_pagination_status.innerText = `${this.overviewPageIndex + 1} of ${lastPageIndex + 1}`;
@@ -2739,6 +2745,17 @@ class PageController {
     paginationGotoNextPage() {
         this.overviewPageIndex += 1;
         this.updateOverview();
+    }
+
+    hidePagination() {
+        let el = document.getElementById("pagination");
+        el.classList.remove('hidden');
+        el.classList.add('hidden');
+    }
+
+    showPagination() {
+        let el = document.getElementById("pagination");
+        el.classList.remove('hidden');
     }
 }
 

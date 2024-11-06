@@ -339,7 +339,8 @@ body {
 #tool-panel.hidden,
 #submit-status-correct.hidden, 
 #submit-status-incorrect.hidden,
-#crop-selected-rectangle-button.hidden {
+#crop-selected-rectangle-button.hidden,
+#pagination.hidden {
     display: none !important;
 }
 
