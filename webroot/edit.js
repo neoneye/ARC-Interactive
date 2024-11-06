@@ -1181,8 +1181,10 @@ class PageController {
 
         
         let task = this.task;
+        let maxExampleCount = Math.max(6 - task.test.length, 3);
+        console.log('maxExampleCount:', maxExampleCount);
 
-        let pageCapacity = Math.min(task.train.length, 3);
+        let pageCapacity = Math.min(task.train.length, maxExampleCount);
         let pageCount = Math.floor((task.train.length - 1) / pageCapacity) + 1;
         console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
         let lastPageIndex = pageCount - 1;
