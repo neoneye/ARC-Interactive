@@ -451,10 +451,39 @@ body {
     padding-bottom: 5px;
 }
 
+#pagination {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+#pagination-prev,
+#pagination-next,
 #pagination-status {
-    display: inline;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#pagination-status {
     color: #ccc;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+@media (max-width: 600px) {
+    #pagination-status {
+        font-size: 11px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    #pagination .secondary-button {
+        margin-right: 0;
+        margin-left: 0;
+        background-color: transparent;
+        border: none;
+    }
 }
 
 /* Default styles for buttons, showing full titles and hiding short titles */
