@@ -1197,7 +1197,7 @@ class PageController {
 
         // Show the current page index in the UI
         let el_pagination_status = document.getElementById('pagination-status');
-        el_pagination_status.innerText = `Page ${this.overviewPageIndex + 1} of ${lastPageIndex + 1}`;
+        el_pagination_status.innerText = `${this.overviewPageIndex + 1} of ${lastPageIndex + 1}`;
 
         let train_offset = this.overviewPageIndex * pageCapacity;
         let n_train = Math.min(task.train.length - train_offset, pageCapacity);

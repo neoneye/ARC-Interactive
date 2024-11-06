@@ -451,6 +451,12 @@ body {
     padding-bottom: 5px;
 }
 
+#pagination-status {
+    display: inline;
+    vertical-align: middle;
+    color: #ccc;
+}
+
 /* Default styles for buttons, showing full titles and hiding short titles */
 .responsive-button .full-title {
     display: inline;
