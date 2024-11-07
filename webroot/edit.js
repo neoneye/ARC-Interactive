@@ -1177,8 +1177,15 @@ class PageController {
         // Get the device pixel ratio, falling back to 1.
         let devicePixelRatio = window.devicePixelRatio || 1;
         // let devicePixelRatio = 1;
-        console.log('devicePixelRatio:', devicePixelRatio);
+        // console.log('devicePixelRatio:', devicePixelRatio);
 
+        // Size of the overview <div>
+        let el_overview = document.getElementById('task-overview');
+        let width_raw = el_overview.clientWidth;
+        let height_raw = el_overview.clientHeight;
+        let width = width_raw * devicePixelRatio;
+        let height = height_raw * devicePixelRatio;
+        console.log('updateOverview() width:', width, 'height:', height, 'width_raw:', width_raw, 'height_raw:', height_raw, 'devicePixelRatio:', devicePixelRatio);
         
         let task = this.task;
         let maxExampleCount = Math.max(6 - task.test.length, 3);
