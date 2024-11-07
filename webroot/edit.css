@@ -430,10 +430,6 @@ body {
     width: calc(var(--ui-overview-image-padding) * 1px);
 }
 
-#task-overview-table .test-output-cell {
-    line-height: 1.5;
-}
-
 #task-overview-table .active-test {
     background-color: #a4a4a4;
     color: black;
