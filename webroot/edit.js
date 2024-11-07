@@ -1186,7 +1186,10 @@ class PageController {
         let width = width_raw * devicePixelRatio;
         let height = height_raw * devicePixelRatio;
         console.log('updateOverview() width:', width, 'height:', height, 'width_raw:', width_raw, 'height_raw:', height_raw, 'devicePixelRatio:', devicePixelRatio);
-        
+
+        const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
+        console.log('image_padding:', image_padding);
+
         let task = this.task;
         let maxExampleCount = Math.max(6 - task.test.length, 3);
         console.log('maxExampleCount:', maxExampleCount);
