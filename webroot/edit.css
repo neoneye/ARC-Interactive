@@ -1,3 +1,7 @@
+:root {
+    --ui-overview-image-padding: 10;
+}
+
 html {
     /* disable pull-to-refresh in mobile browsers */
     overflow: hidden;
@@ -410,20 +414,20 @@ body {
 
 #task-overview-table .input-image-cell { 
     vertical-align: bottom;
-    padding-bottom: 20px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-bottom: calc(var(--ui-overview-image-padding) * 2 * 1px);
+    padding-left: calc(var(--ui-overview-image-padding) * 1px);
+    padding-right: calc(var(--ui-overview-image-padding) * 1px);
 } 
 
 #task-overview-table .output-image-cell { 
     vertical-align: top; 
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: calc(var(--ui-overview-image-padding) * 1px);
+    padding-right: calc(var(--ui-overview-image-padding) * 1px);
 }
 
 #task-overview-table .seperator-column {
     background-color: var(--ui-background);
-    width: 10px;
+    width: calc(var(--ui-overview-image-padding) * 1px);
 }
 
 #task-overview-table .test-output-cell {
