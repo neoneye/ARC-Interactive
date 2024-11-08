@@ -1095,7 +1095,11 @@ class PageController {
 
     // Measure the size of the puzzle, for determining if the entire puzzle can fit inside the overview area.
     // If the puzzle is too large, then the "train" pairs will have to be paginated, which is undesired.
-    sizeOfOverviewContent(task, revealSolutions) {
+    // If the user press the "Reveal" button, then the output images are shown.
+    // If the user hasn't begun drawing, then no output image is shown.
+    // If the user has begun drawing, then the current output image is shown.
+    sizeOfOverviewContent() {
+        let task = this.task;
         // Size of "train" pairs
         var trainSumWidth = 0;
         var trainMaxInputHeight = 0;
@@ -1113,10 +1117,7 @@ class PageController {
         var testMaxOutputHeight = 0;
         for (let i = 0; i < task.test.length; i++) {
             let input = task.test[i].input;
-            var output = this.imageForTestIndex(i);
-            if (revealSolutions) {
-                output = task.test[i].output;
-            }
+            let output = this.outputImageForTestIndexBasedOnUIMode(i);
             var outputWidth = 0;
             var outputHeight = 0;
             if (output) {
@@ -1228,7 +1229,7 @@ class PageController {
         // let devicePixelRatio = 1;
         // console.log('devicePixelRatio:', devicePixelRatio);
 
-        let sizeOfOverviewContent = this.sizeOfOverviewContent(task, this.overviewRevealSolutions);
+        let sizeOfOverviewContent = this.sizeOfOverviewContent();
         console.log('sizeOfOverviewContent:', sizeOfOverviewContent);
 
         // Size of the overview <div>
@@ -1700,6 +1701,20 @@ class PageController {
     
     imageForTestIndex(testIndex) {
         return this.drawingItems[testIndex].originator.getImageClone();
+    }
+
+    outputImageForTestIndexBasedOnUIMode(testIndex) {
+        var image = null;
+        if (this.drawingItems[testIndex].caretaker.undoList.length > 0) {
+            // Only show an image when the user have drawn something.
+            // If there are no actions to undo, then the user have not drawn anything.
+            image = this.drawingItems[testIndex].originator.getImageRef();
+        }
+        if (this.overviewRevealSolutions) {
+            // The user is holding down the button that reveals the solutions.
+            image = this.task.test[testIndex].output;
+        }
+        return image;
     }
 
     activateTestIndex(testIndex) {
