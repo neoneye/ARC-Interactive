@@ -1243,6 +1243,27 @@ class PageController {
         const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
         console.log('image_padding:', image_padding);
 
+        let idealCellSize = 1;
+        {
+            // Calculate ideal cell size.
+            // Considering the best case scenario where the entire puzzle fits inside the overview area.
+            // If it turns out that the ideal cell size is too small, then kludgy workaround such as pagination may be enabled.
+            // This happens if the puzzle is too large, the ARC-Heavy has 30 pairs, where ARC-AGI has between 3 and 10 pairs.
+            // This happens if the device has too tiny a screen, such as a mobile phone.
+            let dpr = devicePixelRatio;
+            let sumPixelWidth = sizeOfOverviewContent.width;
+            let maxPixelHeight = sizeOfOverviewContent.height;
+            let leftRightPaddingOfPuzzle = 6;
+            let widthOfNonImage = image_padding * ((task.train.length + task.test.length) * 2 + 1) + leftRightPaddingOfPuzzle;
+            let heightOfImageSizeLabels = 75;
+            let heightOfNonImage = heightOfImageSizeLabels + image_padding * 2;
+            let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / sumPixelWidth);
+            let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / maxPixelHeight);
+            let idealCellSizeRaw = Math.min(cellSizeX, cellSizeY);
+            idealCellSize = idealCellSizeRaw / devicePixelRatio;
+            console.log('idealCellSizeRaw:', idealCellSizeRaw, 'idealCellSize:', idealCellSize);
+        }
+
         let maxExampleCount = Math.max(6 - task.test.length, 3);
         console.log('maxExampleCount:', maxExampleCount);
 
@@ -1275,6 +1296,7 @@ class PageController {
 
         let cellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
         let cellSize = cellSizeRaw / devicePixelRatio;
+        // let cellSize = idealCellSize;
         console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
