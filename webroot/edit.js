@@ -1331,10 +1331,12 @@ class PageController {
                 el_td0.classList.add('input-image-cell');
                 el_td0.classList.add('center-x');
 
-                let el_div = document.createElement('div');
-                el_div.className = 'image-size-label';
-                el_div.innerText = `${input.width}x${input.height}`;
-                el_td0.appendChild(el_div);
+                {
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${input.width}x${input.height}`;
+                    el_td0.appendChild(el_div);
+                }
 
                 let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                 el_td0.appendChild(canvas);
@@ -1347,10 +1349,12 @@ class PageController {
                 let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                 el_td1.appendChild(canvas);
 
-                let el_div = document.createElement('div');
-                el_div.className = 'image-size-label';
-                el_div.innerText = `${output.width}x${output.height}`;
-                el_td1.appendChild(el_div);
+                {
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${output.width}x${output.height}`;
+                    el_td1.appendChild(el_div);
+                }
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
@@ -1397,10 +1401,12 @@ class PageController {
                 el_td0.classList.add('input-image-cell');
                 el_td0.classList.add('center-x');
 
-                let el_div = document.createElement('div');
-                el_div.className = 'image-size-label';
-                el_div.innerText = `${input.width}x${input.height}`;
-                el_td0.appendChild(el_div);
+                {
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${input.width}x${input.height}`;
+                    el_td0.appendChild(el_div);
+                }
 
                 let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                 el_td0.appendChild(canvas);
@@ -1428,10 +1434,12 @@ class PageController {
                     let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                     el_td1.appendChild(canvas);
     
-                    let el_div = document.createElement('div');
-                    el_div.className = 'image-size-label';
-                    el_div.innerText = `${image.width}x${image.height}`;
-                    el_td1.appendChild(el_div);
+                    {
+                        let el_div = document.createElement('div');
+                        el_div.className = 'image-size-label';
+                        el_div.innerText = `${image.width}x${image.height}`;
+                        el_td1.appendChild(el_div);
+                    }
                 }
     
             }
