@@ -1281,6 +1281,15 @@ class PageController {
             // console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
         }
 
+        let train_offset = this.overviewPageIndex * pageCapacity;
+        let n_train = Math.min(task.train.length - train_offset, pageCapacity);
+        console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
+
+        let cellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
+        let cellSize = cellSizeRaw / devicePixelRatio;
+        // let cellSize = idealCellSize;
+        console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
+
         if (pageCount <= 1) {
             this.hidePagination();
         } else {
@@ -1290,15 +1299,6 @@ class PageController {
         // Show the current page index in the UI
         let el_pagination_status = document.getElementById('pagination-status');
         el_pagination_status.innerText = `${this.overviewPageIndex + 1} of ${lastPageIndex + 1}`;
-
-        let train_offset = this.overviewPageIndex * pageCapacity;
-        let n_train = Math.min(task.train.length - train_offset, pageCapacity);
-        console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
-
-        let cellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
-        let cellSize = cellSizeRaw / devicePixelRatio;
-        // let cellSize = idealCellSize;
-        console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
