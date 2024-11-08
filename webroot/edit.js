@@ -1265,30 +1265,41 @@ class PageController {
             console.log('idealCellSizeRaw:', idealCellSizeRaw, 'idealCellSize:', idealCellSize);
         }
 
-        let maxExampleCount = Math.max(6 - task.test.length, 3);
-        console.log('maxExampleCount:', maxExampleCount);
+        var pageCapacity = task.train.length;
+        var pageCount = 1;
+        var lastPageIndex = 1;
+        var train_offset = 0;
+        var n_train = task.train.length;
+        var paginatedCellSize = 1;
+        if (idealCellSize < 3) {
+            console.log('The ideal cell size is too small. Pagination may be enabled.');
 
-        let pageCapacity = Math.min(task.train.length, maxExampleCount);
-        let pageCount = Math.floor((task.train.length - 1) / pageCapacity) + 1;
-        console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
-        let lastPageIndex = pageCount - 1;
-        // Clamp the overviewPageIndex to a valid range.
-        if (this.overviewPageIndex < 0) {
-            this.overviewPageIndex = lastPageIndex;
-            // console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
-        } else if (this.overviewPageIndex > lastPageIndex) {
-            this.overviewPageIndex = 0;
-            // console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+            let maxExampleCount = Math.max(6 - task.test.length, 3);
+            console.log('maxExampleCount:', maxExampleCount);
+    
+            pageCapacity = Math.min(task.train.length, maxExampleCount);
+            pageCount = Math.floor((task.train.length - 1) / pageCapacity) + 1;
+            console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
+            lastPageIndex = pageCount - 1;
+            // Clamp the overviewPageIndex to a valid range.
+            if (this.overviewPageIndex < 0) {
+                this.overviewPageIndex = lastPageIndex;
+                // console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+            } else if (this.overviewPageIndex > lastPageIndex) {
+                this.overviewPageIndex = 0;
+                // console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+            }
+    
+            train_offset = this.overviewPageIndex * pageCapacity;
+            n_train = Math.min(task.train.length - train_offset, pageCapacity);
+            console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
+    
+            let paginatedCellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
+            paginatedCellSize = paginatedCellSizeRaw / devicePixelRatio;
+            console.log('paginatedCellSizeRaw:', paginatedCellSizeRaw, 'paginatedCellSize:', paginatedCellSize);
         }
-
-        let train_offset = this.overviewPageIndex * pageCapacity;
-        let n_train = Math.min(task.train.length - train_offset, pageCapacity);
-        console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
-
-        let cellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
-        let cellSize = cellSizeRaw / devicePixelRatio;
-        // let cellSize = idealCellSize;
-        console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
+        let cellSize = Math.max(Math.max(idealCellSize, paginatedCellSize), 1);
+        console.log('resolved cellSize:', cellSize);
 
         if (pageCount <= 1) {
             this.hidePagination();
