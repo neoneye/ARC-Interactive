@@ -415,12 +415,18 @@ body {
 #task-overview-table .input-image-cell { 
     vertical-align: bottom;
     padding-bottom: calc(var(--ui-overview-image-padding) * 2 * 1px);
-    padding-left: calc(var(--ui-overview-image-padding) * 1px);
-    padding-right: calc(var(--ui-overview-image-padding) * 1px);
 } 
 
 #task-overview-table .output-image-cell { 
     vertical-align: top; 
+}
+
+#task-overview-table .canvas-holder canvas {
+    display: block;
+}
+
+#task-overview-table .canvas-holder { 
+    display: inline-block;
     padding-left: calc(var(--ui-overview-image-padding) * 1px);
     padding-right: calc(var(--ui-overview-image-padding) * 1px);
 }

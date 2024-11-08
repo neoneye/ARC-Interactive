@@ -1338,16 +1338,26 @@ class PageController {
                     el_td0.appendChild(el_div);
                 }
 
-                let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td0.appendChild(canvas);
+                {
+                    let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                    let el_div = document.createElement('div');
+                    el_div.className = 'canvas-holder';
+                    el_div.appendChild(canvas);
+                    el_td0.appendChild(el_div);
+                }
             }
 
             {
                 el_td1.classList.add('output-image-cell');
                 el_td1.classList.add('center-x');
 
-                let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td1.appendChild(canvas);
+                {
+                    let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                    let el_div = document.createElement('div');
+                    el_div.className = 'canvas-holder';
+                    el_div.appendChild(canvas);
+                    el_td1.appendChild(el_div);
+                }
 
                 {
                     let el_div = document.createElement('div');
@@ -1408,8 +1418,13 @@ class PageController {
                     el_td0.appendChild(el_div);
                 }
 
-                let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td0.appendChild(canvas);
+                {
+                    let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                    let el_div = document.createElement('div');
+                    el_div.className = 'canvas-holder';
+                    el_div.appendChild(canvas);
+                    el_td0.appendChild(el_div);
+                }
             }
 
             {
@@ -1431,8 +1446,13 @@ class PageController {
                     el_td1.innerText = '?';
                 } else {
 
-                    let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                    el_td1.appendChild(canvas);
+                    {
+                        let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                        let el_div = document.createElement('div');
+                        el_div.className = 'canvas-holder';
+                        el_div.appendChild(canvas);
+                        el_td1.appendChild(el_div);
+                    }
     
                     {
                         let el_div = document.createElement('div');
