@@ -1251,14 +1251,15 @@ class PageController {
             // This happens if the puzzle is too large, the ARC-Heavy has 30 pairs, where ARC-AGI has between 3 and 10 pairs.
             // This happens if the device has too tiny a screen, such as a mobile phone.
             let dpr = devicePixelRatio;
-            let sumPixelWidth = sizeOfOverviewContent.width;
-            let maxPixelHeight = sizeOfOverviewContent.height;
+            let pairCount = task.train.length + task.test.length;
+            let puzzleWidth = sizeOfOverviewContent.width;
+            let puzzleHeight = sizeOfOverviewContent.height;
             let leftRightPaddingOfPuzzle = 6;
-            let widthOfNonImage = image_padding * ((task.train.length + task.test.length) * 2 + 1) + leftRightPaddingOfPuzzle;
             let heightOfImageSizeLabels = 75;
+            let widthOfNonImage = image_padding * (pairCount * 2 + 1) + leftRightPaddingOfPuzzle + pairCount;
             let heightOfNonImage = heightOfImageSizeLabels + image_padding * 2;
-            let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / sumPixelWidth);
-            let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / maxPixelHeight);
+            let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / puzzleWidth);
+            let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / puzzleHeight);
             let idealCellSizeRaw = Math.min(cellSizeX, cellSizeY);
             idealCellSize = idealCellSizeRaw / devicePixelRatio;
             console.log('idealCellSizeRaw:', idealCellSizeRaw, 'idealCellSize:', idealCellSize);
