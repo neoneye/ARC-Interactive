@@ -1128,13 +1128,15 @@ class PageController {
             testMaxOutputHeight = Math.max(testMaxOutputHeight, outputHeight);
         }
         // Total size
-        let sumWidth = trainSumWidth + testSumWidth;
+        let width = trainSumWidth + testSumWidth;
         let inputMaxHeight = Math.max(trainMaxInputHeight, testMaxInputHeight);
         let outputMaxHeight = Math.max(trainMaxOutputHeight, testMaxOutputHeight);
+        let height = inputMaxHeight + outputMaxHeight;
         return {
-            'sumWidth': sumWidth,
+            'width': width,
             'inputMaxHeight': inputMaxHeight,
             'outputMaxHeight': outputMaxHeight,
+            'height': height,
         };
     }
 
@@ -1219,12 +1221,14 @@ class PageController {
 
     // Rebuild the overview table, so it shows what the user has drawn so far.
     updateOverview() {
+        let task = this.task;
+
         // Get the device pixel ratio, falling back to 1.
         let devicePixelRatio = window.devicePixelRatio || 1;
         // let devicePixelRatio = 1;
         // console.log('devicePixelRatio:', devicePixelRatio);
 
-        let sizeOfOverviewContent = this.sizeOfOverviewContent(this.task, this.overviewRevealSolutions);
+        let sizeOfOverviewContent = this.sizeOfOverviewContent(task, this.overviewRevealSolutions);
         console.log('sizeOfOverviewContent:', sizeOfOverviewContent);
 
         // Size of the overview <div>
@@ -1238,7 +1242,6 @@ class PageController {
         const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
         console.log('image_padding:', image_padding);
 
-        let task = this.task;
         let maxExampleCount = Math.max(6 - task.test.length, 3);
         console.log('maxExampleCount:', maxExampleCount);
 
