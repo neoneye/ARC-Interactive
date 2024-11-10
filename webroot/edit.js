@@ -1098,15 +1098,15 @@ class PageController {
     // If the user press the "Reveal" button, then the output images are shown.
     // If the user hasn't begun drawing, then no output image is shown.
     // If the user has begun drawing, then the current output image is shown.
-    sizeOfOverviewContent() {
+    sizeOfOverviewContent(trainOffset, trainCount) {
         let task = this.task;
         // Size of "train" pairs
         var trainSumWidth = 0;
         var trainMaxInputHeight = 0;
         var trainMaxOutputHeight = 0;
-        for (let i = 0; i < task.train.length; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
+        for (let i = 0; i < trainCount; i++) {
+            let input = task.train[trainOffset + i].input;
+            let output = task.train[trainOffset + i].output;
             trainSumWidth += Math.max(input.width, output.width);
             trainMaxInputHeight = Math.max(trainMaxInputHeight, input.height);
             trainMaxOutputHeight = Math.max(trainMaxOutputHeight, output.height);
@@ -1229,7 +1229,7 @@ class PageController {
         // let devicePixelRatio = 1;
         // console.log('devicePixelRatio:', devicePixelRatio);
 
-        let sizeOfOverviewContent = this.sizeOfOverviewContent();
+        let sizeOfOverviewContent = this.sizeOfOverviewContent(0, task.train.length);
         console.log('sizeOfOverviewContent:', sizeOfOverviewContent);
 
         // Size of the overview <div>
