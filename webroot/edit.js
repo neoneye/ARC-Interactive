@@ -1323,19 +1323,21 @@ class PageController {
             let input = task.train[i + train_offset].input;
             let output = task.train[i + train_offset].output;
             let el_td0 = document.createElement('td');
+            el_td0.classList.add('input-cell');
             let el_td1 = document.createElement('td');
+            el_td1.classList.add('output-cell');
             // el_td0.innerText = `Input ${i + 1}`;
             // el_td1.innerText = `Output ${i + 1}`;
 
             {
-                el_td0.classList.add('input-image-cell');
-                el_td0.classList.add('center-x');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'input-vstack';
 
                 {
                     let el_div = document.createElement('div');
                     el_div.className = 'image-size-label';
                     el_div.innerText = `${input.width}x${input.height}`;
-                    el_td0.appendChild(el_div);
+                    el_div_parent.appendChild(el_div);
                 }
 
                 {
@@ -1343,28 +1345,30 @@ class PageController {
                     let el_div = document.createElement('div');
                     el_div.className = 'canvas-holder';
                     el_div.appendChild(canvas);
-                    el_td0.appendChild(el_div);
+                    el_div_parent.appendChild(el_div);
                 }
+                el_td0.appendChild(el_div_parent);
             }
 
             {
-                el_td1.classList.add('output-image-cell');
-                el_td1.classList.add('center-x');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'output-vstack';
 
                 {
                     let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                     let el_div = document.createElement('div');
                     el_div.className = 'canvas-holder';
                     el_div.appendChild(canvas);
-                    el_td1.appendChild(el_div);
+                    el_div_parent.appendChild(el_div);
                 }
 
                 {
                     let el_div = document.createElement('div');
                     el_div.className = 'image-size-label';
                     el_div.innerText = `${output.width}x${output.height}`;
-                    el_td1.appendChild(el_div);
+                    el_div_parent.appendChild(el_div);
                 }
+                el_td1.appendChild(el_div_parent);
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
@@ -1384,7 +1388,9 @@ class PageController {
             let input = task.test[i].input;
             let output = task.test[i].output;
             let el_td0 = document.createElement('td');
+            el_td0.classList.add('input-cell');
             let el_td1 = document.createElement('td');
+            el_td1.classList.add('output-cell');
             // el_td0.innerText = `Input ${i + 1}`;
             // el_td1.innerText = `Output ${i + 1}`;
 
@@ -1408,14 +1414,14 @@ class PageController {
             }
 
             {
-                el_td0.classList.add('input-image-cell');
-                el_td0.classList.add('center-x');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'input-vstack';
 
                 {
                     let el_div = document.createElement('div');
                     el_div.className = 'image-size-label';
                     el_div.innerText = `${input.width}x${input.height}`;
-                    el_td0.appendChild(el_div);
+                    el_div_parent.appendChild(el_div);
                 }
 
                 {
@@ -1423,14 +1429,14 @@ class PageController {
                     let el_div = document.createElement('div');
                     el_div.className = 'canvas-holder';
                     el_div.appendChild(canvas);
-                    el_td0.appendChild(el_div);
+                    el_div_parent.appendChild(el_div);
                 }
+                el_td0.appendChild(el_div_parent);
             }
 
             {
-                el_td1.classList.add('output-image-cell');
-                el_td1.classList.add('center-x');
-                el_td1.classList.add('test-output-cell');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'output-vstack';
 
                 var image = null;
                 if (this.drawingItems[i].caretaker.undoList.length > 0) {
@@ -1443,25 +1449,24 @@ class PageController {
                     image = output;
                 }
                 if (!image) {
-                    el_td1.innerText = '?';
+                    el_div_parent.innerText = '?';
                 } else {
-
                     {
                         let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
                         let el_div = document.createElement('div');
                         el_div.className = 'canvas-holder';
                         el_div.appendChild(canvas);
-                        el_td1.appendChild(el_div);
+                        el_div_parent.appendChild(el_div);
                     }
     
                     {
                         let el_div = document.createElement('div');
                         el_div.className = 'image-size-label';
                         el_div.innerText = `${image.width}x${image.height}`;
-                        el_td1.appendChild(el_div);
+                        el_div_parent.appendChild(el_div);
                     }
                 }
-    
+                el_td1.appendChild(el_div_parent);    
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);

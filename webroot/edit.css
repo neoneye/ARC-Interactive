@@ -408,25 +408,33 @@ body {
     background-color: rgb(50, 50, 50);
 }
 
-#task-overview-table .center-x {
-    text-align: center; 
+#task-overview-table .input-cell { 
+    vertical-align: bottom;
 } 
 
-#task-overview-table .input-image-cell { 
-    vertical-align: bottom;
+#task-overview-table .input-vstack { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-bottom: calc(var(--ui-overview-image-padding) * 2 * 1px);
 } 
 
-#task-overview-table .output-image-cell { 
-    vertical-align: top; 
-}
+#task-overview-table .output-cell { 
+    vertical-align: top;
+} 
+
+#task-overview-table .output-vstack { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+} 
 
 #task-overview-table .canvas-holder canvas {
     display: block;
 }
 
 #task-overview-table .canvas-holder { 
-    display: inline-block;
+    display: block;
     padding-left: calc(var(--ui-overview-image-padding) * 1px);
     padding-right: calc(var(--ui-overview-image-padding) * 1px);
 }
