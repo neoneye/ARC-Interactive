@@ -213,6 +213,16 @@ class DrawInteractionState {
     }
 }
 
+class PaginationState {
+    constructor(pageIndex, pageCount, pageCapacity, trainOffset, trainCount) {
+        this.pageIndex = pageIndex;
+        this.pageCount = pageCount;
+        this.pageCapacity = pageCapacity;
+        this.trainOffset = trainOffset;
+        this.trainCount = trainCount;
+    }
+}
+
 class PageController {
     constructor() {
         if (crypto.randomUUID) {
@@ -300,6 +310,7 @@ class PageController {
         this.overviewRevealSolutions = false;
 
         this.overviewPageIndex = 0;
+        this.overviewPaginationState = null;
 
         this.isReplayUndoListButtonVisible = true;
 
@@ -1278,15 +1289,14 @@ class PageController {
             console.log('resolved cellSize:', cellSize);
         }
 
-        if (pageCount <= 1) {
-            this.hidePagination();
-        } else {
-            this.showPagination();
-        }
-
-        // Show the current page index in the UI
-        let el_pagination_status = document.getElementById('pagination-status');
-        el_pagination_status.innerText = `${this.overviewPageIndex + 1} of ${lastPageIndex + 1}`;
+        this.overviewPaginationState = new PaginationState(
+            this.overviewPageIndex, 
+            pageCount, 
+            pageCapacity, 
+            train_offset, 
+            n_train
+        );
+        this.updatePagination();
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -2878,6 +2888,24 @@ class PageController {
     showPagination() {
         let el = document.getElementById("pagination");
         el.classList.remove('hidden');
+    }
+
+    updatePagination() {
+        let state = this.overviewPaginationState;
+        if (!state) {
+            this.hidePagination();
+            return;
+        }
+
+        if (state.pageCount <= 1) {
+            this.hidePagination();
+        } else {
+            this.showPagination();
+        }
+
+        // Show the current page index in the UI
+        let el_pagination_status = document.getElementById('pagination-status');
+        el_pagination_status.innerText = `${state.pageIndex + 1} of ${state.pageCount}`;
     }
 }
 
