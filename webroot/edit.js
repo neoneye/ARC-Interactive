@@ -1145,65 +1145,6 @@ class PageController {
         };
     }
 
-    calcCellSizeForOverview(task, dpr, revealSolutions, maxTrain) {
-        let n_train = Math.min(task.train.length, maxTrain);
-        let el = document.getElementById('main-inner');
-        let width = el.clientWidth;
-        let height = el.clientHeight;
-        // console.log('calcCellSizeForOverview() width:', width, 'height:', height);
-
-        let heightOfNonImage = 75;
-        let separatorWidth = 10;
-        let paddingWidth = (n_train + task.test.length) * 20;
-        let widthOfNonImage = separatorWidth + paddingWidth;
-
-        let separatorSize = 1;
-        var sumPixelWidth = 0;
-        for (let i = 0; i < n_train; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
-            sumPixelWidth += Math.max(input.width, output.width);
-        }
-        for (let i = 0; i < task.test.length; i++) {
-            let input = task.test[i].input;
-            var output = this.imageForTestIndex(i);
-            if (!output) {
-                output = input;
-            }
-            if (revealSolutions) {
-                output = task.test[i].output;
-            }
-            sumPixelWidth += Math.max(input.width, output.width);
-        }
-        sumPixelWidth += separatorSize * (n_train + task.test.length - 1);
-
-        var maxPixelHeight = 0;
-        for (let i = 0; i < n_train; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
-            let pixelHeight = input.height + output.height + separatorSize;
-            maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
-        }
-        for (let i = 0; i < task.test.length; i++) {
-            let input = task.test[i].input;
-            var output = this.imageForTestIndex(i);
-            if (!output) {
-                output = input;
-            }
-            if (revealSolutions) {
-                output = task.test[i].output;
-            }
-            let pixelHeight = input.height + output.height;
-            maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
-        }
-
-        let cellSizeX = Math.floor((width - widthOfNonImage) * dpr / sumPixelWidth);
-        let cellSizeY = Math.floor((height - heightOfNonImage) * dpr / maxPixelHeight);
-        let cellSize = Math.min(cellSizeX, cellSizeY);
-        // console.log('calcCellSizeForOverview() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
-        return cellSize;
-    }
-
     // The user is pressing down the button that reveals the solutions. By default the solutions are hidden.
     overviewRevealSolutionsYes() {
         this.overviewRevealSolutions = true;
