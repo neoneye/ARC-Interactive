@@ -1220,6 +1220,26 @@ class PageController {
         this.history.log(message);
     }
 
+    calculateCellSize(sizeOfOverviewContent, trainCount, width_raw, height_raw) {
+        const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
+        console.log('image_padding:', image_padding);
+
+        let dpr = window.devicePixelRatio || 1;
+        let pairCount = trainCount + this.task.test.length;
+        let puzzleWidth = sizeOfOverviewContent.width;
+        let puzzleHeight = sizeOfOverviewContent.height;
+        let leftRightPaddingOfPuzzle = 6;
+        let heightOfImageSizeLabels = 75;
+        let widthOfNonImage = image_padding * (pairCount * 2 + 1) + leftRightPaddingOfPuzzle + pairCount;
+        let heightOfNonImage = heightOfImageSizeLabels + image_padding * 2;
+        let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / puzzleWidth);
+        let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / puzzleHeight);
+        let cellSizeRaw = Math.min(cellSizeX, cellSizeY);
+        let cellSize = cellSizeRaw / dpr;
+        console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
+        return cellSize;
+    }
+
     // Rebuild the overview table, so it shows what the user has drawn so far.
     updateOverview() {
         let task = this.task;
@@ -1240,8 +1260,8 @@ class PageController {
         let height = height_raw * devicePixelRatio;
         console.log('updateOverview() width:', width, 'height:', height, 'width_raw:', width_raw, 'height_raw:', height_raw, 'devicePixelRatio:', devicePixelRatio);
 
-        const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
-        console.log('image_padding:', image_padding);
+        // const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
+        // console.log('image_padding:', image_padding);
 
         let idealCellSize = 1;
         {
@@ -1250,19 +1270,20 @@ class PageController {
             // If it turns out that the ideal cell size is too small, then kludgy workaround such as pagination may be enabled.
             // This happens if the puzzle is too large, the ARC-Heavy has 30 pairs, where ARC-AGI has between 3 and 10 pairs.
             // This happens if the device has too tiny a screen, such as a mobile phone.
-            let dpr = devicePixelRatio;
-            let pairCount = task.train.length + task.test.length;
-            let puzzleWidth = sizeOfOverviewContent.width;
-            let puzzleHeight = sizeOfOverviewContent.height;
-            let leftRightPaddingOfPuzzle = 6;
-            let heightOfImageSizeLabels = 75;
-            let widthOfNonImage = image_padding * (pairCount * 2 + 1) + leftRightPaddingOfPuzzle + pairCount;
-            let heightOfNonImage = heightOfImageSizeLabels + image_padding * 2;
-            let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / puzzleWidth);
-            let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / puzzleHeight);
-            let idealCellSizeRaw = Math.min(cellSizeX, cellSizeY);
-            idealCellSize = idealCellSizeRaw / devicePixelRatio;
-            console.log('idealCellSizeRaw:', idealCellSizeRaw, 'idealCellSize:', idealCellSize);
+            // let dpr = devicePixelRatio;
+            // let pairCount = task.train.length + task.test.length;
+            // let puzzleWidth = sizeOfOverviewContent.width;
+            // let puzzleHeight = sizeOfOverviewContent.height;
+            // let leftRightPaddingOfPuzzle = 6;
+            // let heightOfImageSizeLabels = 75;
+            // let widthOfNonImage = image_padding * (pairCount * 2 + 1) + leftRightPaddingOfPuzzle + pairCount;
+            // let heightOfNonImage = heightOfImageSizeLabels + image_padding * 2;
+            // let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / puzzleWidth);
+            // let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / puzzleHeight);
+            // let idealCellSizeRaw = Math.min(cellSizeX, cellSizeY);
+            // idealCellSize = idealCellSizeRaw / devicePixelRatio;
+            idealCellSize = this.calculateCellSize(sizeOfOverviewContent, task.train.length, width_raw, height_raw);
+            // console.log('idealCellSizeRaw:', idealCellSizeRaw, 'idealCellSize:', idealCellSize);
         }
 
         var pageCapacity = task.train.length;
@@ -1295,8 +1316,12 @@ class PageController {
             console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
     
             let paginatedCellSizeRaw = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions, n_train);
-            paginatedCellSize = paginatedCellSizeRaw / devicePixelRatio;
-            console.log('paginatedCellSizeRaw:', paginatedCellSizeRaw, 'paginatedCellSize:', paginatedCellSize);
+            let paginatedSizeOfOverviewContent = this.sizeOfOverviewContent(train_offset, n_train);
+            paginatedCellSize = this.calculateCellSize(paginatedSizeOfOverviewContent, n_train, width_raw, height_raw);
+
+            // paginatedCellSize = paginatedCellSizeRaw / devicePixelRatio;
+            // console.log('paginatedCellSizeRaw:', paginatedCellSizeRaw, 'paginatedCellSize:', paginatedCellSize);
+            console.log('paginatedCellSize:', paginatedCellSize);
         }
         let cellSize = Math.max(Math.max(idealCellSize, paginatedCellSize), 1);
         console.log('resolved cellSize:', cellSize);
