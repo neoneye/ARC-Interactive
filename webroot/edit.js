@@ -1265,8 +1265,10 @@ class PageController {
         // Going below the following limit, and the thumbnails are nearly impossible to make sense of.
         let smallestMeaningfulCellSize = 3;
 
+        var firstTime = false;
         if (!this.overviewPaginationState) {
             this.overviewPaginationState = PaginationState.createWithoutPagination(task);
+            firstTime = true;
         }
         let lastPaginationState = this.overviewPaginationState.clone();
 
@@ -1332,12 +1334,13 @@ class PageController {
             train_offset, 
             n_train
         );
-        if (lastPaginationState.isEqualTo(newPaginationState)) {
-            console.log('Pagination state did not change:', lastPaginationState, newPaginationState);
-        } else {
-            console.log('Pagination state changed:', lastPaginationState, newPaginationState);
+        if (firstTime || lastPaginationState.isEqualTo(newPaginationState) == false) {
+            if (verbose) {
+                console.log('Pagination state changed:', lastPaginationState, newPaginationState);
+            }
             this.overviewPaginationState = newPaginationState;
             this.updatePagination();
+            this.historyLogPagination();
         }
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
@@ -2948,6 +2951,29 @@ class PageController {
         // Show the current page index in the UI
         let el_pagination_status = document.getElementById('pagination-status');
         el_pagination_status.innerText = `${state.pageIndex + 1} of ${state.pageCount}`;
+    }
+
+    historyLogPagination() {
+        let state = this.overviewPaginationState;
+        if (!state) {
+            return;
+        }
+        if (state.pageCount <= 1) {
+            let message = "all train pairs fit in overview area";
+            this.history.log(message, {
+                action: 'pagination-disabled',
+            });
+        } else {
+            let message = `${state.pageIndex + 1} of ${state.pageCount}, too many train pairs to fit inside overview area, using pagination`;
+            this.history.log(message, {
+                action: 'pagination-action',
+                pageIndex: state.pageIndex,
+                pageCount: state.pageCount,
+                pageCapacity: state.pageCapacity,
+                trainOffset: state.trainOffset,
+                trainCount: state.trainCount,
+            });
+        }
     }
 }
 
