@@ -744,15 +744,8 @@ class ARCTask {
         let pairGapSize = 5 * scale;
         let trainTestGapSize = 5 * scale;
 
-        // Some puzzles are too wide to fit in the thumbnail, so we reduce the number of pairs to fit
-        var n_train = Math.min(this.train.length, thumbnail_max_train_count);
-        for(let i = 0; i < 3; i++) {
-            let total_width = this.calcThumbnailWidth(pairGapSize, n_train);
-            if (total_width <= 150) {
-                break;
-            }
-            n_train -= 1;
-        }
+        // Truncate those puzzles that are way too wide to fit in the thumbnail
+        let n_train = Math.min(this.train.length, thumbnail_max_train_count);
 
         let n_test = this.test.length;
         let count = n_train + n_test;
