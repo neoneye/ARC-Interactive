@@ -1291,13 +1291,6 @@ class PageController {
     
             let pageCapacityLimit = Math.min(task.train.length, maxExampleCount);
             pageCount = Math.floor((task.train.length - 1) / pageCapacityLimit) + 1;
-            pageCapacity = Math.ceil(task.train.length / pageCount);
-            if (verbose) {
-            }
-            if (pageCapacity != pageCapacityLimit) {
-                console.log('!!!!!!!!!! yay');
-            }
-            console.log('pageCount:', pageCount, 'pageCapacityLimit:', pageCapacityLimit, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
 
             pageIndex = pageIndex + this.overviewPageIndexDelta;
             // Clamp the new pageIndex to a valid range.
@@ -1312,8 +1305,33 @@ class PageController {
                     console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
                 }
             }
+
+            let minimumNumberOfItemsPerPage = Math.floor(task.train.length / pageCount);
+            console.log('minimumNumberOfItemsPerPage:', minimumNumberOfItemsPerPage);
+            let remainingNumberOfItems = task.train.length - minimumNumberOfItemsPerPage * pageCount;
+            console.log('remainingNumberOfItems:', remainingNumberOfItems);
+
+            var counters = [];
+            var train_offsets = [];
+            var current_train_offset = 0;
+            for (let i = 0; i < pageCount; i++) {
+                var count = minimumNumberOfItemsPerPage;
+                if (i < remainingNumberOfItems) {
+                    count++;
+                }
+                console.log('!!! page:', i, 'count:', count, 'offset:', current_train_offset);
+                counters.push(count);
+                train_offsets.push(current_train_offset);
+                current_train_offset += count;
+            }
+            pageCapacity = counters[pageIndex];
+            train_offset = train_offsets[pageIndex];
+            if (pageCapacity != pageCapacityLimit) {
+                console.log('!!!!!!!!!! yay');
+            }
+            console.log('pageCount:', pageCount, 'pageCapacityLimit:', pageCapacityLimit, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
+
     
-            train_offset = pageIndex * pageCapacity;
             n_train = Math.min(task.train.length - train_offset, pageCapacity);
             if (verbose) {
                 console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', pageIndex);
