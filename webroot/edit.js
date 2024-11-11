@@ -1290,10 +1290,12 @@ class PageController {
             }
     
             let pageCapacityLimit = Math.min(task.train.length, maxExampleCount);
+
+            // Determine how many pages are needed.
             pageCount = Math.floor((task.train.length - 1) / pageCapacityLimit) + 1;
 
+            // Adjust the pageIndex based on the delta.
             pageIndex = pageIndex + this.overviewPageIndexDelta;
-            // Clamp the new pageIndex to a valid range.
             if (pageIndex < 0) {
                 pageIndex = pageCount - 1;
                 if (verbose) {
@@ -1306,11 +1308,14 @@ class PageController {
                 }
             }
 
+            // Determine how many items are going to be shown per pages.
             let minimumNumberOfItemsPerPage = Math.floor(task.train.length / pageCount);
-            console.log('minimumNumberOfItemsPerPage:', minimumNumberOfItemsPerPage);
             let remainingNumberOfItems = task.train.length - minimumNumberOfItemsPerPage * pageCount;
-            console.log('remainingNumberOfItems:', remainingNumberOfItems);
+            if (verbose) {
+                console.log('minimumNumberOfItemsPerPage:', minimumNumberOfItemsPerPage, 'remainingNumberOfItems:', remainingNumberOfItems);
+            }
 
+            // For each page, determine the how many items are going to be shown.
             var counters = [];
             var train_offsets = [];
             var current_train_offset = 0;
@@ -1319,18 +1324,20 @@ class PageController {
                 if (i < remainingNumberOfItems) {
                     count++;
                 }
-                console.log('!!! page:', i, 'count:', count, 'offset:', current_train_offset);
+                if (verbose) {
+                    console.log('page:', i, 'count:', count, 'offset:', current_train_offset);
+                }
                 counters.push(count);
                 train_offsets.push(current_train_offset);
                 current_train_offset += count;
             }
+
+            // Use the computed properties.
             pageCapacity = counters[pageIndex];
             train_offset = train_offsets[pageIndex];
-            if (pageCapacity != pageCapacityLimit) {
-                console.log('!!!!!!!!!! yay');
+            if (verbose) {
+                console.log('pageCount:', pageCount, 'pageCapacityLimit:', pageCapacityLimit, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
             }
-            console.log('pageCount:', pageCount, 'pageCapacityLimit:', pageCapacityLimit, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
-
     
             n_train = Math.min(task.train.length - train_offset, pageCapacity);
             if (verbose) {
