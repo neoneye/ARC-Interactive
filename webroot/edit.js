@@ -1289,11 +1289,16 @@ class PageController {
                 console.log('maxExampleCount:', maxExampleCount);
             }
     
-            pageCapacity = Math.min(task.train.length, maxExampleCount);
-            pageCount = Math.floor((task.train.length - 1) / pageCapacity) + 1;
+            let pageCapacityLimit = Math.min(task.train.length, maxExampleCount);
+            pageCount = Math.floor((task.train.length - 1) / pageCapacityLimit) + 1;
+            pageCapacity = Math.ceil(task.train.length / pageCount);
             if (verbose) {
-                console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
             }
+            if (pageCapacity != pageCapacityLimit) {
+                console.log('!!!!!!!!!! yay');
+            }
+            console.log('pageCount:', pageCount, 'pageCapacityLimit:', pageCapacityLimit, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
+
             pageIndex = pageIndex + this.overviewPageIndexDelta;
             // Clamp the new pageIndex to a valid range.
             if (pageIndex < 0) {
