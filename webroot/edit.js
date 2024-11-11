@@ -1828,10 +1828,6 @@ class PageController {
         });
     }
     
-    imageForTestIndex(testIndex) {
-        return this.drawingItems[testIndex].originator.getImageClone();
-    }
-
     outputImageForTestIndexBasedOnUIMode(testIndex) {
         var image = null;
         if (this.drawingItems[testIndex].caretaker.undoList.length > 0) {
