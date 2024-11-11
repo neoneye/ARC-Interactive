@@ -328,7 +328,7 @@ class PageController {
 
         this.overviewRevealSolutions = false;
 
-        this.overviewPageIndex = 0;
+        this.overviewPageIndexDelta = 0;
         this.overviewPaginationState = null;
 
         this.isReplayUndoListButtonVisible = true;
@@ -1266,6 +1266,7 @@ class PageController {
         }
         let lastPaginationState = this.overviewPaginationState.clone();
 
+        var pageIndex = lastPaginationState.pageIndex;
         var pageCapacity = task.train.length;
         var pageCount = 1;
         var lastPageIndex = 1;
@@ -1288,23 +1289,24 @@ class PageController {
                 console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
             }
             lastPageIndex = pageCount - 1;
-            // Clamp the overviewPageIndex to a valid range.
-            if (this.overviewPageIndex < 0) {
-                this.overviewPageIndex = lastPageIndex;
+            pageIndex = pageIndex + this.overviewPageIndexDelta;
+            // Clamp the new pageIndex to a valid range.
+            if (pageIndex < 0) {
+                pageIndex = lastPageIndex;
                 if (verbose) {
-                    console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+                    console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
                 }
-            } else if (this.overviewPageIndex > lastPageIndex) {
-                this.overviewPageIndex = 0;
+            } else if (pageIndex > lastPageIndex) {
+                pageIndex = 0;
                 if (verbose) {
-                    console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'new page index:', this.overviewPageIndex);
+                    console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
                 }
             }
     
-            train_offset = this.overviewPageIndex * pageCapacity;
+            train_offset = pageIndex * pageCapacity;
             n_train = Math.min(task.train.length - train_offset, pageCapacity);
             if (verbose) {
-                console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', this.overviewPageIndex);
+                console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', pageIndex);
             }
     
             let paginatedSizeOfOverviewContent = this.sizeOfOverviewContent(train_offset, n_train);
@@ -1319,8 +1321,9 @@ class PageController {
             console.log('resolved cellSize:', cellSize);
         }
 
+        this.overviewPageIndexDelta = 0;
         let newPaginationState = new PaginationState(
-            this.overviewPageIndex, 
+            pageIndex, 
             pageCount, 
             pageCapacity, 
             train_offset, 
@@ -2906,12 +2909,12 @@ class PageController {
     }
 
     paginationGotoPreviousPage() {
-        this.overviewPageIndex -= 1;
+        this.overviewPageIndexDelta = -1;
         this.updateOverview();
     }
 
     paginationGotoNextPage() {
-        this.overviewPageIndex += 1;
+        this.overviewPageIndexDelta = 1;
         this.updateOverview();
     }
 
