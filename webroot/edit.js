@@ -232,6 +232,16 @@ class PaginationState {
         );
     }
 
+    static createWithoutPagination(task) {
+        return new PaginationState(
+            0, // Start out on the first page
+            1, // There is only one page
+            task.train.length, // The page capacity is the number of train pairs
+            0, // The train offset is 0, since we don't want to skip any task.
+            task.train.length // The train count is the number of train pairs, since all train pairs are shown.
+        );
+    }
+
     isEqualTo(other) {
         if (!(other instanceof PaginationState)) {
             throw new Error("PaginationState.isEqual() 'other' is not an instance of PaginationState");
@@ -1256,16 +1266,11 @@ class PageController {
         let smallestMeaningfulCellSize = 3;
 
         if (!this.overviewPaginationState) {
-            this.overviewPaginationState = new PaginationState(
-                0, 
-                1, 
-                task.train.length, 
-                0, 
-                task.train.length
-            );
+            this.overviewPaginationState = PaginationState.createWithoutPagination(task);
         }
         let lastPaginationState = this.overviewPaginationState.clone();
 
+        // Determine what the pagination state should be.
         var pageIndex = lastPaginationState.pageIndex;
         var pageCapacity = task.train.length;
         var pageCount = 1;
