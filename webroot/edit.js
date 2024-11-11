@@ -1269,7 +1269,6 @@ class PageController {
         var pageIndex = lastPaginationState.pageIndex;
         var pageCapacity = task.train.length;
         var pageCount = 1;
-        var lastPageIndex = 1;
         var train_offset = 0;
         var n_train = task.train.length;
         var paginatedCellSize = 1;
@@ -1288,15 +1287,14 @@ class PageController {
             if (verbose) {
                 console.log('pageCount:', pageCount, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
             }
-            lastPageIndex = pageCount - 1;
             pageIndex = pageIndex + this.overviewPageIndexDelta;
             // Clamp the new pageIndex to a valid range.
             if (pageIndex < 0) {
-                pageIndex = lastPageIndex;
+                pageIndex = pageCount - 1;
                 if (verbose) {
                     console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
                 }
-            } else if (pageIndex > lastPageIndex) {
+            } else if (pageIndex >= pageCount) {
                 pageIndex = 0;
                 if (verbose) {
                     console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
