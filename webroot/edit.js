@@ -221,6 +221,25 @@ class PaginationState {
         this.trainOffset = trainOffset;
         this.trainCount = trainCount;
     }
+
+    clone() {
+        return new PaginationState(
+            this.pageIndex,
+            this.pageCount,
+            this.pageCapacity,
+            this.trainOffset,
+            this.trainCount
+        );
+    }
+
+    isEqualTo(other) {
+        if (!(other instanceof PaginationState)) {
+            throw new Error("PaginationState.isEqual() 'other' is not an instance of PaginationState");
+        }
+        let s0 = JSON.stringify(this);
+        let s1 = JSON.stringify(other);
+        return s0 === s1;
+    }
 }
 
 class PageController {
@@ -1236,6 +1255,17 @@ class PageController {
         // Going below the following limit, and the thumbnails are nearly impossible to make sense of.
         let smallestMeaningfulCellSize = 3;
 
+        if (!this.overviewPaginationState) {
+            this.overviewPaginationState = new PaginationState(
+                0, 
+                1, 
+                task.train.length, 
+                0, 
+                task.train.length
+            );
+        }
+        let lastPaginationState = this.overviewPaginationState.clone();
+
         var pageCapacity = task.train.length;
         var pageCount = 1;
         var lastPageIndex = 1;
@@ -1289,14 +1319,20 @@ class PageController {
             console.log('resolved cellSize:', cellSize);
         }
 
-        this.overviewPaginationState = new PaginationState(
+        let newPaginationState = new PaginationState(
             this.overviewPageIndex, 
             pageCount, 
             pageCapacity, 
             train_offset, 
             n_train
         );
-        this.updatePagination();
+        if (lastPaginationState.isEqualTo(newPaginationState)) {
+            console.log('Pagination state did not change:', lastPaginationState, newPaginationState);
+        } else {
+            console.log('Pagination state changed:', lastPaginationState, newPaginationState);
+            this.overviewPaginationState = newPaginationState;
+            this.updatePagination();
+        }
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
