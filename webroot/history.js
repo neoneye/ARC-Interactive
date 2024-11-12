@@ -1144,7 +1144,7 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSizeForOverview(task, dpr, showSizeAndGrid) {
+    calcCellSizeForOverview(task, dpr, showSizeAndGrid, trainCount) {
         let el = document.getElementById('main-inner');
         let width = el.clientWidth;
         let height = el.clientHeight;
@@ -1152,12 +1152,12 @@ class PageController {
 
         let heightOfNonImage = 75;
         let separatorWidth = 10;
-        let paddingWidth = (task.train.length + task.test.length) * 20;
+        let paddingWidth = (trainCount + task.test.length) * 20;
         let widthOfNonImage = separatorWidth + paddingWidth;
 
         let separatorSize = 1;
         var sumPixelWidth = 0;
-        for (let i = 0; i < task.train.length; i++) {
+        for (let i = 0; i < trainCount; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
             sumPixelWidth += Math.max(input.width, output.width);
@@ -1170,10 +1170,10 @@ class PageController {
             }
             sumPixelWidth += Math.max(input.width, output.width);
         }
-        sumPixelWidth += separatorSize * (task.train.length + task.test.length - 1);
+        sumPixelWidth += separatorSize * (trainCount + task.test.length - 1);
 
         var maxPixelHeight = 0;
-        for (let i = 0; i < task.train.length; i++) {
+        for (let i = 0; i < trainCount; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
             let pixelHeight = input.height + output.height + separatorSize;
@@ -1223,9 +1223,12 @@ class PageController {
         // let devicePixelRatio = 1;
         // console.log('devicePixelRatio:', devicePixelRatio);
 
+        // Some puzzles in the ARC-Heavy dataset have 27 train pairs, this is too many to show in the overview.
+        let maxTrainCount = 6;
+        let trainCount = Math.min(maxTrainCount, this.task.train.length);
         let task = this.task;
         let showSizeAndGrid = this.isGridVisible;
-        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, showSizeAndGrid);
+        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, showSizeAndGrid, trainCount);
         // console.log('cellSize:', cellSize);
         cellSize = cellSize / devicePixelRatio;
 
@@ -1237,7 +1240,7 @@ class PageController {
         el_tr1.innerText = '';
 
         // Populate table for `train` pairs.
-        for (let i = 0; i < task.train.length; i++) {
+        for (let i = 0; i < trainCount; i++) {
             let input = task.train[i].input;
             let output = task.train[i].output;
             let el_td0 = document.createElement('td');

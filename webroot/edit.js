@@ -213,9 +213,57 @@ class DrawInteractionState {
     }
 }
 
+class PaginationState {
+    constructor(pageIndex, pageCount, pageCapacity, trainOffset, trainCount) {
+        this.pageIndex = pageIndex;
+        this.pageCount = pageCount;
+        this.pageCapacity = pageCapacity;
+        this.trainOffset = trainOffset;
+        this.trainCount = trainCount;
+    }
+
+    clone() {
+        return new PaginationState(
+            this.pageIndex,
+            this.pageCount,
+            this.pageCapacity,
+            this.trainOffset,
+            this.trainCount
+        );
+    }
+
+    static createWithoutPagination(task) {
+        return new PaginationState(
+            0, // Start out on the first page
+            1, // There is only one page
+            task.train.length, // The page capacity is the number of train pairs
+            0, // The train offset is 0, since we don't want to skip any task.
+            task.train.length // The train count is the number of train pairs, since all train pairs are shown.
+        );
+    }
+
+    isEqualTo(other) {
+        if (!(other instanceof PaginationState)) {
+            throw new Error("PaginationState.isEqual() 'other' is not an instance of PaginationState");
+        }
+        let s0 = JSON.stringify(this);
+        let s1 = JSON.stringify(other);
+        return s0 === s1;
+    }
+}
+
 class PageController {
     constructor() {
-        this.updateUuid = crypto.randomUUID();
+        if (crypto.randomUUID) {
+            console.log('crypto.randomUUID() is available.');
+            this.updateUuid = crypto.randomUUID();
+        } else {
+            // Safari oddity:
+            // In Safari on iPhone, crypto.randomUUID() is not available, when using http://
+            // In Safari on iPhone, crypto.randomUUID() is available, when using https://
+            console.log('crypto.randomUUID() is NOT available.');
+            this.updateUuid = 'no-crypto-random-uuid';
+        }
 
         this.history = new HistoryContainer();
         this.drawInteractionState = null;
@@ -289,6 +337,9 @@ class PageController {
         this.isGridVisible = true;
 
         this.overviewRevealSolutions = false;
+
+        this.overviewPageIndexDelta = 0;
+        this.overviewPaginationState = null;
 
         this.isReplayUndoListButtonVisible = true;
 
@@ -1082,62 +1133,56 @@ class PageController {
         this.updateOverview();
     }
 
-    calcCellSizeForOverview(task, dpr, revealSolutions) {
-        let el = document.getElementById('main-inner');
-        let width = el.clientWidth;
-        let height = el.clientHeight;
-        // console.log('calcCellSizeForOverview() width:', width, 'height:', height);
-
-        let heightOfNonImage = 75;
-        let separatorWidth = 10;
-        let paddingWidth = (task.train.length + task.test.length) * 20;
-        let widthOfNonImage = separatorWidth + paddingWidth;
-
-        let separatorSize = 1;
-        var sumPixelWidth = 0;
-        for (let i = 0; i < task.train.length; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
-            sumPixelWidth += Math.max(input.width, output.width);
+    // Measure the size of the puzzle, for determining if the entire puzzle can fit inside the overview area.
+    // Or with pagination enabled, if a few training pairs can fit inside the overview area.
+    // If the puzzle is too large, then the "train" pairs will have to be paginated, which is undesired.
+    // If the user press the "Reveal" button, then the output images are shown.
+    // If the user hasn't begun drawing, then no output image is shown.
+    // If the user has begun drawing, then the current output image is shown.
+    //
+    // trainOffset: The index of the first "train" pair to consider.
+    // trainCount: The number of "train" pairs to consider.
+    sizeOfOverviewContent(trainOffset, trainCount) {
+        let task = this.task;
+        // Size of "train" pairs
+        var trainSumWidth = 0;
+        var trainMaxInputHeight = 0;
+        var trainMaxOutputHeight = 0;
+        for (let i = 0; i < trainCount; i++) {
+            let input = task.train[trainOffset + i].input;
+            let output = task.train[trainOffset + i].output;
+            trainSumWidth += Math.max(input.width, output.width);
+            trainMaxInputHeight = Math.max(trainMaxInputHeight, input.height);
+            trainMaxOutputHeight = Math.max(trainMaxOutputHeight, output.height);
         }
+        // Size of "test" pairs
+        var testSumWidth = 0;
+        var testMaxInputHeight = 0;
+        var testMaxOutputHeight = 0;
         for (let i = 0; i < task.test.length; i++) {
             let input = task.test[i].input;
-            var output = this.imageForTestIndex(i);
-            if (!output) {
-                output = input;
+            let output = this.outputImageForTestIndexBasedOnUIMode(i);
+            var outputWidth = 0;
+            var outputHeight = 0;
+            if (output) {
+                outputWidth = output.width;
+                outputHeight = output.height;
             }
-            if (revealSolutions) {
-                output = task.test[i].output;
-            }
-            sumPixelWidth += Math.max(input.width, output.width);
+            testSumWidth += Math.max(input.width, outputWidth);
+            testMaxInputHeight = Math.max(testMaxInputHeight, input.height);
+            testMaxOutputHeight = Math.max(testMaxOutputHeight, outputHeight);
         }
-        sumPixelWidth += separatorSize * (task.train.length + task.test.length - 1);
-
-        var maxPixelHeight = 0;
-        for (let i = 0; i < task.train.length; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
-            let pixelHeight = input.height + output.height + separatorSize;
-            maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
-        }
-        for (let i = 0; i < task.test.length; i++) {
-            let input = task.test[i].input;
-            var output = this.imageForTestIndex(i);
-            if (!output) {
-                output = input;
-            }
-            if (revealSolutions) {
-                output = task.test[i].output;
-            }
-            let pixelHeight = input.height + output.height;
-            maxPixelHeight = Math.max(maxPixelHeight, pixelHeight);
-        }
-
-        let cellSizeX = Math.floor((width - widthOfNonImage) * dpr / sumPixelWidth);
-        let cellSizeY = Math.floor((height - heightOfNonImage) * dpr / maxPixelHeight);
-        let cellSize = Math.min(cellSizeX, cellSizeY);
-        // console.log('calcCellSizeForOverview() cellSize:', cellSize, 'cellSizeX:', cellSizeX, 'cellSizeY:', cellSizeY, 'sumPixelWidth:', sumPixelWidth, 'maxPixelHeight:', maxPixelHeight);
-        return cellSize;
+        // Total size
+        let width = trainSumWidth + testSumWidth;
+        let inputMaxHeight = Math.max(trainMaxInputHeight, testMaxInputHeight);
+        let outputMaxHeight = Math.max(trainMaxOutputHeight, testMaxOutputHeight);
+        let height = inputMaxHeight + outputMaxHeight;
+        return {
+            'width': width,
+            'inputMaxHeight': inputMaxHeight,
+            'outputMaxHeight': outputMaxHeight,
+            'height': height,
+        };
     }
 
     // The user is pressing down the button that reveals the solutions. By default the solutions are hidden.
@@ -1160,17 +1205,173 @@ class PageController {
         this.history.log(message);
     }
 
+    calculateCellSize(sizeOfOverviewContent, trainCount, width_raw, height_raw, verbose) {
+        const image_padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-overview-image-padding'));
+        if (verbose) {
+            console.log('image_padding:', image_padding);
+        }
+
+        let dpr = window.devicePixelRatio || 1;
+        let pairCount = trainCount + this.task.test.length;
+        let puzzleWidth = sizeOfOverviewContent.width;
+        let puzzleHeight = sizeOfOverviewContent.height;
+        let leftRightPaddingOfPuzzle = 6;
+        let heightOfImageSizeLabels = 75;
+        let widthOfNonImage = image_padding * (pairCount * 2 + 1) + leftRightPaddingOfPuzzle + pairCount;
+        let heightOfNonImage = heightOfImageSizeLabels + image_padding * 2;
+        let cellSizeX = Math.floor((width_raw - widthOfNonImage) * dpr / puzzleWidth);
+        let cellSizeY = Math.floor((height_raw - heightOfNonImage) * dpr / puzzleHeight);
+        let cellSizeRaw = Math.min(cellSizeX, cellSizeY);
+        let cellSize = cellSizeRaw / dpr;
+        if (verbose) {
+            console.log('cellSizeRaw:', cellSizeRaw, 'cellSize:', cellSize);
+        }
+        return cellSize;
+    }
+
     // Rebuild the overview table, so it shows what the user has drawn so far.
     updateOverview() {
-        // Get the device pixel ratio, falling back to 1.
-        let devicePixelRatio = window.devicePixelRatio || 1;
-        // let devicePixelRatio = 1;
-        // console.log('devicePixelRatio:', devicePixelRatio);
-
+        let verbose = false;
         let task = this.task;
-        let cellSize = this.calcCellSizeForOverview(task, devicePixelRatio, this.overviewRevealSolutions);
-        // console.log('cellSize:', cellSize);
-        cellSize = cellSize / devicePixelRatio;
+
+        // Size of the overview <div>
+        let devicePixelRatio = window.devicePixelRatio || 1;
+        let el_overview = document.getElementById('task-overview');
+        let width_raw = el_overview.clientWidth;
+        let height_raw = el_overview.clientHeight;
+        let width = width_raw * devicePixelRatio;
+        let height = height_raw * devicePixelRatio;
+        if (verbose) {
+            console.log('updateOverview() width:', width, 'height:', height, 'width_raw:', width_raw, 'height_raw:', height_raw, 'devicePixelRatio:', devicePixelRatio);
+        }
+
+        let idealCellSize = 1;
+        {
+            // Calculate ideal cell size.
+            // Considering the best case scenario where the entire puzzle fits inside the overview area.
+            // If it turns out that the ideal cell size is too small, then kludgy workaround such as pagination may be enabled.
+            // This happens if the puzzle is too large, the ARC-Heavy has 30 pairs, where ARC-AGI has between 3 and 10 pairs.
+            // This happens if the device has too tiny a screen, such as a mobile phone.
+            let sizeOfOverviewContent = this.sizeOfOverviewContent(0, task.train.length);
+            idealCellSize = this.calculateCellSize(sizeOfOverviewContent, task.train.length, width_raw, height_raw, verbose);
+            if (verbose) {
+                console.log('sizeOfOverviewContent:', sizeOfOverviewContent, 'idealCellSize:', idealCellSize);
+            }
+        }
+
+        // With tiny mobile devices, it often happens that the screen is too small to show the entire puzzle.
+        // Also some puzzles from the ARC-Heavy dataset are really big so they cannot fit on a huge screen.
+        // Going below 1 and the thumbnails only shows the grid without any content of the grid.
+        // Going below the following limit, and the thumbnails are nearly impossible to make sense of.
+        let smallestMeaningfulCellSize = 3;
+
+        var firstTime = false;
+        if (!this.overviewPaginationState) {
+            this.overviewPaginationState = PaginationState.createWithoutPagination(task);
+            firstTime = true;
+        }
+        let lastPaginationState = this.overviewPaginationState.clone();
+
+        // Determine what the pagination state should be.
+        var pageIndex = lastPaginationState.pageIndex;
+        var pageCapacity = task.train.length;
+        var pageCount = 1;
+        var train_offset = 0;
+        var n_train = task.train.length;
+        var paginatedCellSize = 1;
+        if (idealCellSize < smallestMeaningfulCellSize) {
+            if (verbose) {
+                console.log('The ideal cell size is too small. Pagination may be enabled.');
+            }
+
+            let maxExampleCount = Math.max(6 - task.test.length, 3);
+            if (verbose) {
+                console.log('maxExampleCount:', maxExampleCount);
+            }
+    
+            let pageCapacityLimit = Math.min(task.train.length, maxExampleCount);
+
+            // Determine how many pages are needed.
+            pageCount = Math.floor((task.train.length - 1) / pageCapacityLimit) + 1;
+
+            // Adjust the pageIndex based on the delta.
+            pageIndex = pageIndex + this.overviewPageIndexDelta;
+            if (pageIndex < 0) {
+                pageIndex = pageCount - 1;
+                if (verbose) {
+                    console.log('Negative overviewPageIndex. Go to last page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
+                }
+            } else if (pageIndex >= pageCount) {
+                pageIndex = 0;
+                if (verbose) {
+                    console.log('Too large overviewPageIndex. Go to first page. pageCapacity:', pageCapacity, 'task.train.length:', task.train.length, 'page index delta:', this.overviewPageIndexDelta);
+                }
+            }
+
+            // Determine how many items are going to be shown per pages.
+            let minimumNumberOfItemsPerPage = Math.floor(task.train.length / pageCount);
+            let remainingNumberOfItems = task.train.length - minimumNumberOfItemsPerPage * pageCount;
+            if (verbose) {
+                console.log('minimumNumberOfItemsPerPage:', minimumNumberOfItemsPerPage, 'remainingNumberOfItems:', remainingNumberOfItems);
+            }
+
+            // For each page, determine the how many items are going to be shown.
+            var counters = [];
+            var train_offsets = [];
+            var current_train_offset = 0;
+            for (let i = 0; i < pageCount; i++) {
+                var count = minimumNumberOfItemsPerPage;
+                if (i < remainingNumberOfItems) {
+                    count++;
+                }
+                if (verbose) {
+                    console.log('page:', i, 'count:', count, 'offset:', current_train_offset);
+                }
+                counters.push(count);
+                train_offsets.push(current_train_offset);
+                current_train_offset += count;
+            }
+
+            // Use the computed properties.
+            pageCapacity = counters[pageIndex];
+            train_offset = train_offsets[pageIndex];
+            if (verbose) {
+                console.log('pageCount:', pageCount, 'pageCapacityLimit:', pageCapacityLimit, 'pageCapacity:', pageCapacity, 'task.train.length:', task.train.length);
+            }
+    
+            n_train = Math.min(task.train.length - train_offset, pageCapacity);
+            if (verbose) {
+                console.log('train_offset:', train_offset, 'n_train:', n_train, 'task.train.length:', task.train.length, 'pageCapacity:', pageCapacity, 'overviewPageIndex:', pageIndex);
+            }
+    
+            let paginatedSizeOfOverviewContent = this.sizeOfOverviewContent(train_offset, n_train);
+            paginatedCellSize = this.calculateCellSize(paginatedSizeOfOverviewContent, n_train, width_raw, height_raw, verbose);
+
+            if (verbose) {
+                console.log('paginatedCellSize:', paginatedCellSize);
+            }
+        }
+        let cellSize = Math.max(Math.max(idealCellSize, paginatedCellSize), 1);
+        if (verbose) {
+            console.log('resolved cellSize:', cellSize);
+        }
+
+        this.overviewPageIndexDelta = 0;
+        let newPaginationState = new PaginationState(
+            pageIndex, 
+            pageCount, 
+            pageCapacity, 
+            train_offset, 
+            n_train
+        );
+        if (firstTime || lastPaginationState.isEqualTo(newPaginationState) == false) {
+            if (verbose) {
+                console.log('Pagination state changed:', lastPaginationState, newPaginationState);
+            }
+            this.overviewPaginationState = newPaginationState;
+            this.updatePagination();
+            this.historyLogPagination();
+        }
 
         let el_tr0 = document.getElementById('task-overview-table-row0');
         let el_tr1 = document.getElementById('task-overview-table-row1');
@@ -1180,38 +1381,56 @@ class PageController {
         el_tr1.innerText = '';
 
         // Populate table for `train` pairs.
-        for (let i = 0; i < task.train.length; i++) {
-            let input = task.train[i].input;
-            let output = task.train[i].output;
+        for (let i = 0; i < n_train; i++) {
+            let input = task.train[i + train_offset].input;
+            let output = task.train[i + train_offset].output;
             let el_td0 = document.createElement('td');
+            el_td0.classList.add('input-cell');
             let el_td1 = document.createElement('td');
+            el_td1.classList.add('output-cell');
             // el_td0.innerText = `Input ${i + 1}`;
             // el_td1.innerText = `Output ${i + 1}`;
 
             {
-                el_td0.classList.add('input-image-cell');
-                el_td0.classList.add('center-x');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'input-vstack';
 
-                let el_div = document.createElement('div');
-                el_div.className = 'image-size-label';
-                el_div.innerText = `${input.width}x${input.height}`;
-                el_td0.appendChild(el_div);
+                {
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${input.width}x${input.height}`;
+                    el_div_parent.appendChild(el_div);
+                }
 
-                let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td0.appendChild(canvas);
+                {
+                    let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                    let el_div = document.createElement('div');
+                    el_div.className = 'canvas-holder';
+                    el_div.appendChild(canvas);
+                    el_div_parent.appendChild(el_div);
+                }
+                el_td0.appendChild(el_div_parent);
             }
 
             {
-                el_td1.classList.add('output-image-cell');
-                el_td1.classList.add('center-x');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'output-vstack';
 
-                let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td1.appendChild(canvas);
+                {
+                    let canvas = output.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                    let el_div = document.createElement('div');
+                    el_div.className = 'canvas-holder';
+                    el_div.appendChild(canvas);
+                    el_div_parent.appendChild(el_div);
+                }
 
-                let el_div = document.createElement('div');
-                el_div.className = 'image-size-label';
-                el_div.innerText = `${output.width}x${output.height}`;
-                el_td1.appendChild(el_div);
+                {
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${output.width}x${output.height}`;
+                    el_div_parent.appendChild(el_div);
+                }
+                el_td1.appendChild(el_div_parent);
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
@@ -1231,7 +1450,9 @@ class PageController {
             let input = task.test[i].input;
             let output = task.test[i].output;
             let el_td0 = document.createElement('td');
+            el_td0.classList.add('input-cell');
             let el_td1 = document.createElement('td');
+            el_td1.classList.add('output-cell');
             // el_td0.innerText = `Input ${i + 1}`;
             // el_td1.innerText = `Output ${i + 1}`;
 
@@ -1255,22 +1476,29 @@ class PageController {
             }
 
             {
-                el_td0.classList.add('input-image-cell');
-                el_td0.classList.add('center-x');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'input-vstack';
 
-                let el_div = document.createElement('div');
-                el_div.className = 'image-size-label';
-                el_div.innerText = `${input.width}x${input.height}`;
-                el_td0.appendChild(el_div);
+                {
+                    let el_div = document.createElement('div');
+                    el_div.className = 'image-size-label';
+                    el_div.innerText = `${input.width}x${input.height}`;
+                    el_div_parent.appendChild(el_div);
+                }
 
-                let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                el_td0.appendChild(canvas);
+                {
+                    let canvas = input.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                    let el_div = document.createElement('div');
+                    el_div.className = 'canvas-holder';
+                    el_div.appendChild(canvas);
+                    el_div_parent.appendChild(el_div);
+                }
+                el_td0.appendChild(el_div_parent);
             }
 
             {
-                el_td1.classList.add('output-image-cell');
-                el_td1.classList.add('center-x');
-                el_td1.classList.add('test-output-cell');
+                let el_div_parent = document.createElement('div');
+                el_div_parent.className = 'output-vstack';
 
                 var image = null;
                 if (this.drawingItems[i].caretaker.undoList.length > 0) {
@@ -1283,18 +1511,24 @@ class PageController {
                     image = output;
                 }
                 if (!image) {
-                    el_td1.innerText = '?';
+                    el_div_parent.innerText = '?';
                 } else {
-
-                    let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
-                    el_td1.appendChild(canvas);
+                    {
+                        let canvas = image.toCanvasWithStyle(this.theme, devicePixelRatio, cellSize, this.isGridVisible);
+                        let el_div = document.createElement('div');
+                        el_div.className = 'canvas-holder';
+                        el_div.appendChild(canvas);
+                        el_div_parent.appendChild(el_div);
+                    }
     
-                    let el_div = document.createElement('div');
-                    el_div.className = 'image-size-label';
-                    el_div.innerText = `${image.width}x${image.height}`;
-                    el_td1.appendChild(el_div);
+                    {
+                        let el_div = document.createElement('div');
+                        el_div.className = 'image-size-label';
+                        el_div.innerText = `${image.width}x${image.height}`;
+                        el_div_parent.appendChild(el_div);
+                    }
                 }
-    
+                el_td1.appendChild(el_div_parent);    
             }
             el_tr0.appendChild(el_td0);
             el_tr1.appendChild(el_td1);
@@ -1594,8 +1828,18 @@ class PageController {
         });
     }
     
-    imageForTestIndex(testIndex) {
-        return this.drawingItems[testIndex].originator.getImageClone();
+    outputImageForTestIndexBasedOnUIMode(testIndex) {
+        var image = null;
+        if (this.drawingItems[testIndex].caretaker.undoList.length > 0) {
+            // Only show an image when the user have drawn something.
+            // If there are no actions to undo, then the user have not drawn anything.
+            image = this.drawingItems[testIndex].originator.getImageRef();
+        }
+        if (this.overviewRevealSolutions) {
+            // The user is holding down the button that reveals the solutions.
+            image = this.task.test[testIndex].output;
+        }
+        return image;
     }
 
     activateTestIndex(testIndex) {
@@ -2694,6 +2938,68 @@ class PageController {
             this.replayHistoryItems(history_items2);
         };
         setTimeout(callback, 100);
+    }
+
+    paginationGotoPreviousPage() {
+        this.overviewPageIndexDelta = -1;
+        this.updateOverview();
+    }
+
+    paginationGotoNextPage() {
+        this.overviewPageIndexDelta = 1;
+        this.updateOverview();
+    }
+
+    hidePagination() {
+        let el = document.getElementById("pagination");
+        el.classList.remove('hidden');
+        el.classList.add('hidden');
+    }
+
+    showPagination() {
+        let el = document.getElementById("pagination");
+        el.classList.remove('hidden');
+    }
+
+    updatePagination() {
+        let state = this.overviewPaginationState;
+        if (!state) {
+            this.hidePagination();
+            return;
+        }
+
+        if (state.pageCount <= 1) {
+            this.hidePagination();
+        } else {
+            this.showPagination();
+        }
+
+        // Show the current page index in the UI
+        let el_pagination_status = document.getElementById('pagination-status');
+        el_pagination_status.innerText = `${state.pageIndex + 1} of ${state.pageCount}`;
+    }
+
+    historyLogPagination() {
+        let state = this.overviewPaginationState;
+        if (!state) {
+            return;
+        }
+        if (state.pageCount <= 1) {
+            let message = "all train pairs fit in overview area";
+            this.history.log(message, {
+                action: 'pagination-disabled',
+            });
+        } else {
+            let message = `${state.pageIndex + 1} of ${state.pageCount}, too many train pairs to fit inside overview area, using pagination`;
+            this.history.log(message, {
+                action: 'pagination-action',
+                pageIndex: state.pageIndex,
+                pageCount: state.pageCount,
+                pageCapacity: state.pageCapacity,
+                trainOffset: state.trainOffset,
+                trainCount: state.trainCount,
+            });
+        }
     }
 }
 

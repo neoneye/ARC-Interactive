@@ -1,3 +1,7 @@
+:root {
+    --ui-overview-image-padding: 10;
+}
+
 html {
     /* disable pull-to-refresh in mobile browsers */
     overflow: hidden;
@@ -339,7 +343,8 @@ body {
 #tool-panel.hidden,
 #submit-status-correct.hidden, 
 #submit-status-incorrect.hidden,
-#crop-selected-rectangle-button.hidden {
+#crop-selected-rectangle-button.hidden,
+#pagination.hidden {
     display: none !important;
 }
 
@@ -403,26 +408,40 @@ body {
     background-color: rgb(50, 50, 50);
 }
 
-#task-overview-table .center-x {
-    text-align: center; 
-} 
-
-#task-overview-table .input-image-cell { 
+#task-overview-table .input-cell { 
     vertical-align: bottom;
-    padding-bottom: 20px;
-    padding-left: 10px;
-    padding-right: 10px;
 } 
 
-#task-overview-table .output-image-cell { 
-    vertical-align: top; 
-    padding-left: 10px;
-    padding-right: 10px;
+#task-overview-table .input-vstack { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: calc(var(--ui-overview-image-padding) * 2 * 1px);
+} 
+
+#task-overview-table .output-cell { 
+    vertical-align: top;
+} 
+
+#task-overview-table .output-vstack { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+} 
+
+#task-overview-table .canvas-holder canvas {
+    display: block;
+}
+
+#task-overview-table .canvas-holder { 
+    display: block;
+    padding-left: calc(var(--ui-overview-image-padding) * 1px);
+    padding-right: calc(var(--ui-overview-image-padding) * 1px);
 }
 
 #task-overview-table .seperator-column {
     background-color: var(--ui-background);
-    width: 10px;
+    width: calc(var(--ui-overview-image-padding) * 1px);
 }
 
 #task-overview-table .active-test {
@@ -445,6 +464,41 @@ body {
     color: rgb(119, 119, 119);
     padding-top: 5px;
     padding-bottom: 5px;
+}
+
+#pagination {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+#pagination-prev,
+#pagination-next,
+#pagination-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#pagination-status {
+    color: #ccc;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+@media (max-width: 600px) {
+    #pagination-status {
+        font-size: 11px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    #pagination .secondary-button {
+        margin-right: 0;
+        margin-left: 0;
+        background-color: transparent;
+        border: none;
+    }
 }
 
 /* Default styles for buttons, showing full titles and hiding short titles */
