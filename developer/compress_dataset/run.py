@@ -4,7 +4,7 @@ import sys
 from glob import glob
 
 # Directory containing JSON files
-directory = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC'
+directory = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC-AGI-2'
 
 # Find files recursively and sort the filenames
 filenames = sorted(glob(os.path.join(directory, '**/*.json'), recursive=True))
