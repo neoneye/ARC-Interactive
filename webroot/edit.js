@@ -838,30 +838,68 @@ class PageController {
         let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
         let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
         
-        let sameX0 = drawingItem.selectRectangle.x0 == x;
-        let sameY0 = drawingItem.selectRectangle.y0 == y;
-        let sameX1 = drawingItem.selectRectangle.x1 == x;
-        let sameY1 = drawingItem.selectRectangle.y1 == y;
-        let sameSelection = sameX0 && sameY0 && sameX1 && sameY1;
+        // If a single cell is selected and it's not empty (color != 0)
+        if (originalImage.pixels[y][x] !== 0) {
+            // Expand selection to include all connected pixels of the same color
+            let { minX, maxX, minY, maxY } = this.expandSelectionToObject(originalImage, x, y);
+            drawingItem.selectRectangle.x0 = minX;
+            drawingItem.selectRectangle.y0 = minY;
+            drawingItem.selectRectangle.x1 = maxX;
+            drawingItem.selectRectangle.y1 = maxY;
+        } else {
+            // Normal single-cell selection
+            drawingItem.selectRectangle.x0 = x;
+            drawingItem.selectRectangle.y0 = y;
+            drawingItem.selectRectangle.x1 = x;
+            drawingItem.selectRectangle.y1 = y;
+        }
 
-        drawingItem.selectRectangle.x0 = x;
-        drawingItem.selectRectangle.y0 = y;
-        drawingItem.selectRectangle.x1 = x;
-        drawingItem.selectRectangle.y1 = y;
         this.updateDrawCanvas();
+
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
+        let selectWidth = maxX - minX + 1;
+        let selectHeight = maxY - minY + 1;
 
         let message = `create selection begin, x: ${x} y: ${y}`;
         this.history.log(message, {
             action: 'create selection begin',
             imageHandle: historyImageHandle,
-            sameSelection: sameSelection,
             x: x,
             y: y,
-            selectX: x,
-            selectY: y,
-            selectWidth: 1,
-            selectHeight: 1,
+            selectX: minX,
+            selectY: minY,
+            selectWidth: selectWidth,
+            selectHeight: selectHeight,
         });
+    }
+
+    expandSelectionToObject(image, startX, startY) {
+        let targetColor = image.pixels[startY][startX];
+        let minX = startX;
+        let maxX = startX;
+        let minY = startY;
+        let maxY = startY;
+        let visited = new Set();
+
+        const checkPixel = (x, y) => {
+            if (x < 0 || x >= image.width || y < 0 || y >= image.height) return;
+            if (visited.has(`${x},${y}`)) return;
+            if (image.pixels[y][x] !== targetColor) return;
+
+            visited.add(`${x},${y}`);
+            minX = Math.min(minX, x);
+            maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y);
+            maxY = Math.max(maxY, y);
+
+            checkPixel(x - 1, y);
+            checkPixel(x + 1, y);
+            checkPixel(x, y - 1);
+            checkPixel(x, y + 1);
+        };
+
+        checkPixel(startX, startY);
+        return { minX, maxX, minY, maxY };
     }
 
     createSelectionUpdate(unclampedX, unclampedY) {
