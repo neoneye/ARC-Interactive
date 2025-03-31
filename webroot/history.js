@@ -245,6 +245,27 @@ class PageController {
         // Get the 'historyJson' parameter
         let urlParamJson = urlParams.get('historyJson');
         // console.log('json:', urlParamJson);
+        if (!urlParamJson) {
+            console.log('Getting historyJsonParam from historyDirectoryContent');
+            this.historyDirectoryContent = PageController.fetchHistoryDirectoryContent();
+            let datasetId = urlParams.get('dataset');
+            let taskId = urlParams.get('task');
+            if (datasetId && taskId) {
+                try {
+                    let historyTaskPathArray = this.historyDirectoryContent[datasetId][taskId];
+                    var paths = [];
+                    // remove the .json suffix from all paths
+                    for (let j = 0; j < historyTaskPathArray.length; j++) {
+                        let pathWithoutSuffix = historyTaskPathArray[j].replace('.json', '');
+                        paths.push(pathWithoutSuffix);
+                    }
+                    urlParamJson = JSON.stringify(paths);
+                    console.log('historyJsonParam:', urlParamJson);
+                } catch (error) {
+                    console.error('error getting historyJsonParam:', error);
+                }
+            }
+        }
         let count = 0;
         if (urlParamJson) {
             let jsonString = decodeURIComponent(urlParamJson);
@@ -448,6 +469,24 @@ class PageController {
                 }
             });
         });
+    }
+
+    static fetchHistoryDirectoryContent() {
+            let url = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/directory_content.json';
+            let json = null;
+            try {
+                console.log('fetching historyDirectoryContent json', url);
+                const response = new XMLHttpRequest();
+                response.open('GET', url, false); // synchronous
+                response.send();
+                if (response.status === 200) {
+                    json = JSON.parse(response.responseText);
+                }
+                return json;
+            } catch (error) {
+                console.error('unable to fetch historyDirectoryContent json', error, url);
+                return [];
+            }
     }
 
     updateTaskId() {
