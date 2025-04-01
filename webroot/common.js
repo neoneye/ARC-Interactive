@@ -547,12 +547,17 @@ class ARCImage {
         for (let i = 0; i < this.height; i++) {
             pixels.push(this.pixels[i].slice());
         }
+        // TODO: detect background color
+        let backgroundColor = 0;
         for (let i = 0; i < other_image.height; i++) {
             for (let j = 0; j < other_image.width; j++) {
                 let yi = y + i;
                 let xj = x + j;
                 if (yi >= 0 && yi < this.height && xj >= 0 && xj < this.width) {
-                    pixels[yi][xj] = other_image.pixels[i][j];
+                    // Only copy non-background pixels
+                    if (other_image.pixels[i][j] !== backgroundColor) {
+                        pixels[yi][xj] = other_image.pixels[i][j];
+                    }
                 }
             }
         }

@@ -838,30 +838,86 @@ class PageController {
         let x = Math.max(0, Math.min(unclampedX, originalImage.width - 1));
         let y = Math.max(0, Math.min(unclampedY, originalImage.height - 1));
         
-        let sameX0 = drawingItem.selectRectangle.x0 == x;
-        let sameY0 = drawingItem.selectRectangle.y0 == y;
-        let sameX1 = drawingItem.selectRectangle.x1 == x;
-        let sameY1 = drawingItem.selectRectangle.y1 == y;
-        let sameSelection = sameX0 && sameY0 && sameX1 && sameY1;
+        // If a single cell is selected and it's not empty (color != 0)
+        if (originalImage.pixels[y][x] !== 0) {
+            // Expand selection to include all connected pixels of the same color
+            let { minX, maxX, minY, maxY } = this.expandSelectionToObject(originalImage, x, y);
+            console.log('expandSelectionToObject output', `(${minX}, ${minY})`, `(${maxX}, ${maxY})`);
+            drawingItem.selectRectangle.x0 = minX;
+            drawingItem.selectRectangle.y0 = minY;
+            drawingItem.selectRectangle.x1 = maxX;
+            drawingItem.selectRectangle.y1 = maxY;
+        } else {
+            // Normal single empty cell selection
+            console.log('createSelectionBegin: single empty cell selection', x, y);
+            drawingItem.selectRectangle.x0 = x;
+            drawingItem.selectRectangle.y0 = y;
+            drawingItem.selectRectangle.x1 = x;
+            drawingItem.selectRectangle.y1 = y;
+        }
 
-        drawingItem.selectRectangle.x0 = x;
-        drawingItem.selectRectangle.y0 = y;
-        drawingItem.selectRectangle.x1 = x;
-        drawingItem.selectRectangle.y1 = y;
         this.updateDrawCanvas();
+
+        let { minX, maxX, minY, maxY } = drawingItem.getSelectedRectangleCoordinates();
+        let selectWidth = maxX - minX + 1;
+        let selectHeight = maxY - minY + 1;
 
         let message = `create selection begin, x: ${x} y: ${y}`;
         this.history.log(message, {
             action: 'create selection begin',
             imageHandle: historyImageHandle,
-            sameSelection: sameSelection,
             x: x,
             y: y,
-            selectX: x,
-            selectY: y,
-            selectWidth: 1,
-            selectHeight: 1,
+            selectX: minX,
+            selectY: minY,
+            selectWidth: selectWidth,
+            selectHeight: selectHeight,
         });
+    }
+
+    expandSelectionToObject(image, startX, startY) {
+        console.log('expandSelectionToObject', startX, startY);
+        let targetColor = image.pixels[startY][startX];
+        let minX = startX;
+        let maxX = startX;
+        let minY = startY;
+        let maxY = startY;
+        let visited = new Set();
+        let queue = [[startX, startY]];
+
+        while (queue.length > 0) {
+            let [x, y] = queue.shift();
+            let key = `${x},${y}`;
+            
+            if (visited.has(key)) continue;
+            visited.add(key);
+
+            // Update bounds
+            minX = Math.min(minX, x);
+            maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y);
+            maxY = Math.max(maxY, y);
+
+            // Check all 8 directions
+            let directions = [
+                [x - 1, y], // left
+                [x + 1, y], // right
+                [x, y - 1], // up
+                [x, y + 1], // down
+                [x - 1, y - 1], // up-left
+                [x + 1, y - 1], // up-right
+                [x - 1, y + 1], // down-left
+                [x + 1, y + 1]  // down-right
+            ];
+
+            for (let [newX, newY] of directions) {
+                if (newX < 0 || newX >= image.width || newY < 0 || newY >= image.height) continue;
+                if (image.pixels[newY][newX] !== targetColor) continue;
+                queue.push([newX, newY]);
+            }
+        }
+
+        return { minX, maxX, minY, maxY };
     }
 
     createSelectionUpdate(unclampedX, unclampedY) {
