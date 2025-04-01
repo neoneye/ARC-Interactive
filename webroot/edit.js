@@ -847,7 +847,8 @@ class PageController {
             drawingItem.selectRectangle.x1 = maxX;
             drawingItem.selectRectangle.y1 = maxY;
         } else {
-            // Normal single-cell selection
+            // Normal single empty cell selection
+            console.log('createSelectionBegin: single empty cell selection', x, y);
             drawingItem.selectRectangle.x0 = x;
             drawingItem.selectRectangle.y0 = y;
             drawingItem.selectRectangle.x1 = x;
@@ -874,31 +875,47 @@ class PageController {
     }
 
     expandSelectionToObject(image, startX, startY) {
+        console.log('expandSelectionToObject', startX, startY);
         let targetColor = image.pixels[startY][startX];
         let minX = startX;
         let maxX = startX;
         let minY = startY;
         let maxY = startY;
         let visited = new Set();
+        let queue = [[startX, startY]];
 
-        const checkPixel = (x, y) => {
-            if (x < 0 || x >= image.width || y < 0 || y >= image.height) return;
-            if (visited.has(`${x},${y}`)) return;
-            if (image.pixels[y][x] !== targetColor) return;
+        while (queue.length > 0) {
+            let [x, y] = queue.shift();
+            let key = `${x},${y}`;
+            
+            if (visited.has(key)) continue;
+            visited.add(key);
 
-            visited.add(`${x},${y}`);
+            // Update bounds
             minX = Math.min(minX, x);
             maxX = Math.max(maxX, x);
             minY = Math.min(minY, y);
             maxY = Math.max(maxY, y);
 
-            checkPixel(x - 1, y);
-            checkPixel(x + 1, y);
-            checkPixel(x, y - 1);
-            checkPixel(x, y + 1);
-        };
+            // Check all 8 directions
+            let directions = [
+                [x - 1, y], // left
+                [x + 1, y], // right
+                [x, y - 1], // up
+                [x, y + 1], // down
+                [x - 1, y - 1], // up-left
+                [x + 1, y - 1], // up-right
+                [x - 1, y + 1], // down-left
+                [x + 1, y + 1]  // down-right
+            ];
 
-        checkPixel(startX, startY);
+            for (let [newX, newY] of directions) {
+                if (newX < 0 || newX >= image.width || newY < 0 || newY >= image.height) continue;
+                if (image.pixels[newY][newX] !== targetColor) continue;
+                queue.push([newX, newY]);
+            }
+        }
+
         return { minX, maxX, minY, maxY };
     }
 
