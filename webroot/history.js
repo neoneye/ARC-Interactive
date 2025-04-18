@@ -222,6 +222,9 @@ class PageController {
         this.taskId = null;
         this.datasetId = null;
         this.currentHistoryJsonString = null;
+        this.replaySpeed = 1.0;
+        this.isPlaying = false;
+        this.stepSize = 1;
 
         // Create URLSearchParams object
         let urlParams = new URLSearchParams(window.location.search);
@@ -365,6 +368,10 @@ class PageController {
             // This code makes sure that the 'tool_draw' radio button is always selected on launch.
             document.getElementById('tool_draw').checked = true;
         }
+
+        this.replayTimeout = null;
+        this.currentReplayIndex = 0;
+        this.currentHistoryItems = null;
     }
 
     async onload() {
@@ -425,15 +432,6 @@ class PageController {
         this.updateHistoryDetailsTable(jsonString);
 
         this.replayHistoryFile2(jsonString);
-    }
-
-    playAction() {
-        console.log('playAction');
-        if (!this.currentHistoryJsonString) {
-            console.error('currentHistoryJsonString is not set');
-            return;
-        }
-        this.replayHistoryFile2(this.currentHistoryJsonString);
     }
 
     addEventListeners() {
@@ -541,7 +539,7 @@ class PageController {
         }
 
         if (event.code === 'Space') {
-            this.playAction();
+            this.togglePlayPause();
         }
 
         if (event.code === 'KeyD') {
@@ -2664,37 +2662,133 @@ class PageController {
     // Show the replay animations inside the "overview" page.
     replayHistoryItems2(history_items) {
         console.log('Replay start');
+        this.currentHistoryItems = history_items;
+        this.currentReplayIndex = 0;
+        this.updateReplaySlider();
+        this.showCurrentFrame();
+    }
 
-        let index = 0; // Start from the first item in the history list
-    
-        // The undoList contains the history items
-        const replayStep = () => {
-            if (index >= history_items.length) {
-                console.log('Replay finished');
-                return; // Stop the replay if we've reached the end of the animation
+    showCurrentFrame() {
+        if (!this.currentHistoryItems || this.currentHistoryItems.length === 0) {
+            console.log('No frames to show');
+            this.togglePlayPause();
+            return;
+        }
+
+        if (this.currentReplayIndex >= this.currentHistoryItems.length) {
+            console.log('Reached end of sequence');
+            this.togglePlayPause();
+            this.currentReplayIndex = this.currentHistoryItems.length - 1;
+            return;
+        }
+
+        let item = this.currentHistoryItems[this.currentReplayIndex];
+        console.log(`Replay index ${this.currentReplayIndex + 1} of ${this.currentHistoryItems.length}`);
+
+        // Update the slider and display
+        this.updateReplaySlider();
+
+        var drawingItemIndex = item.testOutputIndex;
+        if (drawingItemIndex < 0 || drawingItemIndex >= this.drawingItems.length) {
+            console.error(`Invalid drawingItemIndex: ${drawingItemIndex}`);
+            drawingItemIndex = 0;
+        }
+        this.drawingItems[drawingItemIndex].originator.setImage(item.image);
+        this.activateTestIndex(drawingItemIndex);
+        this.updateOverview();
+
+        if (this.isPlaying) {
+            this.scheduleNextFrame();
+        }
+    }
+
+    updateReplaySlider() {
+        if (!this.currentHistoryItems) return;
+        
+        const slider = document.getElementById('replay-index-slider');
+        const display = document.getElementById('replay-index-display');
+        
+        slider.max = this.currentHistoryItems.length - 1;
+        slider.value = this.currentReplayIndex;
+        display.textContent = `${this.currentReplayIndex + 1}/${this.currentHistoryItems.length}`;
+    }
+
+    updateReplayIndex(value) {
+        if (!this.currentHistoryItems) return;
+        
+        const index = parseInt(value);
+        if (index >= 0 && index < this.currentHistoryItems.length) {
+            this.currentReplayIndex = index;
+            this.showCurrentFrame();
+        }
+    }
+
+    scheduleNextFrame() {
+        if (this.replayTimeout) {
+            clearTimeout(this.replayTimeout);
+        }
+        
+        // Only schedule next frame if we haven't reached the end
+        if (this.currentReplayIndex < this.currentHistoryItems.length - 1) {
+            this.replayTimeout = setTimeout(() => {
+                this.stepForward();
+            }, 100 / this.replaySpeed);
+        } else {
+            this.togglePlayPause();
+        }
+    }
+
+    togglePlayPause() {
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        if (this.isPlaying) {
+            this.pauseReplay();
+            playPauseBtn.textContent = '⏵';
+        } else {
+            if (this.currentReplayIndex >= this.currentHistoryItems.length - 1) {
+                // If at last step, restart from beginning
+                this.currentReplayIndex = 0;
             }
-            let item = history_items[index]; // Get the current item to be drawn
-            index++; // Move to the next item for the next iteration
-            console.log(`Replay index ${index} of ${history_items.length}`);
+            this.playReplay();
+            playPauseBtn.textContent = '⏸';
+        }
+    }
 
-            // el_message_step.textContent = `${index} of ${history_items.length}`;
-            // el_message_text.textContent = item.message;
+    playReplay() {
+        this.isPlaying = true;
+        this.showCurrentFrame();
+    }
 
-            var drawingItemIndex = item.testOutputIndex;
-            if (drawingItemIndex < 0 || drawingItemIndex >= this.drawingItems.length) {
-                console.error(`Invalid drawingItemIndex: ${drawingItemIndex}`);
-                drawingItemIndex = 0;
-            }
-            this.drawingItems[drawingItemIndex].originator.setImage(item.image);
+    pauseReplay() {
+        this.isPlaying = false;
+        if (this.replayTimeout) {
+            clearTimeout(this.replayTimeout);
+            this.replayTimeout = null;
+        }
+    }
 
-            this.activateTestIndex(drawingItemIndex);
-            this.updateOverview();
+    stepForward() {
+        if (!this.currentHistoryItems) return;
+        this.currentReplayIndex = Math.min(
+            this.currentReplayIndex + this.stepSize, 
+            this.currentHistoryItems.length - 1
+        );
+        this.showCurrentFrame();
+    }
 
-            // Schedule the next step
-            setTimeout(replayStep, 50);
-        };
-    
-        replayStep(); // Start the replay loop
+    stepBackward() {
+        if (!this.currentHistoryItems) return;
+        this.currentReplayIndex = Math.max(
+            this.currentReplayIndex - this.stepSize, 
+            0
+        );
+        this.showCurrentFrame();
+    }
+
+    changeReplaySpeed(speed) {
+        this.replaySpeed = parseFloat(speed);
+        if (this.isPlaying) {
+            this.scheduleNextFrame();
+        }
     }
 
     isReplayLayerHidden() {
@@ -2920,6 +3014,13 @@ class PageController {
             this.replayHistoryItems2(history_items2_filtered);
         };
         setTimeout(callback, 100);
+    }
+
+    updateStepSize(value) {
+        const newSize = parseInt(value);
+        if (!isNaN(newSize) && newSize > 0) {
+            this.stepSize = newSize;
+        }
     }
 }
 

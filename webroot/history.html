@@ -233,10 +233,33 @@
         </div>
         <div class="page-footer-center">
             <!-- Center -->
-        </div>
-        <div class="page-footer-right">
-            <!-- Right -->
-            <button class="secondary-button" onclick="gPageController.playAction()" title="Space = Play the animation.">Play</button>
+            <div id="replay-controls">
+                <div class="speed-control">
+                    <label for="replay-speed">Speed:</label>
+                    <select id="replay-speed" onchange="gPageController.changeReplaySpeed(this.value)">
+                        <option value="0.5">0.5x</option>
+                        <option value="1.0" selected>1.0x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2.0">2.0x</option>
+                        <option value="2.5">2.5x</option>
+                    </select>
+                </div>
+                <button class="secondary-button" onclick="gPageController.stepBackward()" title="Step backward">←</button>
+                <button class="secondary-button" onclick="gPageController.togglePlayPause()" id="play-pause-btn" title="Play/Pause">⏵</button>
+                <button class="secondary-button" onclick="gPageController.stepForward()" title="Step forward">→</button>
+                <div class="index-slider">
+                    <span id="replay-index-display">0/0</span>
+                    <input type="range" id="replay-index-slider" min="0" max="0" value="0" 
+                           oninput="gPageController.updateReplayIndex(this.value)"
+                           onchange="gPageController.updateReplayIndex(this.value)">
+                </div>
+                <div class="steps-control">
+                    <label for="replay-steps">Steps:</label>
+                    <input type="number" id="replay-steps" value="1" min="1" max="100" 
+                           onchange="gPageController.updateStepSize(this.value)"
+                           onkeydown="if(event.key === 'Enter') this.blur();">
+                </div>
+            </div>
         </div>
     </div>
 </body>
