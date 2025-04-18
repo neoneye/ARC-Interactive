@@ -522,3 +522,89 @@ body {
         display: inline; /* Show short title on small screens */
     }
 }
+
+#replay-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#replay-controls button {
+    padding: 4px 8px;
+    min-width: 40px;
+    font-size: 16px;
+}
+
+#play-pause-btn {
+    font-size: 18px;
+    min-width: 50px;
+}
+
+.speed-control, .steps-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.speed-control label, .steps-control label {
+    color: var(--ui-text-color);
+}
+
+.speed-control select {
+    background: var(--ui-button-background);
+    color: var(--ui-text-color);
+    border: 1px solid var(--ui-text-color);
+    padding: 4px;
+    border-radius: 4px;
+}
+
+#replay-steps {
+    width: 50px;
+    background: var(--ui-button-background);
+    color: var(--ui-text-color);
+    border: 1px solid var(--ui-text-color);
+    padding: 4px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.index-slider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+#replay-index-display {
+    min-width: 40px;
+    text-align: center;
+    color: var(--ui-text-color);
+}
+
+#replay-index-slider {
+    width: 100px;
+    height: 4px;
+    -webkit-appearance: none;
+    background: var(--ui-button-background);
+    border-radius: 2px;
+    outline: none;
+}
+
+#replay-index-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--ui-text-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#replay-index-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--ui-text-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
