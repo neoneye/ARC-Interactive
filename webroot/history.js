@@ -223,7 +223,7 @@ class PageController {
         this.datasetId = null;
         this.currentHistoryJsonString = null;
         this.replaySpeed = 1.0;
-        this.isPlaying = false;
+        this.isPlaying = true;
         this.stepSize = 1;
 
         // Create URLSearchParams object
