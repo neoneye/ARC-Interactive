@@ -239,7 +239,7 @@ class PageController {
                 console.log('historyIndex:', index);
             }
         } else {
-            console.error("Expected 'historyIndex' url parameter.");
+            index = 0;
         }
 
         // Get the 'historyJson' parameter
@@ -263,6 +263,9 @@ class PageController {
                     console.log('historyJsonParam:', urlParamJson);
                 } catch (error) {
                     console.error('error getting historyJsonParam:', error);
+                    document.getElementById('no-history-message').classList.remove('hidden');
+                    document.getElementById('task-overview').classList.add('hidden');
+                    return;
                 }
             }
         }
