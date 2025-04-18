@@ -523,6 +523,21 @@ body {
     }
 }
 
+#no-history-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px;
+}
+
+.no-history-text {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: var(--ui-text-color);
+}
 #replay-controls {
     display: flex;
     align-items: center;
