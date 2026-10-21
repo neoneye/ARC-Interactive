@@ -6,9 +6,9 @@
 
 Explore the puzzles of the Abstraction and Reasoning Corpus (ARC).
 
-[ARC-Interactive](https://neoneye.github.io/arc/) is coded in HTML + CSS + JS. No backend.
+[ARC-Interactive](https://neoneye.github.io/arc/) is coded in HTML + CSS + JS. No custom backend; solved puzzles are stored in Supabase.
 
-Solved puzzles are submitted to Supabase and curated on the [review page](webroot/review.html). Setup notes are in [supabase/README.md](supabase/README.md). Approved interaction histories are published in the [ARC-Interactive-History-Dataset](https://github.com/neoneye/ARC-Interactive-History-Dataset) repo.
+Solved puzzles are submitted to Supabase and curated on the [review page](https://neoneye.github.io/arc/review.html). Setup notes are in [supabase/README.md](supabase/README.md). Approved interaction histories are published in the [ARC-Interactive-History-Dataset](https://github.com/neoneye/ARC-Interactive-History-Dataset) repo.
 
 ## Gallery of tasks in the ARC datasets
 

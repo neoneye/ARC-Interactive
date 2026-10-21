@@ -1,8 +1,13 @@
 // Supabase project configuration. Classic script: defines globals.
 const SUPABASE_URL = 'https://nimirzkqrnhkuiewjmxz.supabase.co';
 // Public anon key (safe to ship in client code; RLS protects the data).
-const SUPABASE_ANON_KEY = '<paste from Project Settings → API>';
+const SUPABASE_ANON_KEY = '<paste from Project Settings -> API>';
+const SUPABASE_JS_INTEGRITY = 'sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o';
 const SUPABASE_JS_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+
+if (SUPABASE_ANON_KEY.includes('<paste')) {
+    console.error('supabase-config.js: SUPABASE_ANON_KEY is still the placeholder. Submissions and the review page are disabled until the key is set.');
+}
 
 let supabaseScriptPromise = null;
 
@@ -16,6 +21,8 @@ function loadSupabaseScript() {
     supabaseScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = SUPABASE_JS_URL;
+        script.integrity = SUPABASE_JS_INTEGRITY;
+        script.crossOrigin = 'anonymous';
         script.onload = () => resolve();
         script.onerror = () => {
             script.remove();
