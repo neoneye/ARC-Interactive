@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="review.css">
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+    <script src="common.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="submission.js"></script>
+    <script src="review.js"></script>
+    <title>Review - ARC-Interactive</title>
+</head>
+<body onload="body_onload()">
+    <header class="titlebar-container">
+        <div class="titlebar-item titlebar-item-left">
+            <a id="link-to-tasks-page" class="secondary-button" href=".">Tasks</a>
+        </div>
+
+        <div class="titlebar-item titlebar-item-center">Review</div>
+
+        <div class="titlebar-item titlebar-item-right">
+            <button class="secondary-button" onclick="gPageController.reviewDownloadSelected()">Download</button>
+            <button class="secondary-button" onclick="gPageController.reviewDeleteSelected()">Delete</button>
+            <button id="sign-out-button" class="secondary-button hidden" onclick="gPageController.signOut()">Sign out</button>
+        </div>
+    </header>
+
+    <main id="main-outer">
+        <div id="main-inner">
+
+            <div id="sign-in-panel" class="hidden">
+                <label for="sign-in-email">Admin email</label>
+                <input type="email" id="sign-in-email" autocomplete="email">
+                <button class="secondary-button" onclick="gPageController.sendMagicLink()">Send magic link</button>
+            </div>
+
+            <div id="status-line"></div>
+
+            <table id="review-table" class="hidden">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all" onclick="gPageController.selectAllCheckbox(this)"></th>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>Dataset</th>
+                        <th>Task</th>
+                        <th>Size</th>
+                        <th>Fully solved</th>
+                        <th>Status</th>
+                        <th>Downloaded</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody id="review-table-body"></tbody>
+            </table>
+
+        </div>
+    </main>
+</body>
+</html>
