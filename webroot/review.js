@@ -3,6 +3,8 @@ class PageController {
         this.sb = null;
         // Entries of {row, checkbox} for the rows currently shown in the table.
         this.entries = [];
+        // True while a Download or Delete is running, so a double-click can't start it twice.
+        this.busy = false;
 
         // Assign link to "Back button", so it preserves the URL parameters.
         document.getElementById('link-to-tasks-page').href = '.' + window.location.search;
@@ -26,6 +28,12 @@ class PageController {
             this.showSignedOut();
             this.setStatus('Error: ' + (error?.message ?? error));
         }
+    }
+
+    setBusy(isBusy) {
+        this.busy = isBusy;
+        document.getElementById('download-button').disabled = isBusy;
+        document.getElementById('delete-button').disabled = isBusy;
     }
 
     setStatus(text) {
@@ -177,13 +185,25 @@ class PageController {
     }
 
     async reviewDownloadSelected() {
+        if (this.busy) {
+            return;
+        }
         const selected = this.selectedRows();
         if (selected.length == 0) {
             alert('No rows selected!');
             return;
         }
+        const notApprovedCount = selected.filter(row => row.review_status != 'approved').length;
+        if (notApprovedCount > 0) {
+            const isConfirmed = confirm(`${notApprovedCount} of ${selected.length} selected row(s) are not approved (pending or rejected). They will be included in the file and imported into the dataset. Continue?`);
+            if (!isConfirmed) {
+                return;
+            }
+        }
         const ids = selected.map(row => row.id);
+        this.setBusy(true);
         try {
+            this.setStatus(`Downloading ${ids.length} rows...`);
             const fullRows = [];
             for (const batch of chunk(ids, 100)) {
                 const { data, error } = await this.sb
@@ -221,15 +241,21 @@ class PageController {
                     throw error;
                 }
             }
+            await this.loadRows();
         } catch (error) {
             console.error('reviewDownloadSelected failed', error);
             alert('Error downloading rows: ' + (error?.message ?? error));
-            return;
+            // Reload anyway: some rows may already have been marked as downloaded.
+            await this.loadRows();
+        } finally {
+            this.setBusy(false);
         }
-        await this.loadRows();
     }
 
     async reviewDeleteSelected() {
+        if (this.busy) {
+            return;
+        }
         const selected = this.selectedRows();
         if (selected.length == 0) {
             alert('No rows selected!');
@@ -251,21 +277,29 @@ class PageController {
                 return;
             }
         }
+        this.setBusy(true);
         try {
+            this.setStatus(`Deleting ${safeIds.length} rows...`);
             for (const batch of chunk(safeIds, 100)) {
+                // The server-side predicate repeats partitionRowsForDelete's rule, in case the list is stale.
                 const { error } = await this.sb
                     .from('submissions')
                     .delete()
-                    .in('id', batch);
+                    .in('id', batch)
+                    .or('downloaded_at.not.is.null,review_status.eq.rejected');
                 if (error) {
                     throw error;
                 }
             }
+            await this.loadRows();
         } catch (error) {
             console.error('reviewDeleteSelected failed', error);
             alert('Error deleting rows: ' + (error?.message ?? error));
+            // Reload anyway: some batches may already have been deleted.
+            await this.loadRows();
+        } finally {
+            this.setBusy(false);
         }
-        await this.loadRows();
     }
 }
 
