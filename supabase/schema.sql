@@ -121,6 +121,7 @@ begin
         json         = excluded.json,
         json_size    = excluded.json_size,
         fully_solved = excluded.fully_solved,
+        downloaded_at = null,  -- a revised row has not been exported yet
         updated_at   = now()
     where s.review_status = 'pending';
 

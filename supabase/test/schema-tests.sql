@@ -77,6 +77,30 @@ end $$;
 \echo PASS: same uuid upserts
 
 -- ---------------------------------------------------------------------------
+-- A resubmitted (still pending) row must no longer count as downloaded.
+truncate public.submissions;
+set role anon;
+select public.submit_history('23232323-2323-2323-2323-232323232323', test_helpers.payload(0, 10));
+reset role;
+update public.submissions set downloaded_at = now() where update_uuid = '23232323-2323-2323-2323-232323232323';
+set role anon;
+do $$
+declare r text;
+begin
+  r := public.submit_history('23232323-2323-2323-2323-232323232323', test_helpers.payload(0, 20));
+  if r <> 'stored' then raise exception 'expected stored, got %', r; end if;
+end $$;
+reset role;
+do $$
+declare s public.submissions;
+begin
+  select * into s from public.submissions where update_uuid = '23232323-2323-2323-2323-232323232323';
+  if s.downloaded_at is not null then raise exception 'resubmit did not clear downloaded_at'; end if;
+  if s.json <> test_helpers.payload(0, 20) then raise exception 'json not replaced by resubmit'; end if;
+end $$;
+\echo PASS: resubmit clears downloaded_at
+
+-- ---------------------------------------------------------------------------
 truncate public.submissions;
 set role anon;
 select public.submit_history('33333333-3333-3333-3333-333333333333', test_helpers.payload(0, 10));
