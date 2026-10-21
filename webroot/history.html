@@ -9,6 +9,8 @@
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <script src="pako_inflate.min.js"></script>
     <script src="common.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="submission.js"></script>
     <script src="history.js"></script>
     <title>ARC-Interactive - Task history</title>
 </head>
@@ -174,6 +176,9 @@
             <a id="goto-prev-file" class="secondary-button" href=".">Prev</a>
             <span id="task-number">X of Y</span>
             <a id="goto-next-file" class="secondary-button" href=".">Next</a>
+            <span id="review-status" class="hidden"></span>
+            <button id="review-approve" class="secondary-button hidden" onclick="gPageController.reviewApprove()">Approve</button>
+            <button id="review-reject" class="secondary-button hidden" onclick="gPageController.reviewReject()">Reject</button>
         </div>
     </header>
 
