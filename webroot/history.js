@@ -241,14 +241,28 @@ class PageController {
                 index = rawIndex;
                 console.log('historyIndex:', index);
             }
-        } else {
+        } else if (!urlParams.get('submissionId')) {
             console.error("Expected 'historyIndex' url parameter.");
         }
 
+        // Review mode: load a single submission from Supabase.
+        // Without a valid positive integer 'submissionId', the normal GitHub-backed viewer is used.
+        this.submissionId = null;
+        this.sb = null;
+        {
+            let rawSubmissionId = urlParams.get('submissionId');
+            if (rawSubmissionId && /^\d+$/.test(rawSubmissionId)) {
+                let parsed = parseInt(rawSubmissionId, 10);
+                if (parsed > 0) {
+                    this.submissionId = parsed;
+                }
+            }
+        }
+
         // Get the 'historyJson' parameter
-        let urlParamJson = urlParams.get('historyJson');
+        let urlParamJson = this.submissionId ? null : urlParams.get('historyJson');
         // console.log('json:', urlParamJson);
-        if (!urlParamJson) {
+        if (!urlParamJson && !this.submissionId) {
             console.log('Getting historyJsonParam from historyDirectoryContent');
             this.historyDirectoryContent = PageController.fetchHistoryDirectoryContent();
             let datasetId = urlParams.get('dataset');
@@ -288,8 +302,14 @@ class PageController {
 
             let el = document.getElementById('task-number');
             el.innerText = `${index + 1} of ${count}`;
-        } else {
+        } else if (!this.submissionId) {
             console.error("Expected 'historyJson' url parameter.");
+        }
+
+        if (this.submissionId) {
+            for (const id of ['goto-prev-file', 'goto-next-file', 'task-number']) {
+                document.getElementById(id).classList.add('hidden');
+            }
         }
 
         if (count > 0) {
@@ -317,7 +337,11 @@ class PageController {
         }
 
         // Assign link to "Back button", so it preserves the URL parameters.
-        {
+        if (this.submissionId) {
+            let el = document.getElementById('link-to-tasks-page');
+            el.href = 'review.html';
+            el.innerText = 'Review';
+        } else {
             let urlParams2 = new URLSearchParams(window.location.search);
             urlParams2.delete('task');
             urlParams2.delete('historyJson');
@@ -379,7 +403,12 @@ class PageController {
         console.log('PageController.onload()', this.db);
         this.history.log('welcome to overview');
         this.addEventListeners();
-        await this.replayExampleHistoryFile2();
+        let didLoad = await this.replayExampleHistoryFile2();
+        if (!didLoad) {
+            // Review mode: the submission could not be loaded. There is nothing to replay.
+            this.loadFailed = true;
+            return;
+        }
         this.resizeOrChangeOrientation();
 
         if (this.isReplayUndoListButtonVisible) {
@@ -404,12 +433,17 @@ class PageController {
         // let s = 'ARC-Interactive history 2024-02-24T21-11-02Z.json';
         // let s = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/11/ARC-Interactive%20history%202024-02-26T16-32-31Z.json';
         // let s = 'https://raw.githubusercontent.com/neoneye/ARC-Interactive-History-Dataset/main/history_files/11/ARC-Interactive%20history%202024-02-26T16-37-56Z.json';
-        let s = this.historyUrl;
-        const response = await fetch(s);
-        // console.log('response:', response);
-        const arrayBuffer = await response.arrayBuffer();
-        let uint8Array = new Uint8Array(arrayBuffer);
-        let jsonString = new TextDecoder().decode(uint8Array);
+        let jsonString;
+        try {
+            jsonString = await this.fetchHistoryJsonString();
+        } catch (error) {
+            console.error('Failed to load history:', error);
+            if (this.submissionId) {
+                this.showReviewStatus('Not found or not signed in, sign in on review.html');
+                return false;
+            }
+            throw error;
+        }
 
         this.currentHistoryJsonString = jsonString;
 
@@ -429,6 +463,105 @@ class PageController {
         this.updateHistoryDetailsTable(jsonString);
 
         this.replayHistoryFile2(jsonString);
+        return true;
+    }
+
+    // Returns the history JSON as a string.
+    // In review mode it comes from Supabase, otherwise from the GitHub history dataset.
+    async fetchHistoryJsonString() {
+        if (this.submissionId) {
+            if (!this.sb) {
+                this.sb = await loadSupabaseClient();
+            }
+            const { data, error } = await this.sb
+                .from('submissions')
+                .select('id,json,review_status')
+                .eq('id', this.submissionId)
+                .single();
+            if (error) {
+                throw new Error(error.message || 'Failed to load submission');
+            }
+            if (!data || typeof data.json !== 'string') {
+                throw new Error('Submission not found');
+            }
+            this.showReviewButtons(data.review_status);
+            return data.json;
+        }
+        const response = await fetch(this.historyUrl);
+        // console.log('response:', response);
+        const arrayBuffer = await response.arrayBuffer();
+        let uint8Array = new Uint8Array(arrayBuffer);
+        return new TextDecoder().decode(uint8Array);
+    }
+
+    showReviewStatus(text) {
+        const el = document.getElementById('review-status');
+        el.innerText = text;
+        el.classList.remove('hidden');
+    }
+
+    showReviewButtons(reviewStatus) {
+        document.getElementById('review-approve').classList.remove('hidden');
+        document.getElementById('review-reject').classList.remove('hidden');
+        this.showReviewStatus(`#${this.submissionId}: ${reviewStatus}`);
+    }
+
+    async reviewApprove() {
+        await this.setReviewStatus('approved');
+    }
+
+    async reviewReject() {
+        await this.setReviewStatus('rejected');
+    }
+
+    async setReviewStatus(status) {
+        try {
+            if (!this.sb) {
+                this.sb = await loadSupabaseClient();
+            }
+            const { data, error } = await this.sb
+                .from('submissions')
+                .update({ review_status: status })
+                .eq('id', this.submissionId)
+                .select('id');
+            if (error) {
+                throw new Error(error.message || 'Update failed');
+            }
+            if (!data || data.length === 0) {
+                throw new Error('No row was updated, are you signed in as admin?');
+            }
+        } catch (error) {
+            console.error('setReviewStatus failed:', error);
+            alert(`Failed to set status to ${status}: ${error.message}`);
+            return;
+        }
+        await this.gotoNextPending();
+    }
+
+    async gotoNextPending() {
+        let nextId = null;
+        try {
+            const { data, error } = await this.sb
+                .from('submissions')
+                .select('id')
+                .eq('review_status', 'pending')
+                .gt('id', this.submissionId)
+                .order('id', { ascending: true })
+                .limit(1);
+            if (error) {
+                throw new Error(error.message);
+            }
+            if (data && data.length > 0) {
+                nextId = data[0].id;
+            }
+        } catch (error) {
+            console.error('gotoNextPending failed:', error);
+        }
+        if (nextId) {
+            window.location.href = `history.html?submissionId=${encodeURIComponent(nextId)}`;
+        } else {
+            window.location.href = 'review.html';
+        }
     }
 
     addEventListeners() {
@@ -493,6 +626,9 @@ class PageController {
     }
 
     resizeOrChangeOrientation() {
+        if (this.loadFailed) {
+            return; // Review mode: no submission was loaded, so there is nothing to lay out.
+        }
         // In Safari on iPhone, the bottom of the <table> gets cut off. This prevents that.
         var viewportHeight = window.innerHeight;
         document.getElementById('replay-with-details-middle').style.height = viewportHeight + 'px';

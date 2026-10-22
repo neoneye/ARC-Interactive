@@ -1,0 +1,47 @@
+#main-inner {
+    padding: 1em;
+    background-color: var(--ui-footer-background);
+}
+
+#sign-in-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    padding-bottom: 1em;
+}
+
+#sign-in-panel.hidden,
+#review-table.hidden {
+    display: none;
+}
+
+#sign-in-email {
+    font-size: 16px;
+    padding: 8px;
+    min-width: 16em;
+}
+
+#status-line {
+    padding-bottom: 0.5em;
+    min-height: 1.2em;
+}
+
+#review-table {
+    border-collapse: collapse;
+}
+
+#review-table td,
+#review-table th {
+    padding: 0.5em;
+    text-align: left;
+    border-bottom: 1px solid var(--ui-separator);
+}
+
+#review-table td.numeric {
+    text-align: right;
+}
+
+#review-table a {
+    color: inherit;
+}

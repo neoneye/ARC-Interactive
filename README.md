@@ -1,14 +1,14 @@
 <p align="center">
-  <a href="https://neoneye.github.io/arc/"><strong>Try it here</strong></a> · <a href="https://braingridgame.com/discord"><strong>Discord</strong></a>
+  <a href="https://neoneye.github.io/arc/"><strong>Try it here</strong></a> · <a href="https://discord.gg/YDd2HAwZDN"><strong>Discord</strong></a>
 </p>
 
 # Puzzle-Solving in Your Browser
 
 Explore the puzzles of the Abstraction and Reasoning Corpus (ARC).
 
-[ARC-Interactive](https://neoneye.github.io/arc/) is coded in HTML + CSS + JS. No backend.
+[ARC-Interactive](https://neoneye.github.io/arc/) is coded in HTML + CSS + JS. No custom backend; solved puzzles are stored in Supabase.
 
-[BrainGridGame](https://braingridgame.com) is ARC-Interactive with a Django backend for collecting interaction histories.
+Solved puzzles are submitted to Supabase and curated on the [review page](https://neoneye.github.io/arc/review.html). Setup notes are in [supabase/README.md](supabase/README.md). Approved interaction histories are published in the [ARC-Interactive-History-Dataset](https://github.com/neoneye/ARC-Interactive-History-Dataset) repo.
 
 ## Gallery of tasks in the ARC datasets
 
@@ -24,7 +24,7 @@ Explore the puzzles of the Abstraction and Reasoning Corpus (ARC).
 
 ## How to Contribute
 
-Share your thoughts on [Discord](https://braingridgame.com/discord).
+Share your thoughts on [Discord](https://discord.gg/YDd2HAwZDN).
 
 Code contributions, bug reports, feature requests, or feedback, 
 your input is invaluable for making this project better for everyone.

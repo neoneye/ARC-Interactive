@@ -254,16 +254,7 @@ class PaginationState {
 
 class PageController {
     constructor() {
-        if (crypto.randomUUID) {
-            console.log('crypto.randomUUID() is available.');
-            this.updateUuid = crypto.randomUUID();
-        } else {
-            // Safari oddity:
-            // In Safari on iPhone, crypto.randomUUID() is not available, when using http://
-            // In Safari on iPhone, crypto.randomUUID() is available, when using https://
-            console.log('crypto.randomUUID() is NOT available.');
-            this.updateUuid = 'no-crypto-random-uuid';
-        }
+        this.updateUuid = generateUuidV4();
 
         this.history = new HistoryContainer();
         this.drawInteractionState = null;
@@ -1778,9 +1769,12 @@ class PageController {
             image: image.pixels,
         });
 
-        let { filename, jsonString } = this.generateHistoryFile();
-        // POST the history file to the server
-        this.postHistoryFile(filename, jsonString);
+        let { jsonString } = this.generateHistoryFile();
+        if (isFullySolvedHistoryJson(jsonString)) {
+            this.postHistoryFile(jsonString);
+        } else {
+            console.log('Not fully solved, not posting history file.');
+        }
 
         var el = null;
         if (isCorrect) {
@@ -1796,38 +1790,12 @@ class PageController {
         }, 3000);
     }
 
-    postHistoryFile(filename, jsonString) {
-        console.log(`Post history file to the server, updateUuid: ${this.updateUuid}`);
-        const url = 'https://braingridgame.com/api/history_guest';
-        // const url = 'http://localhost:8000/api/history_guest';
-        fetch(
-            url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                filename: filename,
-                jsonString: jsonString,
-                updateUuid: this.updateUuid,
-            })
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log('History file was successfully posted to the server.');
-                return response.text(); // This returns a promise
-            } else {
-                throw new Error('Error posting history file to the server.');
-            }
-        })
-        .then(textResponse => {
-            console.log(textResponse);
-        })
-        .catch(error => {
-            console.error(error.message);
-        });
+    postHistoryFile(jsonString) {
+        console.log(`Post history file to Supabase, updateUuid: ${this.updateUuid}`);
+        // Fire and forget. submitHistoryToSupabase never throws and logs its own errors.
+        submitHistoryToSupabase(this.updateUuid, jsonString);
     }
-    
+
     outputImageForTestIndexBasedOnUIMode(testIndex) {
         var image = null;
         if (this.drawingItems[testIndex].caretaker.undoList.length > 0) {
