@@ -1,7 +1,7 @@
 // Supabase project configuration. Classic script: defines globals.
 const SUPABASE_URL = 'https://nimirzkqrnhkuiewjmxz.supabase.co';
 // Public anon key (safe to ship in client code; RLS protects the data).
-const SUPABASE_ANON_KEY = '<paste from Project Settings -> API>';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pbWlyemtxcm5oa3VpZXdqbXh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NTY1ODcsImV4cCI6MjA3NTIzMjU4N30.UCbFcRv5XfW699f4WGoq393sgDswGGaT5XaV-NIOzHs';
 const SUPABASE_JS_INTEGRITY = 'sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o';
 const SUPABASE_JS_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
 
