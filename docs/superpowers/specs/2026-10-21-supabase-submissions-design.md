@@ -104,7 +104,7 @@ Row-level security is on:
   - upserts by `update_uuid`, but only while that row is still `pending`
   - no rate limiting or row caps (my call). Braingridgame had none and abuse never
     happened. If it does later, add it then
-- **Simon** (authenticated, `auth.jwt()->>'email' = 'neoneye@gmail.com'`): select, update
+- **Simon** (authenticated, `auth.jwt()->>'email' = 'neoneye+arcinteractive@gmail.com'`): select, update
   `review_status`, delete. The email check lives in one place, either a small helper SQL
   function or an `admins` table; the builder chooses.
 

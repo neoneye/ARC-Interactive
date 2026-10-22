@@ -23,7 +23,7 @@ returns boolean
 language sql
 stable
 as $$
-  select coalesce(auth.jwt() ->> 'email' = 'neoneye@gmail.com', false)
+  select coalesce(auth.jwt() ->> 'email' = 'neoneye+arcinteractive@gmail.com', false)
 $$;
 
 revoke execute on function public.is_admin() from public, anon;

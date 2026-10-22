@@ -7,7 +7,7 @@
 **Architecture:**
 - **Database.** One Supabase table, `submissions`, with row-level security.
   - Anonymous players write only through a `SECURITY DEFINER` RPC, `submit_history`.
-  - Only the signed-in admin (neoneye@gmail.com) can select rows, update their status, or delete them.
+  - Only the signed-in admin (neoneye+arcinteractive@gmail.com) can select rows, update their status, or delete them.
 - **Shared helpers.** Pure logic (UUID, fully-solved check, export format, delete partition, paging, chunking) lives in `webroot/submission.js`. It is a classic browser script that also exports itself to Node, so `node --test` covers it.
 - **Pages.**
   - The game posts with plain `fetch`.
@@ -22,7 +22,7 @@
 - **Supabase project:**
   - URL: `https://nimirzkqrnhkuiewjmxz.supabase.co`
   - Ref: `nimirzkqrnhkuiewjmxz`
-  - Admin email: `neoneye@gmail.com`
+  - Admin email: `neoneye+arcinteractive@gmail.com`
 - **Build tooling:** no package.json, bundler or Supabase CLI. Tests run with `node --test tests/` and `supabase/test/run-tests.sh`.
 - **Defining the URL and anon key:** both are defined exactly once, in `webroot/supabase-config.js`.
 - **Status values:** `pending`, `approved`, `rejected` (default `pending`).
@@ -62,7 +62,7 @@
   - print `ALL SQL TESTS PASSED`
 - Create: `supabase/README.md`, with setup notes:
   1. Paste `schema.sql` into the SQL editor and run it.
-  2. Create the user `neoneye@gmail.com` under Auth → Users ("Add user", "Send magic link" not needed).
+  2. Create the user `neoneye+arcinteractive@gmail.com` under Auth → Users ("Add user", "Send magic link" not needed).
   3. Auth → URL Configuration:
      - Site URL: `https://neoneye.github.io/arc/`
      - Redirect URLs: `https://neoneye.github.io/arc/review.html`, `https://neoneye.github.io/arc-staging/review.html`, `http://127.0.0.1:5500/**`, `http://localhost:5500/**`
@@ -73,7 +73,7 @@
 - Produces, used by Tasks 2–5:
   - table `public.submissions(id bigint identity pk, created_at timestamptz default now(), updated_at timestamptz default now(), update_uuid uuid unique not null, dataset_id text not null, task_id text not null, json text not null, json_size int not null, fully_solved bool not null, review_status text not null default 'pending' check in (pending, approved, rejected), downloaded_at timestamptz null)`
   - `public.submit_history(p_update_uuid uuid, p_json text) returns text`: returns `'stored'` or `'ignored'`, and raises on invalid input
-  - `public.is_admin() returns boolean`, which checks `auth.jwt()->>'email' = 'neoneye@gmail.com'`
+  - `public.is_admin() returns boolean`, which checks `auth.jwt()->>'email' = 'neoneye+arcinteractive@gmail.com'`
   - RPC endpoint: `POST /rest/v1/rpc/submit_history` with body `{"p_update_uuid": "...", "p_json": "..."}`
 
 - [ ] **Step 1: Write the stub and the failing tests.** In `schema-tests.sql`, each test is a `DO $$ ... $$` block that `RAISE EXCEPTION`s on failure. Switch role with `set role anon` / `set role authenticated`, set the claims with `select set_config('request.jwt.claims', '{"email":"..."}', false)`, and `reset role` between tests. Tests:
@@ -94,7 +94,7 @@
   - **`verbatim round-trip`.** The json contains `"msg":"it's \"quoted\" \\ </script> ü 🧩"`, and the stored `json` equals the input exactly.
   - **`anon cannot touch table`.** As anon, `select count(*)` returns 0 rows or raises, and `update`/`delete`/`insert` raise or affect 0 rows.
   - **`non-admin authenticated sees and changes nothing`.** With claims email `someone@example.com`: select returns 0, and `update ... set review_status='approved'` and `delete` affect 0 rows (check with `GET DIAGNOSTICS`).
-  - **`admin can review`.** With claims email `neoneye@gmail.com`:
+  - **`admin can review`.** With claims email `neoneye+arcinteractive@gmail.com`:
     - select sees every row
     - updating `review_status` and `downloaded_at` works
     - updating `json` raises, because column-level grants restrict updates to `review_status` and `downloaded_at`

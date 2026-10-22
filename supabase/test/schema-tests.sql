@@ -306,6 +306,10 @@ begin
   if n <> 0 then raise exception 'non-admin deleted % rows', n; end if;
 
   if public.is_admin() then raise exception 'is_admin() true for non-admin'; end if;
+
+  -- The plain address without the +arcinteractive tag is not the admin either.
+  perform set_config('request.jwt.claims', '{"email":"neoneye@gmail.com"}', false);
+  if public.is_admin() then raise exception 'is_admin() true for untagged address'; end if;
 end $$;
 reset role;
 do $$
@@ -319,7 +323,7 @@ end $$;
 truncate public.submissions;
 select test_helpers.seed('88888888-8888-8888-8888-888888888881');
 select test_helpers.seed('88888888-8888-8888-8888-888888888882');
-select test_helpers.claims('neoneye@gmail.com');
+select test_helpers.claims('neoneye+arcinteractive@gmail.com');
 set role authenticated;
 do $$
 declare n bigint; s public.submissions; denied boolean;
@@ -365,7 +369,7 @@ end $$;
 -- ---------------------------------------------------------------------------
 truncate public.submissions;
 select test_helpers.seed('99999999-9999-9999-9999-999999999999');
-select test_helpers.claims('neoneye@gmail.com');
+select test_helpers.claims('neoneye+arcinteractive@gmail.com');
 set role authenticated;
 do $$
 declare denied boolean := false;

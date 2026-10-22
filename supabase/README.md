@@ -1,7 +1,7 @@
 # Supabase setup for puzzle submissions
 
 Players' fully solved puzzles are sent to a Supabase table. Only the owner
-(`neoneye@gmail.com`) can read, review, download and delete them.
+(`neoneye+arcinteractive@gmail.com`) can read, review, download and delete them.
 
 ## One-time setup
 
@@ -11,7 +11,7 @@ Row-level security trusts the `email` claim of the signed-in user's JWT, so the 
 must be pinned before the schema goes live. Only that claim gates admin access; the client's
 `shouldCreateUser: false` is not a server-side control.
 
-1. Authentication -> Users (https://supabase.com/dashboard/project/nimirzkqrnhkuiewjmxz/auth/users) -> "Add user": create `neoneye@gmail.com` FIRST, with "Auto Confirm User" ticked.
+1. Authentication -> Users (https://supabase.com/dashboard/project/nimirzkqrnhkuiewjmxz/auth/users) -> "Add user": create `neoneye+arcinteractive@gmail.com` FIRST, with "Auto Confirm User" ticked.
    There is no need to "Send magic link".
 2. Authentication -> Sign In / Providers (https://supabase.com/dashboard/project/nimirzkqrnhkuiewjmxz/auth/providers):
    - Turn OFF "Allow new users to sign up" (magic link still works for the existing user).
