@@ -1,0 +1,51 @@
+# Publish webroot/ to https://neoneye.github.io/arc/
+#
+# Copies webroot/ into the arc/ folder of the neoneye/neoneye.github.io repo and pushes,
+# which replaces the manual "Snapshot of ARC-Interactive" commits.
+#
+# Needs the secret NEONEYE_GITHUB_IO_DEPLOY_KEY: the private half of a deploy key
+# that has write access to neoneye/neoneye.github.io.
+name: Deploy to neoneye.github.io/arc
+
+on:
+  push:
+    branches: [main]
+    paths: ['webroot/**']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-arc
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ARC-Interactive
+        uses: actions/checkout@v4
+        with:
+          path: src
+
+      - name: Check out neoneye.github.io
+        uses: actions/checkout@v4
+        with:
+          repository: neoneye/neoneye.github.io
+          ssh-key: ${{ secrets.NEONEYE_GITHUB_IO_DEPLOY_KEY }}
+          path: site
+
+      - name: Copy webroot/ into arc/
+        run: rsync -a --delete --exclude .DS_Store src/webroot/ site/arc/
+
+      - name: Commit and push
+        working-directory: site
+        run: |
+          git add -A arc
+          if git diff --cached --quiet; then
+            echo "arc/ is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Snapshot of ARC-Interactive ${GITHUB_SHA::7}." \
+                     -m "https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+          git push
