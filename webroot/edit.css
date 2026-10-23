@@ -6,6 +6,9 @@ html {
     /* disable pull-to-refresh in mobile browsers */
     overflow: hidden;
     overscroll-behavior: none;
+
+    /* disable double-tap to zoom on iOS, which ignores user-scalable=no */
+    touch-action: manipulation;
 }
 
 body {

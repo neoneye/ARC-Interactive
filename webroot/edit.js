@@ -315,6 +315,8 @@ class PageController {
         this.isPasting = false;
         this.pasteCenterX = 0;
         this.pasteCenterY = 0;
+        this.pasteAcceptTimestamp = 0;
+        this.toolPanelTextfieldHadFocus = false;
 
         this.enablePlotDraw = false;
 
@@ -375,6 +377,14 @@ class PageController {
         // Add an event listener to resize the canvas whenever the window is resized
         window.addEventListener('resize', () => { this.resizeOrChangeOrientation(); });
         window.addEventListener('orientationchange', () => { this.resizeOrChangeOrientation(); });
+
+        // The textfield loses focus on pointerdown, before the click event reaches dismissToolPanel().
+        // Remember whether a textfield in the tool panel had focus when the tap began.
+        document.getElementById('tool-panel').addEventListener('pointerdown', () => {
+            let el = document.activeElement;
+            let innerDiv = document.getElementById('tool-panel-inner');
+            this.toolPanelTextfieldHadFocus = innerDiv.contains(el) && el.tagName === 'INPUT' && el.type === 'text';
+        });
 
         // Interaction with the draw canvas
         this.drawCanvas.addEventListener('touchstart', (event) => { this.startDraw(event); });
@@ -1739,6 +1749,11 @@ class PageController {
     }
     
     submitDrawing() {
+        let millisecondsSincePasteAccept = Date.now() - this.pasteAcceptTimestamp;
+        if (millisecondsSincePasteAccept < 1000) {
+            console.log(`Ignoring submit, it's only ${millisecondsSincePasteAccept} ms since the paste was accepted.`);
+            return;
+        }
         console.log('Submit');
         let drawingItem = this.currentDrawingItem();
         let historyImageHandle = drawingItem.getHistoryImageHandle();
@@ -2086,6 +2101,10 @@ class PageController {
             return;
         }
         console.log('Paste from clipboard accept.');
+
+        // The Submit button is located behind the Accept button.
+        // Remember when Accept was tapped, so a quick second tap doesn't submit by accident.
+        this.pasteAcceptTimestamp = Date.now();
 
         let canvasWidth = this.drawCanvas.width;
         let canvasHeight = this.drawCanvas.height;
@@ -2618,6 +2637,11 @@ class PageController {
         // Check if the click was outside the inner div
         if (event.target === innerDiv || innerDiv.contains(event.target)) {
             // Click inside, do nothing
+        } else if (this.toolPanelTextfieldHadFocus) {
+            // Click outside while typing in a textfield, such as the resize textfield.
+            // Defocus the textfield, but keep the panel visible.
+            this.toolPanelTextfieldHadFocus = false;
+            document.activeElement.blur();
         } else {
             // Click outside, dismiss the panel
             this.hideToolPanel();
