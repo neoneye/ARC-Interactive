@@ -222,9 +222,9 @@ class PageController {
         this.taskId = null;
         this.datasetId = null;
         this.currentHistoryJsonString = null;
-        this.replaySpeed = 1.0;
+        this.replaySpeed = PageController.loadReplaySpeed();
         this.isPlaying = true;
-        this.stepSize = 1;
+        this.stepSize = PageController.loadStepSize();
 
         // Create URLSearchParams object
         let urlParams = new URLSearchParams(window.location.search);
@@ -396,6 +396,8 @@ class PageController {
     }
 
     async onload() {
+        document.getElementById('replay-speed').value = this.replaySpeed.toFixed(1);
+        document.getElementById('replay-steps').value = this.stepSize;
         Theme.assignBodyClassName();
         this.theme = Theme.themeFromBody();
         
@@ -2917,8 +2919,26 @@ class PageController {
         this.showCurrentFrame();
     }
 
+    // Remember the replay speed and step size across page loads, so they survive when reviewing many submissions.
+    static loadReplaySpeed() {
+        let value = parseFloat(localStorage.getItem('history-replay-speed'));
+        if ([0.5, 1.0, 1.5, 2.0, 2.5].includes(value)) {
+            return value;
+        }
+        return 1.0;
+    }
+
+    static loadStepSize() {
+        let value = parseInt(localStorage.getItem('history-replay-steps'));
+        if (!isNaN(value) && value >= 1 && value <= 100) {
+            return value;
+        }
+        return 1;
+    }
+
     changeReplaySpeed(speed) {
         this.replaySpeed = parseFloat(speed);
+        localStorage.setItem('history-replay-speed', this.replaySpeed);
         if (this.isPlaying) {
             this.scheduleNextFrame();
         }
@@ -3153,6 +3173,7 @@ class PageController {
         const newSize = parseInt(value);
         if (!isNaN(newSize) && newSize > 0) {
             this.stepSize = newSize;
+            localStorage.setItem('history-replay-steps', newSize);
         }
     }
 }
